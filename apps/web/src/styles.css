@@ -1,0 +1,15 @@
+@import '../../../design-system/tokens.css';
+
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; min-height: 100vh; background: var(--vybe-canvas); color: var(--vybe-text); font-family: var(--vybe-font); }
+.welcome { min-height: 100vh; display: grid; place-items: center; padding: 24px; }
+.welcome-card { width: min(100%, 580px); padding: clamp(32px, 8vw, 64px); border: 1px solid var(--vybe-border); border-radius: 24px; background: var(--vybe-white); text-align: center; }
+.brand-mark { width: 64px; height: 64px; margin: auto; display: grid; place-items: center; border-radius: 20px; background: var(--vybe-purple); color: white; font-size: 48px; font-weight: 800; line-height: 1; }
+.eyebrow { margin: 24px 0 12px; color: var(--vybe-purple); font-size: 11px; font-weight: 700; letter-spacing: 3px; }
+h1 { margin: 0; font-size: clamp(30px, 7vw, 44px); line-height: 1.12; letter-spacing: -1.8px; }
+.description { max-width: 390px; margin: 18px auto 28px; color: var(--vybe-muted); line-height: 1.7; }
+.status { display: flex; justify-content: center; align-items: center; gap: 9px; min-height: 44px; padding: 10px; border-radius: 10px; background: var(--vybe-canvas); color: var(--vybe-muted); font-size: 13px; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; background: #a8a5b2; }
+.status-dot.online { background: var(--vybe-success); }
+.status-dot.offline { background: var(--vybe-warning); }
+.version { display: block; margin-top: 24px; color: var(--vybe-muted); font-size: 11px; }

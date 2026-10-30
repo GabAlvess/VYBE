@@ -1,31 +1,61 @@
 # Roadmap
 
-Proposta inicial de sequência de trabalho. Prioridades, responsáveis e datas ainda precisam ser definidos; esta lista não representa um compromisso de entrega.
+O escopo abaixo vem da proposta v1.0. A sequência é uma organização sugerida para execução, sem datas, responsáveis ou compromissos comerciais definidos. Nenhum item está marcado como implementado.
 
-## 1. Definição do produto
+A stack inicial é monorepo com React, Node.js e MongoDB. Consulte o [plano de desenvolvimento](plano-desenvolvimento.md) para estrutura, etapas e qualidade.
 
-- [ ] Definir problema, público e proposta de valor.
-- [ ] Delimitar o escopo da primeira versão.
-- [ ] Definir critérios de sucesso e regras essenciais.
+## 1. Refinamento e fundação técnica
 
-## 2. Experiência e design
+- [ ] Criar e verificar o banco de desenvolvimento `vybe_dev` e configurar acesso seguro.
+- [ ] Definir workspaces, versões e ferramentas do monorepo.
+- [ ] Resolver as [pendências de escopo e comportamento](pendencias.md).
+- [ ] Definir arquitetura, modelo de dados, endereçamento e estratégia de isolamento.
+- [ ] Detalhar permissões, segurança, uploads, auditoria e backups.
+- [ ] Preparar execução, testes e integração contínua.
 
-- [ ] Mapear a jornada principal do usuário.
-- [ ] Criar e validar os primeiros fluxos e protótipos.
-- [ ] Definir a identidade visual e os critérios de acessibilidade.
+## 2. MVP — plataforma e comunidade
 
-## 3. Base técnica
+- [ ] Estrutura multi-comunidade, banco de dados e isolamento de tenants.
+- [ ] Administração central básica e criação de comunidades.
+- [ ] Configuração, identidade básica, responsável e política de entrada.
+- [ ] Cadastro, login e sessão segura por comunidade.
+- [ ] Aprovação de participantes e detalhamento dos modos de entrada suportados no lançamento.
 
-- [ ] Escolher e registrar a stack e a arquitetura inicial.
-- [ ] Configurar execução local, testes e integração contínua.
-- [ ] Documentar configuração e variáveis necessárias, sem expor segredos.
+## 3. MVP — personagem e rede social
 
-## 4. Primeira versão
+- [ ] Criar personagem com nome, username, foto, bio e perfil.
+- [ ] Feed cronológico ou parcialmente cronológico, conforme decisão pendente.
+- [ ] Publicações de texto e imagem.
+- [ ] Curtidas, comentários, seguir e deixar de seguir.
+- [ ] Detalhar exploração, busca e campos personalizados previstos no produto.
+- [ ] Validar as jornadas em desktop e mobile.
 
-- [ ] Dividir o escopo aprovado em entregas com critérios de aceitação.
-- [ ] Implementar e validar a jornada principal.
-- [ ] Revisar requisitos e preparar o lançamento.
+## 4. MVP — proteção e administração
 
-## Evoluções futuras
+- [ ] Bloqueios e denúncias.
+- [ ] Moderação, justificativas e recurso básico.
+- [ ] Painel da comunidade e gestão de participantes.
+- [ ] Painel central, permissões e registros administrativos relevantes.
+- [ ] Validar isolamento entre comunidades, privacidade e autorização no servidor.
 
-A definir com base na validação da primeira versão.
+Segurança é transversal às entregas anteriores; esta etapa consolida sua validação e não posterga proteções fundamentais.
+
+## 5. Validação e lançamento
+
+- [ ] Validar entrada → eventual aprovação → personagem → publicação → interação.
+- [ ] Validar denúncia → análise → ação justificada → recurso e eventual escalonamento.
+- [ ] Demonstrar que contas, buscas, conteúdo e administração não vazam entre comunidades.
+- [ ] Definir critérios mensuráveis de lançamento e testar operação, acessibilidade e recuperação de dados.
+- [ ] Definir o recorte inicial do institucional e da descoberta.
+
+## Escopo a conciliar
+
+Recuperação de acesso aparece na tela de login, mas é explicitamente posterior na lista do MVP. Notificações simples são opcionais no MVP; sua inclusão não está fechada. Planos e definições comerciais não precisam estar concluídos no MVP. Ver [pendências](pendencias.md).
+
+## Pós-MVP
+
+Após estabilidade da base, avaliar recuperação de acesso conforme conciliação de escopo, mensagens privadas, Stories, notificações em tempo real, múltiplos formatos de conteúdo, temas, personalização avançada, premium, monetização e sistemas específicos de RPG. Entrada híbrida e automação de criação de comunidades também são evoluções futuras.
+
+No longo prazo: outros públicos de roleplay, marketplace, ferramentas para criadores, APIs e integrações externas. São possibilidades, não entregas assumidas.
+
+Fonte de escopo: [Estrutura do produto, seções 47–49](proposta/02-estrutura-do-produto.md).

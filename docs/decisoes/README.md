@@ -1,16 +1,20 @@
 # Decisões
 
-Histórico das escolhas relevantes de produto, design e tecnologia. Nenhuma decisão registrada ainda.
-
-## Como registrar
-
-1. Copie o [modelo](modelo.md) para um arquivo com número sequencial e título, por exemplo `0001-titulo-da-decisao.md`.
-2. Preencha o contexto, as alternativas e a justificativa.
-3. Comece com o status `Proposta`; registre aprovação apenas quando ela ocorrer.
-4. Adicione um link ao registro no índice abaixo.
-5. Se uma decisão for substituída, preserve o histórico e vincule a nova decisão.
+Histórico das diretrizes de produto e das escolhas futuras de design e tecnologia.
 
 ## Índice
 
-| Registro | Status | Data |
+| Registro | Status | Origem |
 | --- | --- | --- |
+| [0001 — Fundação e fronteiras do produto](0001-fundacao-do-produto.md) | Estabelecida na proposta v1.0 | Documentos 01 e 02 |
+| [0002 — Stack inicial e monorepo](0002-stack-e-monorepo.md) | Definida pelo responsável pelo projeto | Instrução do responsável pelo projeto |
+
+## Como registrar
+
+1. Copie o [modelo](modelo.md) para um arquivo com número sequencial e título.
+2. Preencha contexto, alternativas, justificativa e consequências.
+3. Use `Proposta` até existir aprovação; não invente data, responsáveis ou alternativas avaliadas.
+4. Adicione o registro ao índice.
+5. Ao substituir uma decisão, preserve o histórico e vincule a substituta.
+
+As [pendências](../pendencias.md) não representam decisões tomadas. A stack de alto nível foi definida; ferramentas e versões ainda estão em aberto.
