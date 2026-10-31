@@ -820,7 +820,9 @@ function CommunityAppIcon({ app }: { app: string }) {
     settings: <><circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1a1.7 1.7 0 1 1-2.4 2.4l-.1-.1a1.7 1.7 0 0 0-2.9 1.2v.2a1.7 1.7 0 1 1-3.4 0v-.2a1.7 1.7 0 0 0-2.9-1.2l-.1.1a1.7 1.7 0 1 1-2.4-2.4l.1-.1a1.7 1.7 0 0 0-1.2-2.9H4a1.7 1.7 0 1 1 0-3.4h.2a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a1.7 1.7 0 1 1 2.4-2.4l.1.1a1.7 1.7 0 0 0 2.9-1.2V4a1.7 1.7 0 1 1 3.4 0v.2a1.7 1.7 0 0 0 2.9 1.2l.1-.1a1.7 1.7 0 1 1 2.4 2.4l-.1.1a1.7 1.7 0 0 0 1.2 2.9h.2a1.7 1.7 0 1 1 0 3.4h-.2a1.7 1.7 0 0 0-1.2 2.9Z"/></>,
     apps: <><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></>,
   };
-  return <svg className="community-app-svg" viewBox="0 0 24 24" aria-hidden="true" {...common}>{drawings[app] ?? drawings.feed}</svg>;
+  // Keep unknown app keys neutral: showing the Social camera as a fallback
+  // makes newly added apps look like the wrong application.
+  return <svg className="community-app-svg" viewBox="0 0 24 24" aria-hidden="true" {...common}>{drawings[app] ?? drawings.apps}</svg>;
 }
 
 function CommunityHome({ character, tenant, onLogout }: { character: SocialCharacter; tenant: TenantInfo | null; onLogout: () => void }) {
