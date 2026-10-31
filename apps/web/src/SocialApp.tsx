@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 37312)
-Total output lines: 965
-
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode, type SyntheticEvent } from 'react';
 import './SocialApp.css';
 import { notifySnack } from './SnackMessage';
@@ -460,7 +457,209 @@ function ProfilePage({ username, currentCharacter, onUpdated }: { username: stri
   if (error && !profile) return <section className="social-page-card"><p className="inline-error">{error}</p></section>;
   if (!profile) return <div className="social-panel blank-state">Carregando perfil…</div>;
   const visiblePosts = posts.filter((post) => post.kind === 'post' && (post.imageUrls?.length || post.imageUrl));
-  return <div className="profile-page"><section className="profile-header"><div className="profile-cover-art" style={profile.coverUrl ? { backgroundImage: `url("${profile.coverUrl}")` } : undefined}/><div className="profile-info"><Avatar character={profile} className="large-avatar"/><div className="profile-actions">{profile.own ? <button className="soft-button" type="button" onClick={() => setShowEdit(true)}>Editar perfil</button> : <button className="primary-button" type="button" onClick={() => void toggleFollow()}>{profile.following ? 'Seguindo' : 'Seguir'}</button>}</div><h1>{profile.displayName} <VerificationBadge verified={profile.verified}/></h1><span>@{profile.username}</span><p>{profile.bio}</p>{(profile.age || profile.photoplayerName) && <div className="profile-character-meta">{profile.age && <span>{profile.age} anos</span>}{profile.photoplayerName && <span>Photoplayer: {profile.photoplayerName}</span>}</div>}<div className="profile-stats"><strong>{profile.postCount.toLocaleString('pt-BR')}<small>publicações</small></strong><a href={`/@${profile.username}/followers`}><strong>{profile.followerCount.toLocaleString('pt-BR')}<small>seguidores</small></strong></a><a href={`/@${profile.username}/following`}><strong>{profile.followingCount.toLocaleString('pt-BR')}<small>seguindo</small></strong></a></div></div></section><h2 className="profile-grid-heading">Publicações</h2><div className="profile-post-grid">{visiblePosts.map((post) => <button className="profile-post-tile" type="button" key={post.id} title="Abrir publicação" aria-label={`Abrir publicação de ${post.author.displayName}`} onClick={() => setSelectedPost(post)}><img src={post.imageUrls?.[0] || post.imageUrl} alt={post.content || `Publicação de ${post.author.displayName}`}/><small><MaterialIcon name="favorite" filled/>{post.likesCount} <MaterialIcon name="comment"/>{post.commentsCount}</small></button>)}</div>{visiblePosts.length === 0 && <div className="blank-state">Ainda não há publicações por aqui.</div>}{selectedPost && <div className="profile-post-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.curre…7312 tokens truncated… 21 10.2C20.2 6.1 16.4 3 12 3Z"/><circle cx="7.5" cy="11" r=".8"/><circle cx="10" cy="7.5" r=".8"/><circle cx="14.5" cy="7.5" r=".8"/></>,
+  return <div className="profile-page"><section className="profile-header"><div className="profile-cover-art" style={profile.coverUrl ? { backgroundImage: `url("${profile.coverUrl}")` } : undefined}/><div className="profile-info"><Avatar character={profile} className="large-avatar"/><div className="profile-actions">{profile.own ? <button className="soft-button" type="button" onClick={() => setShowEdit(true)}>Editar perfil</button> : <button className="primary-button" type="button" onClick={() => void toggleFollow()}>{profile.following ? 'Seguindo' : 'Seguir'}</button>}</div><h1>{profile.displayName} <VerificationBadge verified={profile.verified}/></h1><span>@{profile.username}</span><p>{profile.bio}</p>{(profile.age || profile.photoplayerName) && <div className="profile-character-meta">{profile.age && <span>{profile.age} anos</span>}{profile.photoplayerName && <span>Photoplayer: {profile.photoplayerName}</span>}</div>}<div className="profile-stats"><strong>{profile.postCount.toLocaleString('pt-BR')}<small>publicações</small></strong><a href={`/@${profile.username}/followers`}><strong>{profile.followerCount.toLocaleString('pt-BR')}<small>seguidores</small></strong></a><a href={`/@${profile.username}/following`}><strong>{profile.followingCount.toLocaleString('pt-BR')}<small>seguindo</small></strong></a></div></div></section><h2 className="profile-grid-heading">Publicações</h2><div className="profile-post-grid">{visiblePosts.map((post) => <button className="profile-post-tile" type="button" key={post.id} title="Abrir publicação" aria-label={`Abrir publicação de ${post.author.displayName}`} onClick={() => setSelectedPost(post)}><img src={post.imageUrls?.[0] || post.imageUrl} alt={post.content || `Publicação de ${post.author.displayName}`}/><small><MaterialIcon name="favorite" filled/>{post.likesCount} <MaterialIcon name="comment"/>{post.commentsCount}</small></button>)}</div>{visiblePosts.length === 0 && <div className="blank-state">Ainda não há publicações por aqui.</div>}{selectedPost && <div className="profile-post-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setSelectedPost(null); }}><section className="profile-post-modal" role="dialog" aria-modal="true" aria-label={`Publicação de ${selectedPost.author.displayName}`}><button className="modal-x" type="button" aria-label="Fechar publicação" onClick={() => setSelectedPost(null)}><MaterialIcon name="close"/></button><PostCard post={selectedPost} currentCharacter={currentCharacter} onRefresh={() => void load()} onComments={(post) => window.dispatchEvent(new CustomEvent('vybe:comments', { detail: post }))}/></section></div>}{showEdit && <ProfileEditModal profile={profile} onClose={() => setShowEdit(false)} onSave={saveProfile}/>}</div>;
+}
+
+type ChatChannel = { id: string; name: string; category: string; description: string; kind: 'text' | 'announcement' | 'roleplay' | 'restricted'; posting: 'members' | 'staff' | 'restricted'; private: boolean };
+type ChatMember = Pick<SocialCharacter, 'id' | 'username' | 'displayName' | 'avatarUrl' | 'verified'> & { online?: boolean };
+type ChatMessage = { id: string; content: string; createdAt: string; deleted: boolean; own: boolean; author: ChatMember | null };
+
+function CommunityChatPage() {
+  const [channels, setChannels] = useState<ChatChannel[]>([]);
+  const [members, setMembers] = useState<ChatMember[]>([]);
+  const [selected, setSelected] = useState<ChatChannel | null>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [content, setContent] = useState('');
+  const contentRef = useRef<HTMLTextAreaElement>(null);
+  const { captureSelection, insertEmoji } = useEmojiInsertion(contentRef, content, setContent);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [membersOpen, setMembersOpen] = useState(false);
+  async function loadChannels() {
+    try {
+      const [channelList, memberList] = await Promise.all([
+        apiRequest<ChatChannel[]>('/api/conversations/channels'),
+        apiRequest<ChatMember[]>('/api/conversations/members'),
+      ]);
+      setChannels(channelList);
+      setMembers(memberList);
+      setSelected((current) => current ? channelList.find((channel) => channel.id === current.id) ?? channelList[0] ?? null : channelList[0] ?? null);
+      setError('');
+    } catch (loadError) { setError(loadError instanceof Error ? loadError.message : 'Não foi possível carregar os canais.'); }
+    finally { setLoading(false); }
+  }
+  async function loadMessages(channelId: string) {
+    try { setMessages(await apiRequest<ChatMessage[]>(`/api/conversations/channels/${channelId}/messages`)); setError(''); }
+    catch (loadError) { setError(loadError instanceof Error ? loadError.message : 'Não foi possível carregar as mensagens.'); }
+  }
+  useEffect(() => { void loadChannels(); }, []);
+  useEffect(() => {
+    if (!selected) return;
+    void loadMessages(selected.id);
+    const timer = window.setInterval(() => { void loadMessages(selected.id); }, 8000);
+    return () => window.clearInterval(timer);
+  }, [selected?.id]);
+  async function sendMessage(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!selected || !content.trim()) return;
+    const sent = await apiRequest<ChatMessage>(`/api/conversations/channels/${selected.id}/messages`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content }) });
+    setMessages((current) => [...current, sent]);
+    setContent('');
+  }
+  const categories = [...new Set(channels.map((channel) => channel.category))];
+  return <div className={`community-chat ${selected ? 'has-channel' : ''} ${membersOpen ? 'members-open' : ''}`}>
+    <aside className="channel-sidebar"><header><span>COMUNIDADE</span><h1>Conversas</h1><p>Espaços para criar histórias juntos.</p></header>{loading ? <p className="muted-copy">Carregando canais…</p> : categories.map((category) => <section className="channel-category" key={category}><h2>{category}</h2>{channels.filter((channel) => channel.category === category).map((channel) => <button key={channel.id} className={selected?.id === channel.id ? 'active' : ''} type="button" onClick={() => setSelected(channel)}><MaterialIcon name={channel.kind === 'announcement' ? 'campaign' : channel.kind === 'roleplay' ? 'auto_awesome' : 'tag'}/><span>{channel.name.replaceAll('-', ' ')}</span></button>)}</section>)}</aside>
+    <section className="community-chat-main"><header className="chat-channel-header"><button className="chat-back" type="button" onClick={() => setSelected(null)} aria-label="Voltar aos canais"><MaterialIcon name="arrow_back"/></button><div><h2>{selected ? `# ${selected.name.replaceAll('-', ' ')}` : 'Escolha um canal'}</h2><p>{selected?.description ?? 'Selecione um espaço para conversar.'}</p></div><span className="channel-kind">{selected?.kind === 'roleplay' ? 'Canal temático' : selected?.kind === 'announcement' ? 'Avisos' : 'Comunidade'}</span><button className="members-toggle" type="button" onClick={() => setMembersOpen(true)}><MaterialIcon name="groups"/>{members.length}</button></header>
+      <div className="chat-message-list">{error && <p className="inline-error" role="alert">{error}</p>}{messages.map((message, index) => { const previous = messages[index - 1]; const grouped = previous?.author?.id === message.author?.id && new Date(message.createdAt).getTime() - new Date(previous.createdAt).getTime() < 5 * 60_000; return <article className={`chat-message ${grouped ? 'is-grouped' : ''}`} key={message.id}>{grouped ? <span className="chat-message-time">{new Date(message.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span> : <Avatar character={message.author}/>}<div className="chat-message-body">{!grouped && <header><strong>{message.author?.displayName ?? 'Novo membro'}</strong><span>{new Date(message.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span></header>}<p>{message.content}</p><div className="chat-message-actions">{message.own && !message.deleted && <button type="button" aria-label="Excluir mensagem" onClick={async () => { await apiRequest(`/api/conversations/messages/${message.id}`, { method: 'DELETE' }); setMessages((items) => items.map((item) => item.id === message.id ? { ...item, deleted: true, content: 'Esta mensagem foi removida.' } : item)); }}><MaterialIcon name="delete"/></button>}{!message.own && !message.deleted && <button type="button" aria-label="Denunciar mensagem" onClick={() => void apiRequest(`/api/conversations/messages/${message.id}/report`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ reason: 'Conteúdo inadequado ou contrário às regras.' }) })}><MaterialIcon name="flag"/></button>}</div></div></article>; })}{!loading && messages.length === 0 && selected && <div className="chat-empty"><MaterialIcon name="forum"/><p>Esta conversa começa com você.</p></div>}</div>
+      <form className="chat-composer" onSubmit={(event) => void sendMessage(event)}><textarea ref={contentRef} value={content} onChange={(event) => setContent(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); event.currentTarget.form?.requestSubmit(); } }} placeholder={selected ? `Mensagem em #${selected.name}...` : 'Escolha um canal para começar'} maxLength={2000} disabled={!selected}/><div><EmojiButton onBeforeOpen={captureSelection} onSelect={insertEmoji}/><small>Enter envia · Shift + Enter quebra linha</small><button className="primary-button" type="submit" disabled={!selected || !content.trim()} aria-label="Enviar mensagem"><MaterialIcon name="send"/></button></div></form>
+    </section>
+    {membersOpen && <button className="members-scrim" type="button" onClick={() => setMembersOpen(false)} aria-label="Fechar lista de membros"/>}<aside className={`chat-members ${membersOpen ? 'is-open' : ''}`}><header><h2>Membros <small>{members.length}</small></h2><button type="button" onClick={() => setMembersOpen(false)} aria-label="Fechar"><MaterialIcon name="close"/></button></header><h3>Online</h3>{members.filter((member) => member.online).map((member) => <div key={member.id}><Avatar character={member}/><span>{member.displayName} <VerificationBadge verified={member.verified}/><small>online nesta sessão</small></span><i className="online-dot"/></div>)}<h3>Offline</h3>{members.filter((member) => !member.online).map((member) => <div key={member.id}><Avatar character={member}/><span>{member.displayName} <VerificationBadge verified={member.verified}/><small>@{member.username}</small></span></div>)}</aside>
+  </div>;
+}
+
+type DirectThread = { character: ChatMember; lastMessage: string; createdAt: string; unreadCount?: number };
+type DirectMessageItem = { id: string; content: string; createdAt: string; own: boolean; readAt?: string | null };
+function MessagesPage() {
+  const [threads, setThreads] = useState<DirectThread[]>([]);
+  const [selected, setSelected] = useState(new URLSearchParams(window.location.search).get('to') ?? '');
+  const [recipient, setRecipient] = useState('');
+  const [activeCharacter, setActiveCharacter] = useState<ChatMember | null>(null);
+  const [messages, setMessages] = useState<DirectMessageItem[]>([]);
+  const [content, setContent] = useState(new URLSearchParams(window.location.search).get('draft') ?? '');
+  const contentRef = useRef<HTMLTextAreaElement>(null);
+  const { captureSelection, insertEmoji } = useEmojiInsertion(contentRef, content, setContent);
+  const [error, setError] = useState('');
+  const [partnerTyping, setPartnerTyping] = useState(false);
+  const messagesListRef = useRef<HTMLDivElement>(null);
+  const typingActive = useRef(false);
+  const typingTimeout = useRef<number | undefined>(undefined);
+  function sendTypingState(typing: boolean) {
+    if (!selected) return;
+    void fetch('/api/messages/typing', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ toUsername: selected, typing }) });
+  }
+  function updateDraft(value: string) {
+    setContent(value);
+    if (!value.trim()) {
+      window.clearTimeout(typingTimeout.current);
+      if (typingActive.current) { typingActive.current = false; sendTypingState(false); }
+      return;
+    }
+    if (!typingActive.current) { typingActive.current = true; sendTypingState(true); }
+    window.clearTimeout(typingTimeout.current);
+    typingTimeout.current = window.setTimeout(() => { typingActive.current = false; sendTypingState(false); }, 1800);
+  }
+  async function loadThreads() { try { setThreads(await apiRequest<DirectThread[]>('/api/messages')); } catch (loadError) { setError(loadError instanceof Error ? loadError.message : 'Não foi possível carregar as mensagens.'); } }
+  async function openThread(username: string) {
+    const normalized = username.trim().replace(/^@/, '').toLowerCase();
+    if (!normalized) return;
+    const result = await apiRequest<{ character: ChatMember; messages: DirectMessageItem[]; typing: boolean }>(`/api/messages/${encodeURIComponent(normalized)}`);
+    setSelected(normalized); setActiveCharacter(result.character); setMessages(result.messages); setPartnerTyping(result.typing); setRecipient('');
+    window.dispatchEvent(new Event('vybe:messages-read'));
+    void loadThreads();
+    window.history.replaceState({}, '', `/mensagens?to=${encodeURIComponent(normalized)}`);
+  }
+  useEffect(() => { void loadThreads(); }, []);
+  useEffect(() => { if (selected) void openThread(selected); }, []);
+  useEffect(() => {
+    if (!selected) return;
+    const interval = window.setInterval(() => { void openThread(selected).then(loadThreads).catch(() => undefined); }, 3500);
+    return () => window.clearInterval(interval);
+  }, [selected]);
+  useEffect(() => {
+    const list = messagesListRef.current;
+    if (list) list.scrollTop = list.scrollHeight;
+  }, [messages, partnerTyping]);
+  useEffect(() => () => {
+    window.clearTimeout(typingTimeout.current);
+    if (typingActive.current) sendTypingState(false);
+  }, [selected]);
+  async function send(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault(); if (!selected || !content.trim()) return;
+    window.clearTimeout(typingTimeout.current);
+    typingActive.current = false;
+    sendTypingState(false);
+    const sent = await apiRequest<DirectMessageItem>('/api/messages', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ toUsername: selected, content }) });
+    setMessages((items) => [...items, sent]); setContent(''); void loadThreads();
+  }
+  return <div className={`direct-messages ${selected ? 'has-thread' : ''}`}><aside className="direct-sidebar"><header><span>PRIVADO</span><h1>Mensagens</h1><form onSubmit={(event) => { event.preventDefault(); void openThread(recipient); }}><input value={recipient} onChange={(event) => setRecipient(event.target.value)} placeholder="Iniciar com @usuário"/><button type="submit" aria-label="Abrir conversa"><MaterialIcon name="arrow_forward"/></button></form></header><div className="direct-thread-list">{threads.map((thread) => <button type="button" className={selected === thread.character.username ? 'active' : ''} key={thread.character.id} onClick={() => void openThread(thread.character.username)}><Avatar character={thread.character}/><span><strong>{thread.character.displayName} <VerificationBadge verified={thread.character.verified}/></strong><small>{thread.lastMessage}</small></span>{Boolean(thread.unreadCount) && <i className="direct-unread-dot" aria-label={`${thread.unreadCount} mensagens não lidas`}/>}</button>)}</div></aside><section className="direct-main"><header className="chat-channel-header"><button className="chat-back" type="button" onClick={() => { setSelected(''); setActiveCharacter(null); window.history.replaceState({}, '', '/mensagens'); }} aria-label="Voltar às mensagens"><MaterialIcon name="arrow_back"/></button>{activeCharacter ? <><Avatar character={activeCharacter}/><div><h2>{activeCharacter.displayName} <VerificationBadge verified={activeCharacter.verified}/></h2><p>@{activeCharacter.username}</p>{partnerTyping && <small className="direct-typing-indicator">Digitando…</small>}</div></> : <div><h2>Suas mensagens</h2><p>Converse em particular com personagens da comunidade.</p></div>}</header>{activeCharacter ? <><div className="chat-message-list direct-chat-message-list" ref={messagesListRef}>{error && <p className="inline-error" role="alert">{error}</p>}{messages.map((message) => <article className={`direct-message ${message.own ? 'own' : ''}`} key={message.id}><p>{message.content}</p><small>{new Date(message.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}{message.own && <span className="direct-read-status">{message.readAt ? ' · Visualizado' : ' · Enviado'}</span>}</small></article>)}{messages.length === 0 && <div className="chat-empty"><MaterialIcon name="mail"/><p>Envie a primeira mensagem para {activeCharacter.displayName}.</p></div>}</div><form className="chat-composer" onSubmit={(event) => void send(event)}><textarea ref={contentRef} value={content} onChange={(event) => updateDraft(event.target.value)} onBlur={() => { window.clearTimeout(typingTimeout.current); if (typingActive.current) { typingActive.current = false; sendTypingState(false); } }} onKeyDown={(event) => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); event.currentTarget.form?.requestSubmit(); } }} maxLength={2000} placeholder={`Mensagem para ${activeCharacter.displayName}...`}/><div><EmojiButton onBeforeOpen={captureSelection} onSelect={insertEmoji}/><small>Enter envia · Shift + Enter quebra linha</small><button className="primary-button" type="submit" disabled={!content.trim()} aria-label="Enviar mensagem"><MaterialIcon name="send"/></button></div></form></> : <div className="chat-empty direct-empty"><MaterialIcon name="mail"/><p>Escolha uma conversa ou inicie uma nova pelo nome de usuário.</p></div>}</section></div>;
+}
+
+function CommunityPage({ tenant }: { tenant: TenantInfo | null }) { return <section className="social-page-card tenant-about"><div className="about-cover"/><span className="about-crest"><MaterialIcon name="auto_awesome"/></span><h1>{tenant?.name ?? 'VYBE Community'}</h1><p>{tenant?.description}</p><div className="about-stats"><strong>{tenant?.memberCount ?? 0}<small>membros</small></strong><strong>Pública<small>comunidade</small></strong><strong>Aberta<small>entrada</small></strong></div><h2>Regras da comunidade</h2><ol>{(tenant?.rules ?? ['Respeite os outros personagens e suas histórias.', 'Mantenha as interações dentro das regras da comunidade.', 'Use os canais adequados para dúvidas e sugestões.']).map((rule) => <li key={rule}>{rule}</li>)}</ol><h2>Administradores</h2>{tenant?.administrators?.length ? tenant.administrators.map((admin) => <a className="community-admin" href={`/@${admin.username}`} key={admin.id}><Avatar character={admin}/><span><strong>{admin.displayName}</strong><small>@{admin.username} · Administração</small></span></a>) : <p>A equipe da comunidade será exibida aqui quando configurada.</p>}</section>; }
+function CompaniesPage({ community }: { community: string }) { return <section className="social-page-card tenant-about"><span className="about-crest"><MaterialIcon name="apartment"/></span><h1>Empresas</h1><p>Organizações e instituições de {community} aparecerão aqui quando forem cadastradas.</p><p className="settings-empty-state">Nenhuma empresa disponível no momento.</p></section>; }
+
+function NotificationsPage({ echo = false }: { echo?: boolean }) { const [items, setItems] = useState<{ id: string; type: string; targetId: string; amountCents?: number | null; joinUpdate?: { status: string; communityName: string; message: string } | null; actor: SocialCharacter | null; createdAt: string; readAt?: string }[]>([]); useEffect(() => { void apiRequest<typeof items>('/api/notifications').then((all) => all.filter((item) => echo ? ['echo_like', 'echo_mention', 'repost', 'echo_reply', 'follow'].includes(item.type) : ['like', 'comment', 'follow', 'mention', 'message', 'bank_transfer_received', 'bank_admin_credit_received', 'community_join_update'].includes(item.type))).then(setItems).then(() => apiRequest(`/api/notifications/read${echo ? '?scope=echo' : ''}`, { method: 'PATCH' })).catch(() => undefined); }, [echo]); const descriptions: Record<string, string> = { follow: 'começou a seguir você.', message: 'enviou uma mensagem para você.', like: 'curtiu uma publicação sua.', comment: 'comentou em uma publicação sua.', echo_like: 'curtiu seu Echo.', echo_reply: 'respondeu ao seu Echo.', repost: 'repostou seu Echo.', mention: 'mencionou você em uma publicação.', echo_mention: 'mencionou você em um Echo.' }; function notificationText(item: (typeof items)[number]) { if (item.type === 'bank_transfer_received') return `enviou ${moneyForNotification(item.amountCents)} para você.`; if (item.type === 'bank_admin_credit_received') return `creditou ${moneyForNotification(item.amountCents)} na sua carteira.`; if (item.type === 'community_join_update') { const update = item.joinUpdate; if (!update) return 'atualizou sua solicitação de entrada em uma comunidade.'; const statusText = update.status === 'APPROVED' ? 'aprovou sua entrada' : update.status === 'REJECTED' ? 'recusou sua solicitação' : 'solicitou ajustes na sua ficha'; return `${statusText} em ${update.communityName}.${update.message ? ` ${update.message}` : ''}`; } return descriptions[item.type] ?? ''; } return <section className="social-page-card"><div className="social-page-title"><span>{echo ? 'VYBE ECHO' : 'ATIVIDADE'}</span><h1>Notificações</h1></div>{items.map((item) => <article className="notification-row" key={item.id}><Avatar character={item.actor}/><p><strong>{item.type === 'community_join_update' ? 'Atualização da comunidade' : item.actor?.displayName ?? 'Alguém'}</strong> {notificationText(item)}<small>{new Date(item.createdAt).toLocaleString('pt-BR')}</small></p></article>)}{!items.length && <div className="blank-state">Nenhuma novidade por enquanto.</div>}</section>; }
+
+function moneyForNotification(cents?: number | null) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format((cents ?? 0) / 100); }
+
+type SettingsData = {
+  role: 'owner';
+  community: {
+    id: string; name: string; slug: string; subdomain: string; description: string; category: string; logoUrl: string; coverUrl: string; wallpaperUrl: string;
+    status: string; memberCount: number; entry: string; brand: { primary: string; dark: string; medium: string; soft: string; lilac: string; white: string; graphite: string };
+    settings: {
+      access: { visibility: 'public' | 'private' | 'controlled'; approvalRequired: boolean; invitesEnabled: boolean; welcomeMessage: string };
+      characters: { usernameMinLength: number; usernameMaxLength: number; minimumAge: number; requireBio: boolean; customFields: Array<{ key: string; label: string; required: boolean }> };
+      features: { feed: boolean; pulse: boolean; stories: boolean; conversations: boolean; messages: boolean; events: boolean; match?: boolean; bank?: boolean; academic?: boolean; career?: boolean; news?: boolean; companies?: boolean; eventCreation: 'any_pending' | 'staff' | 'admins' | 'owner' };
+      privacy: { showInDirectory: boolean; showMembers: boolean; showAdmins: boolean; publicContent: boolean };
+      moderation: { rules: string[]; requireReportReason: boolean; maxPostLength: number };
+    };
+  };
+  team: Array<{ accountId: string; role: 'owner' | 'admin' | 'moderator'; email: string; character: string }>;
+  pendingMembers: Array<{ accountId: string; email: string; createdAt: string; character: { displayName: string; username: string; bio: string; avatarUrl: string } | null }>;
+  joinRequests: Array<{ id: string; status: 'PENDING' | 'NEEDS_INFORMATION'; createdAt: string; characterName: string; requestedUsername: string; characterAge: number; photoplayerName: string; photoplayerImageUrl: string; characterDescription: string; customAnswers: Array<{ key: string; label: string; value: string }>; requestedChanges: string[]; adminMessage: string; requester: { id: string; displayName: string; username: string; avatarUrl: string } | null }>;
+  members: Array<{ accountId: string; joinedAt: string; displayName: string; username: string; bio: string; avatarUrl: string }>;
+  pendingEvents: Array<{ id: string; title: string; description: string; startsAt: string; location: string; category: string; createdAt: string }>;
+  sanctions: Array<{ id: string; accountId: string; action: 'suspend' | 'ban'; reason: string; createdAt: string; endsAt: string | null; displayName: string; username: string; avatarUrl: string }>;
+  audit: Array<{ id: string; action: string; details: Record<string, unknown>; createdAt: string; actorEmail: string }>;
+  metrics: { pendingMembers: number; teachers: number; newsWriters: number; pendingEvents: number; activeMembers: number; openReports: number | null };
+};
+
+function JoinRequestReviewCard({ request, onReview }: { request: SettingsData['joinRequests'][number]; onReview: (id: string, decision: 'approve' | 'request_changes' | 'reject', payload?: { fields?: string[]; message?: string }) => Promise<void> }) {
+  const [fields, setFields] = useState<string[]>([]);
+  const [message, setMessage] = useState('');
+  const [busy, setBusy] = useState(false);
+  async function submit(decision: 'approve' | 'request_changes' | 'reject', selectedFields?: string[]) {
+    setBusy(true);
+    try { await onReview(request.id, decision, { ...(selectedFields ? { fields: selectedFields } : {}), ...(message.trim() ? { message: message.trim() } : {}) }); }
+    catch (error) { notifySnack(error instanceof Error ? error.message : 'Não foi possível revisar esta ficha.'); }
+    finally { setBusy(false); }
+  }
+  function toggleField(field: string) { setFields((current) => current.includes(field) ? current.filter((item) => item !== field) : [...current, field]); }
+  return <article className="settings-join-request"><header><Avatar character={{ displayName: request.requester?.displayName ?? 'Membro', avatarUrl: request.requester?.avatarUrl ?? '' }}/><div><strong>Solicitação de {request.requester?.displayName ?? 'membro'}</strong><small>{request.requester?.username ? `@${request.requester.username}` : ''}</small></div><span className={`join-request-status is-${request.status.toLowerCase()}`}>{request.status === 'PENDING' ? 'Aguardando análise' : 'Alterações solicitadas'}</span></header>
+    {request.status === 'NEEDS_INFORMATION' && <p className="join-request-admin-message">{request.adminMessage}</p>}
+    <div className="join-request-profile"><img src={request.photoplayerImageUrl} alt={`Photoplayer de ${request.characterName}`}/><div><span>PERSONAGEM</span><h3>{request.characterName}</h3><p>@{request.requestedUsername} · {request.characterAge} anos</p><p><b>Photoplayer:</b> {request.photoplayerName}</p><time>{new Date(request.createdAt).toLocaleString('pt-BR')}</time></div></div>
+    <section><h4>Quem é você?</h4><p>{request.characterDescription}</p></section>
+    {!!request.customAnswers.length && <section><h4>Perguntas adicionais</h4>{request.customAnswers.map((answer) => <p key={answer.key}><b>{answer.label}:</b> {answer.value}</p>)}</section>}
+    <div className="join-request-review-actions"><button type="button" className="primary-button" disabled={busy} onClick={() => void submit('approve')}>Aprovar</button>
+      <details><summary>Solicitar alteração</summary><form onSubmit={(event) => { event.preventDefault(); void submit('request_changes', fields); }}><div>{[['username', 'Username'], ['photoplayer', 'Photoplayer'], ['description', 'Descrição']].map(([key, label]) => <label key={key}><input type="checkbox" checked={fields.includes(key)} onChange={() => toggleField(key)}/>{label}</label>)}</div><textarea value={message} onChange={(event) => setMessage(event.target.value)} maxLength={1000} placeholder="Explique o que precisa ser atualizado." required minLength={3}/><button type="submit" disabled={busy || !fields.length}>Enviar pedido</button></form></details>
+      <details><summary>Recusar</summary><form onSubmit={(event) => { event.preventDefault(); void submit('reject'); }}><textarea value={message} onChange={(event) => setMessage(event.target.value)} maxLength={1000} placeholder="Informe o motivo da recusa." required minLength={3}/><button type="submit" disabled={busy}>Confirmar recusa</button></form></details>
+    </div>
+  </article>;
+}
+
+const settingsTabs = [
+  ['overview', 'Visão geral', 'home'], ['members', 'Solicitações de entrada', 'person_add'], ['directory', 'Membros', 'groups'], ['team', 'Equipe e permissões', 'groups'], ['academic', 'Acadêmico', 'school'], ['news', 'Notícias (Jornal)', 'newspaper'], ['events', 'Eventos e calendário', 'calendar_month'], ['moderation', 'Moderação', 'shield'], ['appearance', 'Personalização', 'palette'], ['general', 'Configurações gerais', 'tune'], ['access', 'Acesso e entrada', 'lock_open'], ['characters', 'Identidade', 'person'],
+  ['features', 'Aplicativos', 'apps'], ['privacy', 'Privacidade', 'visibility'], ['advanced', 'Auditoria', 'settings'], ['risk', 'Zona de risco', 'warning'],
+] as const;
+
+function SettingsIcon({ name }: { name: string }) {
+  const common = { fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const };
+  const artwork: Record<string, ReactNode> = {
+    home: <><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></>,
+    person_add: <><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0M19 8v6m-3-3h6"/></>,
+    school: <><path d="m2 9 10-5 10 5-10 5z"/><path d="M6 11v5c3 3 9 3 12 0v-5M22 9v6"/></>,
+    newspaper: <><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h5v5H7zm8 0h3m-3 4h3m-11 1v3h11"/></>,
+    calendar_month: <><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18m-13 4h2m4 0h2m-8 3h2"/></>,
+    bolt: <><path d="m13 2-9 12h7l-1 8 10-13h-7z"/></>,
+    tune: <><path d="M4 7h9M17 7h3M4 17h3m4 0h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></>,
+    lock_open: <><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 7.5-2"/><path d="M12 14v3"/></>,
+    person: <><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></>,
+    apps: <><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></>,
+    forum: <><path d="M20 11.5a6.5 6.5 0 0 1-6.5 6.5H8l-4 3v-5.5A6.5 6.5 0 0 1 10.5 9H14"/><path d="M13 4h7v7h-7z"/></>,
+    groups: <><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0M16 5a3 3 0 0 1 0 6M18 14a5 5 0 0 1 3 4.5"/></>,
+    shield: <><path d="M12 3 20 6v5c0 5-3.4 8.3-8 10-4.6-1.7-8-5-8-10V6z"/><path d="m9 12 2 2 4-4"/></>,
+    visibility: <><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Z"/><circle cx="12" cy="12" r="3"/></>,
+    palette: <><path d="M12 3a9 9 0 1 0 0 18h1.2a2 2 0 0 0 1.3-3.5 1.7 1.7 0 0 1 1.1-3h1.1A4.3 4.3 0 0 0 21 10.2C20.2 6.1 16.4 3 12 3Z"/><circle cx="7.5" cy="11" r=".8"/><circle cx="10" cy="7.5" r=".8"/><circle cx="14.5" cy="7.5" r=".8"/></>,
     settings: <><circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1 1.4 1.1-1.4 2.4-1.7-.7a8 8 0 0 1-1.6.9l-.3 1.8h-2.8l-.3-1.8a8 8 0 0 1-1.6-.9l-1.7.7-1.4-2.4 1.4-1.1a8 8 0 0 1 0-1.9l-1.4-1.2 1.4-2.4 1.7.7a8 8 0 0 1 1.6-.9l.3-1.8h2.8l.3 1.8a8 8 0 0 1 1.6.9l1.7-.7 1.4 2.4-1.4 1.2a8 8 0 0 1 0 1.9Z" transform="translate(-1 -1) scale(1.08)"/></>,
     warning: <><path d="m12 3 10 18H2L12 3Z"/><path d="M12 9v5M12 17h.01"/></>,
   };
