@@ -1,8 +1,15 @@
-import 'dotenv/config';
+import { config } from 'dotenv';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import cors from 'cors';
 import express from 'express';
 import mongoose from 'mongoose';
 import { apiInfo } from '@vybe/shared';
+import { resolveTenant } from './middleware/tenant.js';
+import { mediaRouter } from './routes/media.js';
+import { tenantRouter } from './routes/tenant.js';
+
+config({ path: resolve(dirname(fileURLToPath(import.meta.url)), '../../../.env') });
 
 const app = express();
 const host = process.env.HOST ?? '127.0.0.1';
@@ -11,7 +18,7 @@ const webOrigin = process.env.WEB_ORIGIN ?? 'http://127.0.0.1:5173';
 
 app.disable('x-powered-by');
 app.use(cors({ origin: webOrigin }));
-app.use(express.json({ limit: '1mb' }));
+app.use(express.json({ limit: '20mb' }));
 
 app.get('/api/health', (_request, response) => {
   response.json({ status: 'ok', service: apiInfo.name, version: apiInfo.version });
@@ -25,13 +32,20 @@ app.get('/api/ready', (_request, response) => {
   });
 });
 
+app.use(resolveTenant);
+app.use('/media', mediaRouter);
+app.use('/api', tenantRouter);
+
 const server = app.listen(port, host, () => {
   console.log(`VYBE API listening at http://${host}:${port}`);
 });
 
 const mongoUri = process.env.MONGODB_URI;
 if (mongoUri) {
-  mongoose.connect(mongoUri).then(
+  const mongoOptions = process.env.NODE_ENV === 'development'
+    ? { dbName: process.env.VYBE_DEV_DB_NAME ?? 'vybe_dev' }
+    : {};
+  mongoose.connect(mongoUri, mongoOptions).then(
     () => console.log('MongoDB connection established'),
     (error: unknown) => {
       console.error('MongoDB connection failed:', error instanceof Error ? error.message : 'unknown error');

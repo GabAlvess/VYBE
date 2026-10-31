@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@vybe/shared": "*",
+    "emoji-picker-react": "^5.1.4",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
   },

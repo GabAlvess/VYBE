@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "db:init": "tsx src/scripts/init-db.ts",
+    "db:init": "node --import tsx src/scripts/init-db.ts",
+    "db:seed": "node --import tsx src/scripts/seed.ts",
+    "test": "node --import tsx --test src/*.test.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit -p tsconfig.json"
