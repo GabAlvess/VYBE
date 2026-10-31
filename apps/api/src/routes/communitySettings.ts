@@ -6,11 +6,13 @@ import { Router, type Request, type Response } from 'express';
 import mongoose from 'mongoose';
 import { Community, type CommunityDocument } from '../models/Community.js';
 import { CommunityAudit } from '../models/CommunityAudit.js';
+import { CommunityJoinRequest } from '../models/CommunityJoinRequest.js';
+import { VybeAccount } from '../models/VybeAccount.js';
 import { Account, Character, CommunityEvent } from '../models/Social.js';
 import { AcademicRole } from '../models/Academic.js';
 import { NewsRole } from '../models/News.js';
 import { CommunitySanction } from '../models/CommunitySanction.js';
-import { isCommunityOwner, sanctionEndDate } from './communityAdminPolicy.js';
+import { isCommunityOwner, isPlatformAppCreator, sanctionEndDate } from './communityAdminPolicy.js';
 
 export const communitySettingsRouter = Router();
 const uploadsDirectory = resolve(dirname(fileURLToPath(import.meta.url)), '../../uploads');
@@ -24,7 +26,7 @@ function roleFor(request: Request): SettingsRole | null {
   const user = account(request);
   const configuredPlatformAdmin = community.slug === (process.env.VYBE_PLATFORM_TENANT_SLUG ?? 'community')
     && (process.env.VYBE_PLATFORM_ADMIN_EMAILS ?? '').split(',').map((email) => email.trim().toLowerCase()).filter(Boolean).includes(user.email.toLowerCase());
-  if (isCommunityOwner(community, user)) return 'owner';
+  if (isCommunityOwner(community, user) || isPlatformAppCreator(user)) return 'owner';
   if (community.admins.some((id) => id.equals(user._id)) || configuredPlatformAdmin) return 'admin';
   if (community.moderators.some((id) => id.equals(user._id))) return 'moderator';
   return null;
@@ -65,6 +67,12 @@ communitySettingsRouter.get('/settings/community', async (request, response) => 
   const logs = await CommunityAudit.find({ tenantId: community._id }).sort({ createdAt: -1 }).limit(30).lean();
   const pendingAccounts = await Account.find({ tenantId: community._id, status: 'pending' }).select('email createdAt').sort({ createdAt: 1 }).lean();
   const pendingCharacters = await Character.find({ tenantId: community._id, accountId: { $in: pendingAccounts.map((item) => item._id) } }).select('accountId displayName username bio avatarUrl').lean();
+  const joinRequests = await CommunityJoinRequest.find({ communityId: community._id, status: { $in: ['PENDING', 'NEEDS_INFORMATION'] } }).sort({ createdAt: 1 }).lean();
+  const joinSourceTenantIds = [...new Set(joinRequests.map((item) => item.sourceTenantId?.toString()).filter((id): id is string => Boolean(id)))].map((id) => new mongoose.Types.ObjectId(id));
+  const [joinRequesters, globalJoinRequesters] = await Promise.all([
+    Character.find({ _id: { $in: joinRequests.map((item) => item.sourceCharacterId).filter(Boolean) }, tenantId: { $in: joinSourceTenantIds } }).select('tenantId displayName username avatarUrl').lean(),
+    VybeAccount.find({ _id: { $in: joinRequests.map((item) => item.vybeAccountId).filter(Boolean) }, status: 'active' }).select('displayName username avatarUrl').lean(),
+  ]);
   const expiredSanctions = await CommunitySanction.find({ tenantId: community._id, status: 'active', endsAt: { $lte: new Date() } }).select('_id accountId').lean();
   if (expiredSanctions.length) {
     await Promise.all([
@@ -109,6 +117,12 @@ communitySettingsRouter.get('/settings/community', async (request, response) => 
       ...community.moderators.map((id) => ({ accountId: id.toString(), role: 'moderator', email: moderators.find((person) => person._id.equals(id))?.email ?? '', character: characterFor(id)?.displayName ?? '' })),
     ],
     pendingMembers: pendingAccounts.map((item) => ({ accountId: item._id.toString(), email: item.email, createdAt: item.createdAt, character: pendingCharacters.find((person) => person.accountId.equals(item._id)) ?? null })),
+    joinRequests: joinRequests.map((item) => {
+      const requester = joinRequesters.find((person) => String(person._id) === String(item.sourceCharacterId) && String(person.tenantId) === String(item.sourceTenantId));
+      const globalRequester = globalJoinRequesters.find((person) => String(person._id) === String(item.vybeAccountId));
+      const identity = globalRequester ?? requester;
+      return { id: String(item._id), status: item.status, createdAt: item.createdAt, characterName: item.characterName, requestedUsername: item.requestedUsername, characterAge: item.characterAge, photoplayerName: item.photoplayerName, photoplayerImageUrl: `/api/settings/community/join-requests/${String(item._id)}/photo`, characterDescription: item.characterDescription, customAnswers: item.customAnswers, requestedChanges: item.requestedChanges, adminMessage: item.adminMessage, requester: identity ? { id: String(identity._id), displayName: identity.displayName, username: identity.username, avatarUrl: identity.avatarUrl } : null };
+    }),
     audit: logs.map((item) => ({ id: String(item._id), action: item.action, details: item.details, createdAt: item.createdAt, actorEmail: actorEmails.get(item.actorId.toString()) ?? 'Conta removida' })),
   });
 });
@@ -194,9 +208,9 @@ communitySettingsRouter.patch('/settings/community/:section', async (request, re
     community.entry = approvalRequired || visibility === 'controlled' || visibility === 'private' ? 'approval' : 'open';
     changes.access = community.settings.access;
   } else if (section === 'characters') {
-    const { usernameMinLength, usernameMaxLength, requireBio, customFields } = body;
-    if (!Number.isInteger(usernameMinLength) || usernameMinLength < 3 || usernameMinLength > 24 || !Number.isInteger(usernameMaxLength) || usernameMaxLength < usernameMinLength || usernameMaxLength > 24 || typeof requireBio !== 'boolean' || !Array.isArray(customFields) || customFields.length > 12 || customFields.some((item: any) => !item || typeof item.key !== 'string' || !/^[a-z][a-z0-9_]{1,30}$/.test(item.key) || typeof item.label !== 'string' || item.label.trim().length < 2 || item.label.trim().length > 50 || typeof item.required !== 'boolean')) { sendError(response, 400, 'Configurações de personagens inválidas.'); return; }
-    community.settings.characters = { usernameMinLength, usernameMaxLength, requireBio, customFields: customFields.map((item: any) => ({ key: item.key, label: item.label.trim(), required: item.required })) };
+    const { usernameMinLength, usernameMaxLength, minimumAge, requireBio, customFields } = body;
+    if (!Number.isInteger(usernameMinLength) || usernameMinLength < 3 || usernameMinLength > 24 || !Number.isInteger(usernameMaxLength) || usernameMaxLength < usernameMinLength || usernameMaxLength > 24 || !Number.isInteger(minimumAge) || minimumAge < 13 || minimumAge > 100 || typeof requireBio !== 'boolean' || !Array.isArray(customFields) || customFields.length > 12 || customFields.some((item: any) => !item || typeof item.key !== 'string' || !/^[a-z][a-z0-9_]{1,30}$/.test(item.key) || typeof item.label !== 'string' || item.label.trim().length < 2 || item.label.trim().length > 50 || typeof item.required !== 'boolean')) { sendError(response, 400, 'Configurações de personagens inválidas.'); return; }
+    community.settings.characters = { usernameMinLength, usernameMaxLength, minimumAge, requireBio, customFields: customFields.map((item: any) => ({ key: item.key, label: item.label.trim(), required: item.required })) };
     changes.characters = community.settings.characters;
   } else if (section === 'features') {
     const keys = ['feed', 'pulse', 'stories', 'conversations', 'messages', 'events', 'match', 'bank', 'academic', 'career', 'news', 'companies'] as const;

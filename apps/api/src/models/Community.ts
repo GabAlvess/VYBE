@@ -24,7 +24,7 @@ export interface CommunityFields {
   moderators: mongoose.Types.ObjectId[];
   settings: {
     access: { visibility: 'public' | 'private' | 'controlled'; approvalRequired: boolean; invitesEnabled: boolean; welcomeMessage: string };
-    characters: { usernameMinLength: number; usernameMaxLength: number; requireBio: boolean; customFields: Array<{ key: string; label: string; required: boolean }> };
+    characters: { usernameMinLength: number; usernameMaxLength: number; minimumAge: number; requireBio: boolean; customFields: Array<{ key: string; label: string; required: boolean }> };
     features: { feed: boolean; pulse: boolean; stories: boolean; conversations: boolean; messages: boolean; events: boolean; match?: boolean; bank?: boolean; academic?: boolean; career?: boolean; news?: boolean; companies?: boolean; eventCreation: 'any_pending' | 'staff' | 'admins' | 'owner' };
     privacy: { showInDirectory: boolean; showMembers: boolean; showAdmins: boolean; publicContent: boolean };
     moderation: { rules: string[]; requireReportReason: boolean; maxPostLength: number };
@@ -72,6 +72,7 @@ const communitySchema = new mongoose.Schema<CommunityFields>({
     characters: {
       usernameMinLength: { type: Number, default: 3, min: 3, max: 24 },
       usernameMaxLength: { type: Number, default: 24, min: 3, max: 24 },
+      minimumAge: { type: Number, default: 18, min: 13, max: 100 },
       requireBio: { type: Boolean, default: false },
       customFields: { type: [{ key: String, label: String, required: Boolean }], default: [] },
     },

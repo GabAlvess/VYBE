@@ -2,6 +2,7 @@ import mongoose, { type HydratedDocument } from 'mongoose';
 
 export interface AccountFields {
   tenantId: mongoose.Types.ObjectId;
+  globalAccountId?: mongoose.Types.ObjectId;
   email: string;
   passwordHash: string;
   status: 'pending' | 'active' | 'disabled';
@@ -15,6 +16,7 @@ export interface AccountFields {
 export type AccountDocument = HydratedDocument<AccountFields>;
 const accountSchema = new mongoose.Schema<AccountFields>({
   tenantId: { type: mongoose.Schema.Types.ObjectId, required: true, index: true },
+  globalAccountId: { type: mongoose.Schema.Types.ObjectId, default: undefined, index: true },
   email: { type: String, required: true, lowercase: true, trim: true },
   passwordHash: { type: String, required: true },
   status: { type: String, enum: ['pending', 'active', 'disabled'], default: 'active' },
@@ -24,6 +26,7 @@ const accountSchema = new mongoose.Schema<AccountFields>({
   privacyVersion: { type: String, maxlength: 20 },
 }, { timestamps: true });
 accountSchema.index({ tenantId: 1, email: 1 }, { unique: true });
+accountSchema.index({ tenantId: 1, globalAccountId: 1 }, { unique: true, partialFilterExpression: { globalAccountId: { $type: 'objectId' } } });
 
 export interface CharacterFields {
   tenantId: mongoose.Types.ObjectId;
@@ -32,6 +35,10 @@ export interface CharacterFields {
   displayName: string;
   communityFunction?: string;
   bio: string;
+  age?: number;
+  photoplayerName?: string;
+  normalizedPhotoplayerName?: string;
+  photoplayerImageUrl?: string;
   avatarUrl: string;
   coverUrl: string;
   followerCount: number;
@@ -58,6 +65,10 @@ const characterSchema = new mongoose.Schema<CharacterFields>({
   displayName: { type: String, required: true, trim: true, maxlength: 60 },
   communityFunction: { type: String, default: '', trim: true, maxlength: 80 },
   bio: { type: String, default: '', maxlength: 280 },
+  age: { type: Number, min: 13, max: 100, default: undefined },
+  photoplayerName: { type: String, default: '', trim: true, maxlength: 100 },
+  normalizedPhotoplayerName: { type: String, default: undefined, lowercase: true, trim: true, maxlength: 120 },
+  photoplayerImageUrl: { type: String, default: '', maxlength: 300 },
   avatarUrl: { type: String, default: '' },
   coverUrl: { type: String, default: '' },
   followerCount: { type: Number, min: 0, default: 0 },
@@ -75,6 +86,7 @@ const characterSchema = new mongoose.Schema<CharacterFields>({
   seedKey: { type: String, default: undefined },
 }, { timestamps: true });
 characterSchema.index({ tenantId: 1, username: 1 }, { unique: true });
+characterSchema.index({ tenantId: 1, normalizedPhotoplayerName: 1 }, { unique: true, partialFilterExpression: { normalizedPhotoplayerName: { $type: 'string' } } });
 characterSchema.index({ tenantId: 1, seedKey: 1 }, { unique: true, partialFilterExpression: { seedKey: { $type: 'string' } } });
 
 export interface SessionFields {
@@ -196,7 +208,7 @@ export interface NotificationFields {
   tenantId: mongoose.Types.ObjectId;
   characterId: mongoose.Types.ObjectId;
   actorId: mongoose.Types.ObjectId;
-  type: 'follow' | 'like' | 'comment' | 'mention' | 'message' | 'echo_like' | 'echo_mention' | 'repost' | 'echo_reply' | 'event_created' | 'event_updated' | 'event_cancelled' | 'event_review' | 'event_pending' | 'verification_requested' | 'verification_payment_confirmed' | 'verification_approved' | 'verification_rejected' | 'verification_removed' | 'bank_transfer_received' | 'bank_admin_credit_received' | 'academic_update' | 'academic_submission' | 'academic_grade' | 'news_published' | 'news_reviewed' | 'career_status' | 'career_job';
+  type: 'follow' | 'like' | 'comment' | 'mention' | 'message' | 'echo_like' | 'echo_mention' | 'repost' | 'echo_reply' | 'event_created' | 'event_updated' | 'event_cancelled' | 'event_review' | 'event_pending' | 'verification_requested' | 'verification_payment_confirmed' | 'verification_approved' | 'verification_rejected' | 'verification_removed' | 'bank_transfer_received' | 'bank_admin_credit_received' | 'academic_update' | 'academic_submission' | 'academic_grade' | 'news_published' | 'news_reviewed' | 'career_status' | 'career_job' | 'community_join_update';
   targetId: mongoose.Types.ObjectId;
   readAt?: Date;
   seedKey?: string;
@@ -207,7 +219,7 @@ const notificationSchema = new mongoose.Schema<NotificationFields>({
   tenantId: { type: mongoose.Schema.Types.ObjectId, required: true, index: true },
   characterId: { type: mongoose.Schema.Types.ObjectId, required: true },
   actorId: { type: mongoose.Schema.Types.ObjectId, required: true },
-  type: { type: String, enum: ['follow', 'like', 'comment', 'mention', 'message', 'echo_like', 'echo_mention', 'repost', 'echo_reply', 'event_created', 'event_updated', 'event_cancelled', 'event_review', 'event_pending', 'verification_requested', 'verification_payment_confirmed', 'verification_approved', 'verification_rejected', 'verification_removed', 'bank_transfer_received', 'bank_admin_credit_received', 'academic_update', 'academic_submission', 'academic_grade', 'news_published', 'news_reviewed', 'career_status', 'career_job'], required: true },
+  type: { type: String, enum: ['follow', 'like', 'comment', 'mention', 'message', 'echo_like', 'echo_mention', 'repost', 'echo_reply', 'event_created', 'event_updated', 'event_cancelled', 'event_review', 'event_pending', 'verification_requested', 'verification_payment_confirmed', 'verification_approved', 'verification_rejected', 'verification_removed', 'bank_transfer_received', 'bank_admin_credit_received', 'academic_update', 'academic_submission', 'academic_grade', 'news_published', 'news_reviewed', 'career_status', 'career_job', 'community_join_update'], required: true },
   targetId: { type: mongoose.Schema.Types.ObjectId, required: true },
   readAt: { type: Date },
   seedKey: { type: String, default: undefined },

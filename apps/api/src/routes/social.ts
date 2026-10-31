@@ -10,6 +10,8 @@ import { canJoinEvent, canSeeEvent, eventCreationDecision } from './eventPolicy.
 import { requireSession, tenantScope } from '../middleware/tenant.js';
 import { WalletTransaction } from '../models/Wallet.js';
 import { EchoAppProfile } from '../models/EchoAppProfile.js';
+import { Community } from '../models/Community.js';
+import { CommunityJoinRequest } from '../models/CommunityJoinRequest.js';
 
 export const socialRouter = Router();
 socialRouter.use(requireSession);
@@ -754,7 +756,12 @@ socialRouter.get('/notifications', async (request, response) => {
   const bankTypes = ['bank_transfer_received', 'bank_admin_credit_received'];
   const bankTransactions = await WalletTransaction.find(tenantScope(tenant, { _id: { $in: notifications.filter((item) => bankTypes.includes(item.type)).map((item) => item.targetId) } })).select('amountCents description').lean();
   const bankMap = new Map((bankTransactions as unknown as Array<{ _id: mongoose.Types.ObjectId; amountCents: number; description: string }>).map((item) => [item._id.toString(), item]));
-  response.json(notifications.map((item) => ({ id: item._id.toString(), type: item.type, targetId: item.targetId.toString(), eventTitle: eventMap.get(item.targetId.toString()) ?? '', amountCents: bankMap.get(item.targetId.toString())?.amountCents ?? null, description: bankMap.get(item.targetId.toString())?.description ?? '', communityId: tenant.toString(), readAt: item.readAt, createdAt: item.createdAt, actor: actorMap.has(item.actorId.toString()) ? characterJson(actorMap.get(item.actorId.toString())!) : null })));
+  const joinUpdates = await CommunityJoinRequest.find({ _id: { $in: notifications.filter((item) => item.type === 'community_join_update').map((item) => item.targetId) }, sourceTenantId: tenant, accountId: request.vybeAccount!._id }).select('communityId status adminMessage rejectionReason').lean();
+  const joinCommunityIds = joinUpdates.map((item) => item.communityId);
+  const joinCommunities = await Community.find({ _id: { $in: joinCommunityIds } }).select('name').lean();
+  const joinCommunityMap = new Map(joinCommunities.map((item) => [String(item._id), item.name]));
+  const joinUpdateMap = new Map(joinUpdates.map((item) => [String(item._id), { status: item.status, communityName: joinCommunityMap.get(String(item.communityId)) ?? 'comunidade', message: item.status === 'NEEDS_INFORMATION' ? item.adminMessage : item.status === 'REJECTED' ? item.rejectionReason : '' }]));
+  response.json(notifications.map((item) => ({ id: item._id.toString(), type: item.type, targetId: item.targetId.toString(), eventTitle: eventMap.get(item.targetId.toString()) ?? '', amountCents: bankMap.get(item.targetId.toString())?.amountCents ?? null, description: bankMap.get(item.targetId.toString())?.description ?? '', joinUpdate: joinUpdateMap.get(item.targetId.toString()) ?? null, communityId: tenant.toString(), readAt: item.readAt, createdAt: item.createdAt, actor: actorMap.has(item.actorId.toString()) ? characterJson(actorMap.get(item.actorId.toString())!) : null })));
 });
 
 socialRouter.patch('/notifications/read', async (request, response) => {

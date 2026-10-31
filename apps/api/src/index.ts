@@ -8,6 +8,7 @@ import { apiInfo } from '@vybe/shared';
 import { resolveTenant } from './middleware/tenant.js';
 import { mediaRouter } from './routes/media.js';
 import { tenantRouter } from './routes/tenant.js';
+import { platformRouter } from './routes/platform.js';
 
 config({ path: resolve(dirname(fileURLToPath(import.meta.url)), '../../../.env') });
 
@@ -34,6 +35,7 @@ app.get('/api/ready', (_request, response) => {
 
 app.use(resolveTenant);
 app.use('/media', mediaRouter);
+app.use('/api', platformRouter);
 app.use('/api', tenantRouter);
 
 const server = app.listen(port, host, () => {

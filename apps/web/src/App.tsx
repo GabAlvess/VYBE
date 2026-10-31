@@ -7,19 +7,23 @@ import { LEGAL_PRIVACY_VERSION, LEGAL_TERMS_VERSION } from '@vybe/shared';
 import { PrivacyPolicyPage, TermsOfUsePage } from './LegalPages';
 import { VybeLogo } from './VybeLogo';
 import { CareerApp } from './CareerApp';
+import { CommunityJoinPage } from './CommunityJoinPage';
+import { activateLocalCommunity, communityHomeHref } from './communityNavigation';
 
-type AuthPayload = { account: { id: string; email: string }; character: SocialCharacter };
+type AuthPayload = { account: { id: string; email: string }; character: SocialCharacter; globalAccount?: boolean };
 
 function Logo() {
   return <a className="brand" href="/" aria-label="VYBE"><VybeLogo className="brand-reference-image"/></a>;
 }
 
 function PlatformHome() {
-  return <main className="platform-home"><header><Logo/><span>A plataforma para comunidades de RPG</span></header><section><p>UM UNIVERSO, MUITAS HISTÓRIAS</p><h1>Comunidades de RPG<br/>com vida própria.</h1><span>Cada universo ganha sua identidade, personagens e espaço para histórias compartilhadas.</span><a href="https://community.vybe.com.br">Conheça a VYBE Community <b><MaterialIcon name="arrow_forward"/></b></a></section><footer>VYBE · Plataforma principal</footer></main>;
+  return <main className="platform-home"><header><Logo/><span>A plataforma para comunidades de RPG</span><nav><a href="/?auth=login">Entrar</a><a href="/?auth=register">Criar conta</a></nav></header><section><p>UM UNIVERSO, MUITAS HISTÓRIAS</p><h1>Comunidades de RPG<br/>com vida própria.</h1><span>Crie sua conta VYBE e escolha em quais comunidades deseja participar.</span><a href="/?auth=register">Criar minha conta VYBE <b><MaterialIcon name="arrow_forward"/></b></a></section><footer>VYBE · Plataforma principal</footer></main>;
 }
 
-type CommunitySummary = { id: string; name: string; slug: string; subdomain: string; description: string; coverUrl: string; logoUrl: string; memberCount: number };
+type CommunitySummary = { id: string; name: string; slug: string; subdomain: string; description: string; coverUrl: string; logoUrl: string; memberCount: number; requiresApproval?: boolean; joinStatus?: 'MEMBER' | 'NONE' | 'PENDING' | 'NEEDS_INFORMATION' | 'REJECTED' };
 type CommunityRequestSummary = { id: string; rpgName: string; slug: string; description: string; status: 'pending' | 'approved' | 'rejected'; createdAt: string; updatedAt?: string; photoUrl?: string };
+type MyJoinRequest = { id: string; communityId: string; communitySlug: string; characterName: string; requestedUsername: string; status: 'PENDING' | 'NEEDS_INFORMATION' | 'APPROVED' | 'REJECTED'; adminMessage: string; rejectionReason: string; createdAt: string; updatedAt: string };
+type JoinNotice = { id: string; status: 'NEEDS_INFORMATION' | 'APPROVED' | 'REJECTED'; message: string; createdAt: string; communityName: string; communitySlug: string };
 type AdminCommunityRequest = CommunityRequestSummary & { applicant: { displayName: string; username: string } | null; photoUrl: string };
 type ManagedCommunity = Omit<CommunitySummary, 'coverUrl'> & { coverUrl: string; status: 'active' | 'archived' | 'suspended' };
 
@@ -43,6 +47,8 @@ function CommunityPickerPage({ character, onLogout }: { character: SocialCharact
   const [communities, setCommunities] = useState<CommunitySummary[]>([]);
   const [currentTenantSlug, setCurrentTenantSlug] = useState('community');
   const [requests, setRequests] = useState<CommunityRequestSummary[]>([]);
+  const [joinRequests, setJoinRequests] = useState<MyJoinRequest[]>([]);
+  const [joinNotices, setJoinNotices] = useState<JoinNotice[]>([]);
   const [reviewQueue, setReviewQueue] = useState<AdminCommunityRequest[]>([]);
   const [managedCommunities, setManagedCommunities] = useState<ManagedCommunity[]>([]);
   const [canReview, setCanReview] = useState(false);
@@ -56,19 +62,25 @@ function CommunityPickerPage({ character, onLogout }: { character: SocialCharact
   const [reviewingId, setReviewingId] = useState('');
   const isRequestsPage = window.location.pathname === '/minhas-solicitacoes';
   const isAdminPage = window.location.pathname === '/administracao-vybe';
+  const isPlatformHost = ['vybe.com.br', 'www.vybe.com.br'].includes(window.location.hostname.toLowerCase());
+  const isLocalHost = ['localhost', '127.0.0.1'].includes(window.location.hostname.toLowerCase());
 
   useEffect(() => () => { if (photoPreview) URL.revokeObjectURL(photoPreview); }, [photoPreview]);
 
   async function loadPage() {
     setLoading(true);
     try {
-      const [directory, ownRequests] = await Promise.all([
+      const [directory, ownRequests, ownJoinRequests, notices] = await Promise.all([
         fetchJson<{ currentTenantSlug: string; communities: CommunitySummary[] }>('/api/communities'),
         fetchJson<CommunityRequestSummary[]>('/api/community-requests'),
+        fetchJson<MyJoinRequest[]>('/api/my/community-join-requests'),
+        isPlatformHost ? fetchJson<JoinNotice[]>('/api/notifications') : Promise.resolve([]),
       ]);
       setCommunities(directory.communities);
       setCurrentTenantSlug(directory.currentTenantSlug);
       setRequests(ownRequests);
+      setJoinRequests(ownJoinRequests);
+      setJoinNotices(notices);
       setError('');
     } catch (reason) {
       const message = reason instanceof Error ? reason.message : 'Não foi possível carregar as comunidades.';
@@ -165,8 +177,9 @@ function CommunityPickerPage({ character, onLogout }: { character: SocialCharact
       {!isRequestsPage && !isAdminPage && <div className="picker-controls"><label className="picker-search"><MaterialIcon name="search"/><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar comunidades..."/></label><button className="picker-create-button" type="button" onClick={() => { setShowRequestForm(true); setRequestMessage(''); }}><MaterialIcon name="add"/>Criar nova comunidade</button><a className="picker-requests-button" href="/minhas-solicitacoes">Minhas solicitações{requests.length > 0 && <span>{requests.length}</span>}</a></div>}
       {error && <p className="picker-error" role="alert">{error}</p>}
       {requestMessage && <p className="picker-success" role="status">{requestMessage}</p>}
-      {!isRequestsPage && !isAdminPage && <div className="picker-grid">{visibleCommunities.map((item) => <a className="picker-community" href={item.slug === currentTenantSlug ? '/' : `${window.location.protocol}//${item.subdomain}.vybe.com.br`} aria-label={`Entrar em ${item.name}`} key={item.id}><div className="picker-cover" style={item.coverUrl ? { backgroundImage: `url("${item.coverUrl}")` } : undefined}/>{item.logoUrl ? <img className="picker-emblem-image" src={item.logoUrl} alt=""/> : <span className="picker-emblem">{item.name.slice(0, 1).toUpperCase()}</span>}<div className="picker-card-body"><h2>{item.name}</h2><p>{item.description}</p><div className="picker-members"><span className="picker-member-avatars"><i>Y</i><i>L</i><i>C</i></span><small>{item.memberCount.toLocaleString('pt-BR')} membros</small><b><MaterialIcon name="arrow_forward"/></b></div></div></a>)}{loading && <p className="picker-empty">Carregando comunidades…</p>}{!loading && !error && !visibleCommunities.length && <p className="picker-empty">Nenhuma comunidade encontrada.</p>}</div>}
-      {isRequestsPage && <section className="picker-own-requests is-dedicated"><a className="picker-page-back" href="/comunidades">← Voltar para comunidades</a>{requests.length ? requests.map((item) => <article id={`solicitacao-${item.id}`} key={item.id}>{item.photoUrl ? <img className="picker-request-cover" src={item.photoUrl} alt={`Capa de ${item.rpgName}`}/> : <div className="picker-request-emblem">{item.rpgName.slice(0, 1).toUpperCase()}</div>}<div className="picker-request-info"><strong>{item.rpgName}</strong><small>{item.slug}.vybe.com.br · Enviada em {new Date(item.createdAt).toLocaleDateString('pt-BR')}</small><p>{item.description}</p><span>Última atualização: {new Date(item.updatedAt ?? item.createdAt).toLocaleDateString('pt-BR')}</span></div><div className="picker-request-action"><b className={`request-status is-${item.status}`}>{requestStatus[item.status]}</b>{item.status === 'approved' ? <a href={`${window.location.protocol}//${item.slug}.vybe.com.br`}>Entrar na comunidade</a> : item.status === 'rejected' ? <button type="button" disabled title="O motivo não está disponível nesta versão.">Ver motivo</button> : <button type="button" onClick={() => void loadPage()}>Acompanhar</button>}</div></article>) : <p className="picker-empty">Você ainda não enviou solicitações de comunidades.</p>}</section>}
+      {!isRequestsPage && !isAdminPage && joinNotices.map((notice) => <p className="picker-success" role="status" key={notice.id}><strong>{notice.status === 'APPROVED' ? 'Entrada aprovada' : notice.status === 'REJECTED' ? 'Solicitação recusada' : 'Ajustes solicitados'}</strong> · {notice.communityName}{notice.message ? ` — ${notice.message}` : ''} <a href={`/comunidades/${notice.communitySlug}/solicitar-entrada`}>Ver solicitação</a></p>)}
+      {!isRequestsPage && !isAdminPage && <div className="picker-grid">{visibleCommunities.map((item) => { const isCurrent = item.slug === currentTenantSlug; const isMember = item.joinStatus === 'MEMBER'; const localEntry = isLocalHost && isCurrent && isMember; const destination = localEntry ? communityHomeHref(item.subdomain) : isCurrent && isMember && !isLocalHost ? '/' : isMember ? communityHomeHref(item.subdomain) : `/comunidades/${item.slug}/solicitar-entrada`; const action = isMember ? 'Entrar' : item.joinStatus === 'PENDING' ? 'Acompanhar solicitação' : item.joinStatus === 'NEEDS_INFORMATION' ? 'Atualizar solicitação' : item.joinStatus === 'REJECTED' ? 'Ver resposta' : item.requiresApproval ? 'Solicitar entrada' : 'Entrar na comunidade'; return <a className="picker-community" href={destination} onClick={() => { if (localEntry) activateLocalCommunity(item.subdomain); }} aria-label={`${action} em ${item.name}`} key={item.id}><div className="picker-cover" style={item.coverUrl ? { backgroundImage: `url("${item.coverUrl}")` } : undefined}/>{item.logoUrl ? <img className="picker-emblem-image" src={item.logoUrl} alt=""/> : <span className="picker-emblem">{item.name.slice(0, 1).toUpperCase()}</span>}<div className="picker-card-body"><h2>{item.name}</h2><p>{item.description}</p><div className="picker-members"><span className="picker-member-avatars"><i>Y</i><i>L</i><i>C</i></span><small>{item.memberCount.toLocaleString('pt-BR')} membros · {action}</small><b><MaterialIcon name="arrow_forward"/></b></div></div></a>; })}{loading && <p className="picker-empty">Carregando comunidades…</p>}{!loading && !error && !visibleCommunities.length && <p className="picker-empty">Nenhuma comunidade encontrada.</p>}</div>}
+      {isRequestsPage && <section className="picker-own-requests is-dedicated"><a className="picker-page-back" href="/comunidades">← Voltar para comunidades</a><h2>Solicitações para criar comunidade</h2>{requests.length ? requests.map((item) => <article id={`solicitacao-${item.id}`} key={item.id}>{item.photoUrl ? <img className="picker-request-cover" src={item.photoUrl} alt={`Capa de ${item.rpgName}`}/> : <div className="picker-request-emblem">{item.rpgName.slice(0, 1).toUpperCase()}</div>}<div className="picker-request-info"><strong>{item.rpgName}</strong><small>{item.slug}.vybe.com.br · Enviada em {new Date(item.createdAt).toLocaleDateString('pt-BR')}</small><p>{item.description}</p><span>Última atualização: {new Date(item.updatedAt ?? item.createdAt).toLocaleDateString('pt-BR')}</span></div><div className="picker-request-action"><b className={`request-status is-${item.status}`}>{requestStatus[item.status]}</b>{item.status === 'approved' ? <a href={communityHomeHref(item.slug)} onClick={() => activateLocalCommunity(item.slug)}>Entrar na comunidade</a> : item.status === 'rejected' ? <button type="button" disabled title="O motivo não está disponível nesta versão.">Ver motivo</button> : <button type="button" onClick={() => void loadPage()}>Acompanhar</button>}</div></article>) : <p className="picker-empty">Você ainda não enviou solicitações para criar comunidades.</p>}<h2>Solicitações de entrada</h2>{joinRequests.length ? joinRequests.map((item) => <article id={`entrada-${item.id}`} key={item.id}><div className="picker-request-emblem">{item.characterName.slice(0, 1).toUpperCase()}</div><div className="picker-request-info"><strong>{item.characterName} <small>@{item.requestedUsername}</small></strong><small>{item.communitySlug}.vybe.com.br · Enviada em {new Date(item.createdAt).toLocaleDateString('pt-BR')}</small><span>Última atualização: {new Date(item.updatedAt).toLocaleDateString('pt-BR')}</span>{item.status === 'NEEDS_INFORMATION' && <p>{item.adminMessage}</p>}{item.status === 'REJECTED' && <p>{item.rejectionReason}</p>}</div><div className="picker-request-action"><b className={`request-status is-${item.status.toLowerCase()}`}>{item.status === 'PENDING' ? 'Aguardando análise' : item.status === 'NEEDS_INFORMATION' ? 'Alterações solicitadas' : item.status === 'APPROVED' ? 'Aprovada' : 'Recusada'}</b>{item.status === 'APPROVED' ? <a href={communityHomeHref(item.communitySlug)} onClick={() => activateLocalCommunity(item.communitySlug)}>Entrar na comunidade</a> : <a href={`/comunidades/${item.communitySlug}/solicitar-entrada`}>{item.status === 'NEEDS_INFORMATION' ? 'Atualizar ficha' : 'Acompanhar'}</a>}</div></article>) : <p className="picker-empty">Você ainda não solicitou entrada em comunidades.</p>}</section>}
       {isAdminPage && !canReview && <div className="picker-empty picker-restricted">Esta área está disponível apenas para a administração VYBE.</div>}
       {isAdminPage && canReview && <><section className="picker-review-queue"><header><div><p className="picker-eyebrow">ADMINISTRAÇÃO VYBE</p><h2>Solicitações para aprovação</h2></div><span>{reviewQueue.length}</span></header>{reviewQueue.length ? <div className="picker-review-grid">{reviewQueue.map((item) => <article className="picker-review-card" key={item.id}><img src={item.photoUrl} alt={`Capa proposta para ${item.rpgName}`}/><div><h3>{item.rpgName}</h3><small>{item.slug}.vybe.com.br · por @{item.applicant?.username ?? 'personagem'}</small><p>{item.description}</p><footer><button type="button" disabled={reviewingId === item.id} onClick={() => void decideRequest(item.id, 'reject')}>Recusar</button><button type="button" disabled={reviewingId === item.id} onClick={() => void decideRequest(item.id, 'approve')}>{reviewingId === item.id ? 'Aguarde…' : 'Aprovar'}</button></footer></div></article>)}</div> : <p className="picker-empty">Nenhuma solicitação aguardando aprovação.</p>}</section><section className="picker-community-management"><header><div><p className="picker-eyebrow">ADMINISTRAÇÃO VYBE</p><h2>Gerenciar comunidades</h2></div><span>{managedCommunities.length}</span></header>{managedCommunities.length ? <div className="picker-managed-list">{managedCommunities.map((item) => <article key={item.id}><span className="picker-managed-emblem">{item.name.slice(0, 1).toUpperCase()}</span><div className="picker-managed-info"><strong>{item.name}</strong><small>{item.subdomain}.vybe.com.br · {item.memberCount.toLocaleString('pt-BR')} membros</small></div><b className={`request-status is-${item.status === 'active' ? 'approved' : 'rejected'}`}>{item.status === 'active' ? 'Ativa' : item.status === 'suspended' ? 'Suspensa' : 'Arquivada'}</b><div className="picker-managed-actions">{item.status === 'active' ? <><button type="button" onClick={() => void updateCommunityStatus(item, 'archived')}>Arquivar</button><button className="is-danger" type="button" onClick={() => void updateCommunityStatus(item, 'suspended')}>Suspender</button></> : <button type="button" onClick={() => void updateCommunityStatus(item, 'active')}>Reativar</button>}<button className="is-danger" type="button" onClick={() => void deleteCommunity(item)}>Excluir</button></div></article>)}</div> : <p className="picker-empty">Nenhuma comunidade para gerenciar.</p>}</section></>}
       <footer className="picker-footer"><span>✳</span><p>MAIS QUE UMA REDE SOCIAL.<br/>UM UNIVERSO PARA CHAMAR DE SEU.</p></footer>
@@ -176,11 +189,13 @@ function CommunityPickerPage({ character, onLogout }: { character: SocialCharact
 }
 
 export function App() {
-  const isPlatformDomain = ['vybe.com.br', 'www.vybe.com.br'].includes(window.location.hostname.toLowerCase());
+  const hostname = window.location.hostname.toLowerCase();
+  const isLocalDevelopmentHost = ['localhost', '127.0.0.1'].includes(hostname);
+  const isPlatformDomain = ['vybe.com.br', 'www.vybe.com.br'].includes(hostname);
   const [session, setSession] = useState<AuthPayload | null>(null);
-  const [checkingSession, setCheckingSession] = useState(!isPlatformDomain);
+  const [checkingSession, setCheckingSession] = useState(true);
   const [bootError, setBootError] = useState('');
-  const [registerMode, setRegisterMode] = useState(false);
+  const [registerMode, setRegisterMode] = useState(() => new URLSearchParams(window.location.search).get('auth') === 'register');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [message, setMessage] = useState('');
@@ -192,7 +207,6 @@ export function App() {
   }, [registerMode]);
 
   useEffect(() => {
-    if (isPlatformDomain) return;
     fetch('/api/auth/me', { credentials: 'same-origin' })
       .then(async (response) => {
         if (response.ok) setSession(await response.json() as AuthPayload);
@@ -251,6 +265,7 @@ export function App() {
 
   async function logout() {
     await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' }).catch(() => undefined);
+    sessionStorage.removeItem('vybe_active_community');
     setSession(null);
     window.location.assign('/');
   }
@@ -258,8 +273,12 @@ export function App() {
   const pathname = window.location.pathname;
   if (pathname === '/termos-de-uso') return <TermsOfUsePage/>;
   if (pathname === '/politica-de-privacidade') return <PrivacyPolicyPage/>;
-  if (isPlatformDomain) return <PlatformHome/>;
   if (checkingSession) return <main className="auth-loading">Preparando seu universo…</main>;
+  if (isPlatformDomain && !session && !new URLSearchParams(window.location.search).has('auth')) return <PlatformHome/>;
+  if ((isPlatformDomain || isLocalDevelopmentHost) && session && pathname === '/' && (!isLocalDevelopmentHost || !sessionStorage.getItem('vybe_active_community'))) return <CommunityPickerPage character={session.character} onLogout={() => void logout()}/>;
+  const joinRoute = pathname.match(/^\/comunidades\/([a-z0-9-]+)\/solicitar-entrada$/);
+  if (session && joinRoute) return <CommunityJoinPage slug={joinRoute[1]}/>;
+  if (isPlatformDomain && session) return <CommunityPickerPage character={session.character} onLogout={() => void logout()}/>;
   if (session && ['/comunidades', '/minhas-solicitacoes', '/administracao-vybe'].includes(pathname)) return <CommunityPickerPage character={session.character} onLogout={() => void logout()}/>;
   if (session && pathname.startsWith('/carreira')) return <CareerApp character={session.character}/>;
   if (session) return <SocialApp character={session.character} onCharacterUpdated={(character) => setSession({ ...session, character })} onLogout={() => void logout()}/>;

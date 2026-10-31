@@ -7,8 +7,9 @@ import mongoose from 'mongoose';
 import { LEGAL_PRIVACY_VERSION, LEGAL_TERMS_VERSION } from '@vybe/shared';
 import { Community, type CommunityDocument } from '../models/Community.js';
 import { communityRequestsRouter } from './communityRequests.js';
+import { communityJoinRequestsRouter } from './communityJoinRequests.js';
 import { Account, Character, Session, type AccountDocument } from '../models/Social.js';
-import { clearSessionCookie, hashSessionToken, requireSession, requireTenant, setSessionCookie } from '../middleware/tenant.js';
+import { clearGlobalSessionCookie, clearSessionCookie, hashSessionToken, requireSession, requireTenant, setSessionCookie } from '../middleware/tenant.js';
 import { socialRouter } from './social.js';
 import { chatRouter } from './chat.js';
 import { communitySettingsRouter } from './communitySettings.js';
@@ -19,7 +20,10 @@ import { bankRouter } from './bank.js';
 import { academicRouter } from './academic.js';
 import { newsRouter } from './news.js';
 import { careerRouter } from './career.js';
-import { isCommunityOwner } from './communityAdminPolicy.js';
+import { isCommunityOwner, isPlatformAppCreator } from './communityAdminPolicy.js';
+import { CommunitySanction } from '../models/CommunitySanction.js';
+import { VybeSession } from '../models/VybeSession.js';
+import { VybeAccount } from '../models/VybeAccount.js';
 
 export const tenantRouter = Router();
 tenantRouter.use(requireTenant);
@@ -41,8 +45,8 @@ async function claimCommunityOwnership(community: CommunityDocument, user: Accou
   await community.save();
 }
 
-function publicCharacter(character: { _id: mongoose.Types.ObjectId; username: string; displayName: string; communityFunction?: string; bio: string; avatarUrl: string; coverUrl: string; followerCount: number; followingCount: number; postCount: number; verification?: { verifiedAt?: Date; removedAt?: Date } }) {
-  return { id: character._id.toString(), username: character.username, displayName: character.displayName, communityFunction: character.communityFunction ?? '', bio: character.bio, avatarUrl: character.avatarUrl, coverUrl: character.coverUrl, followerCount: character.followerCount, followingCount: character.followingCount, postCount: character.postCount, verified: Boolean(character.verification?.verifiedAt && !character.verification.removedAt) };
+function publicCharacter(character: { _id: mongoose.Types.ObjectId; username: string; displayName: string; communityFunction?: string; bio: string; age?: number; photoplayerName?: string; photoplayerImageUrl?: string; avatarUrl: string; coverUrl: string; followerCount: number; followingCount: number; postCount: number; verification?: { verifiedAt?: Date; removedAt?: Date } }) {
+  return { id: character._id.toString(), username: character.username, displayName: character.displayName, communityFunction: character.communityFunction ?? '', bio: character.bio, age: character.age, photoplayerName: character.photoplayerName ?? '', photoplayerImageUrl: character.photoplayerImageUrl ?? '', avatarUrl: character.avatarUrl, coverUrl: character.coverUrl, followerCount: character.followerCount, followingCount: character.followingCount, postCount: character.postCount, verified: Boolean(character.verification?.verifiedAt && !character.verification.removedAt) };
 }
 
 async function issueSession(request: Request, response: Response, accountId: mongoose.Types.ObjectId, characterId: mongoose.Types.ObjectId) {
@@ -112,6 +116,8 @@ tenantRouter.post('/auth/register', async (request, response) => {
     sendError(response, 400, 'Informe nome, e-mail válido e senha com pelo menos 8 caracteres.'); return;
   }
   const normalizedEmail = email.trim().toLowerCase();
+  const ownerBootstrap = tenant.ownerEmail?.toLowerCase() === normalizedEmail && !tenant.ownerAccountId;
+  if (!ownerBootstrap) { sendError(response, 403, 'Crie sua conta VYBE no site principal e escolha uma comunidade para entrar.'); return; }
   if (await Account.exists({ tenantId: tenant._id, email: normalizedEmail })) { sendError(response, 409, 'Já existe uma conta com este e-mail nesta comunidade.'); return; }
   const baseUsername = usernameFrom(typeof username === 'string' ? username : displayName) || 'personagem';
   let characterUsername = baseUsername;
@@ -139,8 +145,30 @@ tenantRouter.post('/auth/login', async (request, response) => {
   const tenant = sessionTenant(request);
   const { email, password } = request.body ?? {};
   if (typeof email !== 'string' || typeof password !== 'string') { sendError(response, 400, 'Informe e-mail e senha.'); return; }
-  const account = await Account.findOne({ tenantId: tenant._id, email: email.trim().toLowerCase(), status: { $in: ['active', 'pending'] } });
+  const normalizedEmail = email.trim().toLowerCase();
+  const globalAccount = await VybeAccount.findOne({ email: normalizedEmail, status: 'active' });
+  if (globalAccount && verifyPassword(password, globalAccount.passwordHash)) {
+    const memberAccount = await Account.findOne({ tenantId: tenant._id, status: 'active', $or: [{ globalAccountId: globalAccount._id }, { email: normalizedEmail }] });
+    if (!memberAccount) { sendError(response, 403, 'Você ainda não participa desta comunidade. Entre na sua conta VYBE para solicitar ou iniciar a entrada.'); return; }
+    const memberCharacter = await Character.findOne({ tenantId: tenant._id, accountId: memberAccount._id }).sort({ createdAt: 1 });
+    if (!memberCharacter) { sendError(response, 403, 'Seu perfil nesta comunidade ainda não está disponível.'); return; }
+    await issueSession(request, response, memberAccount._id, memberCharacter._id);
+    response.json({ account: { id: memberAccount._id.toString(), email: memberAccount.email }, character: publicCharacter(memberCharacter) });
+    return;
+  }
+  const account = await Account.findOne({ tenantId: tenant._id, email: normalizedEmail });
   if (!account || !verifyPassword(password, account.passwordHash)) { sendError(response, 401, 'E-mail ou senha inválidos.'); return; }
+  if (account.status === 'disabled') {
+    const sanction = await CommunitySanction.findOne({ tenantId: tenant._id, accountId: account._id, status: 'active' });
+    if (sanction?.endsAt && sanction.endsAt <= new Date()) {
+      sanction.status = 'expired';
+      account.status = 'active';
+      await Promise.all([sanction.save(), account.save()]);
+    } else {
+      sendError(response, 403, sanction?.action === 'ban' ? 'Seu acesso a esta comunidade foi banido.' : sanction ? 'Seu acesso a esta comunidade está suspenso.' : 'Conta indisponível.');
+      return;
+    }
+  }
   if (account.status === 'pending') { sendError(response, 403, 'Seu pedido de entrada ainda aguarda aprovação da equipe.'); return; }
   await claimCommunityOwnership(tenant, account);
   const character = await Character.findOne({ tenantId: tenant._id, accountId: account._id }).sort({ createdAt: 1 });
@@ -154,10 +182,15 @@ tenantRouter.get('/auth/me', requireSession, (request, response) => {
 });
 
 tenantRouter.post('/auth/logout', async (request, response) => {
-  const cookie = request.headers.cookie?.split(';').map((part) => part.trim()).find((part) => part.startsWith('vybe_session='));
+  const cookies = request.headers.cookie?.split(';').map((part) => part.trim()) ?? [];
+  const cookie = cookies.find((part) => part.startsWith('vybe_session='));
   const token = cookie?.slice('vybe_session='.length);
   if (token) await Session.deleteOne({ tenantId: sessionTenant(request)._id, tokenHash: hashSessionToken(decodeURIComponent(token)) });
+  const globalCookie = cookies.find((part) => part.startsWith('vybe_account_session='));
+  const globalToken = globalCookie?.slice('vybe_account_session='.length);
+  if (globalToken) await VybeSession.deleteOne({ tokenHash: hashSessionToken(decodeURIComponent(globalToken)) });
   clearSessionCookie(response);
+  clearGlobalSessionCookie(response);
   response.status(204).end();
 });
 
@@ -165,9 +198,10 @@ tenantRouter.use(requireSession);
 tenantRouter.get('/community/admin-access', (request, response) => {
   const community = sessionTenant(request);
   const user = request.vybeAccount!;
-  response.json({ canManage: isCommunityOwner(community, user) });
+  response.json({ canManage: isCommunityOwner(community, user) || isPlatformAppCreator(user) });
 });
 tenantRouter.use(communityRequestsRouter);
+tenantRouter.use(communityJoinRequestsRouter);
 tenantRouter.use(communitySettingsRouter);
 tenantRouter.use(verificationRouter);
 tenantRouter.use('/bank', bankRouter);

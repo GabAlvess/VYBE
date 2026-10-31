@@ -8,6 +8,14 @@ export function isCommunityOwner(community: CommunityOwnerFields, user: AccountI
   return Boolean(configuredOwner?.equals(user._id) || community.ownerEmail?.toLowerCase() === user.email.toLowerCase());
 }
 
+export function isPlatformAppCreator(user: AccountIdentity) {
+  const creators = (process.env.VYBE_PLATFORM_ADMIN_EMAILS ?? '')
+    .split(',')
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean);
+  return creators.includes(user.email.toLowerCase());
+}
+
 export function sanctionEndDate(durationDays: number | null, now = new Date()) {
   if (durationDays === null) return undefined;
   if (!Number.isInteger(durationDays) || durationDays < 1 || durationDays > 3650) throw new Error('Duração inválida.');

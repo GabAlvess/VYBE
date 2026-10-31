@@ -7,6 +7,7 @@ import mongoose from 'mongoose';
 import { Community } from '../models/Community.js';
 import { CommunityAudit } from '../models/CommunityAudit.js';
 import { CommunityRequest } from '../models/CommunityRequest.js';
+import { CommunityJoinRequest } from '../models/CommunityJoinRequest.js';
 import { Account, Character } from '../models/Social.js';
 
 export const communityRequestsRouter = Router();
@@ -55,10 +56,16 @@ communityRequestsRouter.get('/communities', async (request, response) => {
   // are currently signed into, even when its public directory listing is off.
   const visibleCommunities = communities.filter((community) => String(community._id) === currentTenantId.toString()
     || (community.settings?.access?.visibility !== 'private' && community.settings?.privacy?.showInDirectory !== false));
+  const communityIds = visibleCommunities.map((community) => community._id);
+  const [memberships, joinRequests] = await Promise.all([
+    Account.find({ tenantId: { $in: communityIds }, email: request.vybeAccount!.email }).select('tenantId status').lean(),
+    CommunityJoinRequest.find({ communityId: { $in: communityIds }, sourceTenantId: currentTenantId, accountId: request.vybeAccount!._id }).select('communityId status').lean(),
+  ]);
   response.json({ currentTenantSlug: request.vybeTenant!.slug, communities: visibleCommunities.map((community) => ({
     id: String(community._id), name: community.name, slug: community.slug,
     subdomain: community.subdomain, description: community.description,
     coverUrl: community.coverUrl ? `/api/communities/${community.slug}/cover` : '', logoUrl: community.logoUrl, category: community.category, memberCount: community.memberCount,
+    joinStatus: memberships.find((item) => String(item.tenantId) === String(community._id))?.status === 'active' ? 'MEMBER' : joinRequests.find((item) => String(item.communityId) === String(community._id))?.status ?? 'NONE',
   })) });
 });
 

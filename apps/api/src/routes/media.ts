@@ -5,6 +5,7 @@ import { requireTenant } from '../middleware/tenant.js';
 import { requireSession } from '../middleware/tenant.js';
 import { Conversation, ConversationMessage } from '../models/Conversation.js';
 import { MessageAppProfile } from '../models/MessageAppProfile.js';
+import { CommunityJoinRequest } from '../models/CommunityJoinRequest.js';
 
 export const mediaRouter = Router();
 const uploadsDirectory = resolve(dirname(fileURLToPath(import.meta.url)), '../../uploads');
@@ -27,13 +28,15 @@ mediaRouter.get('/:tenantSlug/message-:filename', requireSession, async (request
   if (!profile && !canReadConversationFile) { response.status(404).end(); return; }
   response.sendFile(`message-${filename}`, { root: resolve(uploadsDirectory, tenant.slug) }, (error) => { if (error && !response.headersSent) response.status(404).end(); });
 });
-mediaRouter.get('/:tenantSlug/:filename', (request, response) => {
+mediaRouter.get('/:tenantSlug/:filename', async (request, response) => {
   const tenant = request.vybeTenant!;
   const { tenantSlug, filename } = request.params;
   if (tenantSlug !== tenant.slug || !/^[a-f0-9]{32}\.(png|jpg|webp)$/.test(filename)) {
     response.status(404).end();
     return;
   }
+  const isUnapprovedJoinPhoto = await CommunityJoinRequest.exists({ communityId: tenant._id, photoplayerImageFilename: filename, status: { $ne: 'APPROVED' } });
+  if (isUnapprovedJoinPhoto) { response.status(404).end(); return; }
   response.sendFile(filename, { root: resolve(uploadsDirectory, tenant.slug) }, (error) => {
     if (error && !response.headersSent) response.status(404).end();
   });
