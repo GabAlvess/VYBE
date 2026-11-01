@@ -6,6 +6,7 @@ import { Account, Character, Notification } from '../models/Social.js';
 import { Conversation, ConversationBlock, ConversationMessage } from '../models/Conversation.js';
 import { Match, MatchBlock } from '../models/Match.js';
 import { requireSession, tenantScope } from '../middleware/tenant.js';
+import { emitToCommunity, emitToProfiles } from '../realtime/chatWebSocket.js';
 
 export const chatRouter = Router();
 chatRouter.use(requireSession);
@@ -121,6 +122,12 @@ chatRouter.post('/conversations/channels/:channelId/messages', async (request, r
   if (!channel || !canReadChannel(channel.private, isStaff(request))) { sendError(response, 404, 'Canal não encontrado nesta comunidade.'); return; }
   if (!canPostChannel(channel.posting, isStaff(request))) { sendError(response, 403, 'Você não tem permissão para publicar neste canal.'); return; }
   const message = await CommunityMessage.create({ tenantId: tenant, channelId: channel._id, characterId: characterId(request), content });
+  const event = { type: 'channel:message', channelId: channel._id.toString() };
+  if (channel.private) {
+    const staffAccounts = [...request.vybeTenant!.admins, ...request.vybeTenant!.moderators];
+    const staffProfiles = await Character.find(tenantScope(tenant, { accountId: { $in: staffAccounts } })).select('_id').lean();
+    emitToProfiles(tenant.toString(), staffProfiles.map((profile) => profile._id), event);
+  } else emitToCommunity(tenant.toString(), event);
   response.status(201).json({ id: message._id.toString(), content: message.content, deleted: false, own: true, createdAt: message.createdAt, author: characterJson(request.vybeCharacter!) });
 });
 
@@ -215,6 +222,7 @@ chatRouter.post('/messages/typing', async (request, response) => {
   } else {
     await DirectTyping.deleteOne(scope);
   }
+  emitToProfiles(tenant.toString(), [recipient._id], { type: 'direct:typing', otherProfileId: self.toString(), typing });
   response.status(204).end();
 });
 
@@ -238,6 +246,8 @@ chatRouter.post('/messages', async (request, response) => {
   conversation.lastMessageAt = message.createdAt; await conversation.save();
   const targetParticipant = conversation.participants.find((participant) => participant.profileId.equals(recipient._id));
   if (!targetParticipant?.mutedAt) await Notification.create({ tenantId: tenant, characterId: recipient._id, actorId: self, type: 'message', targetId: message._id });
+  emitToProfiles(tenant.toString(), [self], { type: 'direct:message', otherProfileId: recipient._id.toString(), messageId: message._id.toString() });
+  emitToProfiles(tenant.toString(), [recipient._id], { type: 'direct:message', otherProfileId: self.toString(), messageId: message._id.toString() });
   const match = await Match.findOne({ tenantId: tenant, status: 'active', $or: [{ profileAId: self, profileBId: recipient._id }, { profileAId: recipient._id, profileBId: self }] }).lean();
   response.status(201).json({ id: message._id.toString(), content: message.content, createdAt: message.createdAt, own: true, ...(match ? { matchId: match._id.toString() } : {}) });
 });

@@ -1,6 +1,6 @@
 import mongoose, { type HydratedDocument } from 'mongoose';
 
-export type WalletTransactionType = 'TRANSFER' | 'ADMIN_CREDIT' | 'ADMIN_DEBIT' | 'PAYMENT' | 'REFUND' | 'SALARY' | 'OTHER';
+export type WalletTransactionType = 'TRANSFER' | 'ADMIN_CREDIT' | 'ADMIN_DEBIT' | 'ADMIN_TAX' | 'PAYMENT' | 'REFUND' | 'SALARY' | 'OTHER';
 
 export interface WalletFields {
   tenantId: mongoose.Types.ObjectId;
@@ -16,7 +16,7 @@ export type WalletDocument = HydratedDocument<WalletFields>;
 const walletSchema = new mongoose.Schema<WalletFields>({
   tenantId: { type: mongoose.Schema.Types.ObjectId, required: true },
   characterId: { type: mongoose.Schema.Types.ObjectId, required: true },
-  balanceCents: { type: Number, required: true, min: 0, default: 0 },
+  balanceCents: { type: Number, required: true, min: -Number.MAX_SAFE_INTEGER, max: Number.MAX_SAFE_INTEGER, default: 0 },
   limitCents: { type: Number, min: 0, default: null },
   cardLast4: { type: String, required: true, match: /^\d{4}$/ },
 }, { timestamps: true, collection: 'bank_wallets' });
@@ -39,7 +39,7 @@ export type WalletTransactionDocument = HydratedDocument<WalletTransactionFields
 
 const transactionSchema = new mongoose.Schema<WalletTransactionFields>({
   tenantId: { type: mongoose.Schema.Types.ObjectId, required: true },
-  type: { type: String, enum: ['TRANSFER', 'ADMIN_CREDIT', 'ADMIN_DEBIT', 'PAYMENT', 'REFUND', 'SALARY', 'OTHER'], required: true },
+  type: { type: String, enum: ['TRANSFER', 'ADMIN_CREDIT', 'ADMIN_DEBIT', 'ADMIN_TAX', 'PAYMENT', 'REFUND', 'SALARY', 'OTHER'], required: true },
   amountCents: { type: Number, required: true, min: 1 },
   senderWalletId: { type: mongoose.Schema.Types.ObjectId },
   recipientWalletId: { type: mongoose.Schema.Types.ObjectId },

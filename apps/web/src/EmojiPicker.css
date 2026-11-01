@@ -3,9 +3,9 @@
 .vybe-emoji-trigger:hover, .vybe-emoji-trigger[aria-expanded="true"] { background: var(--color-primary-soft); color: var(--color-primary-dark); }
 .vybe-emoji-trigger:focus-visible { outline: 2px solid var(--color-primary-medium); outline-offset: 2px; }
 .vybe-emoji-trigger .material-symbol { font-size: 20px; }
-.vybe-emoji-popover { position: absolute; z-index: 60; right: 0; bottom: calc(100% + 8px); display: block; width: min(360px, calc(100vw - 24px)); padding: 4px; overflow: hidden; border: 1px solid var(--color-border); border-radius: 15px; background: white; box-shadow: 0 12px 36px #171a1926; }
+.vybe-emoji-popover { position: fixed; z-index: 120; right: auto; bottom: auto; display: block; box-sizing: border-box; width: min(360px, calc(100vw - 24px)); height: 350px; padding: 4px; overflow: hidden; border: 1px solid var(--color-border); border-radius: 15px; background: white; box-shadow: 0 12px 36px #171a1926; transform: none; }
 .vybe-emoji-popover .EmojiPickerReact { --epr-highlight-color: #16815d; --epr-hover-bg-color: #f2faf6; --epr-focus-bg-color: #ddf3ea; --epr-picker-border-color: #e7ebe9; --epr-search-input-bg-color: #fafbfa; --epr-search-input-bg-color-active: #fafbfa; --epr-category-icon-active-color: #16815d; --epr-category-icon-inactive-color: #737b78; --epr-emoji-size: 27px; border: 0 !important; border-radius: 11px !important; }
 @media (max-width: 640px) {
-  .vybe-emoji-popover { position: fixed; right: auto; bottom: 68px; left: 50%; width: min(360px, calc(100vw - 16px)); transform: translateX(-50%); padding: 5px; border-radius: 16px; }
-  .vybe-emoji-popover .EmojiPickerReact { width: 100% !important; height: min(370px, calc(100dvh - 110px)) !important; }
+  .vybe-emoji-popover { width: min(360px, calc(100vw - 16px)); height: min(350px, calc(100dvh - 24px)); padding: 5px; border-radius: 16px; }
+  .vybe-emoji-popover .EmojiPickerReact { width: 100% !important; height: calc(100% - 2px) !important; }
 }

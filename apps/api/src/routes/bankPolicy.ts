@@ -10,7 +10,7 @@ export function canSpend(balanceCents: number, amountCents: number, monthlyUsedC
 
 export function transactionDirection(transaction: { type: string; senderWalletId?: { toString(): string } | null; recipientWalletId?: { toString(): string } | null }, walletId: string) {
   if (transaction.type === 'ADMIN_CREDIT' || transaction.type === 'SALARY' || transaction.type === 'REFUND') return 'in' as const;
-  if (transaction.type === 'ADMIN_DEBIT' || transaction.type === 'PAYMENT') return 'out' as const;
+  if (transaction.type === 'ADMIN_DEBIT' || transaction.type === 'ADMIN_TAX' || transaction.type === 'PAYMENT') return 'out' as const;
   return transaction.recipientWalletId?.toString() === walletId ? 'in' as const : 'out' as const;
 }
 

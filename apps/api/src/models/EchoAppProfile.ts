@@ -6,6 +6,7 @@ export interface EchoAppProfileFields {
   displayName: string;
   bio: string;
   avatarUrl: string;
+  coverUrl: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -16,6 +17,7 @@ const echoAppProfileSchema = new mongoose.Schema<EchoAppProfileFields>({
   displayName: { type: String, default: '', trim: true, maxlength: 60 },
   bio: { type: String, default: '', trim: true, maxlength: 300 },
   avatarUrl: { type: String, default: '' },
+  coverUrl: { type: String, default: '' },
 }, { timestamps: true, collection: 'echo_app_profiles' });
 
 echoAppProfileSchema.index({ tenantId: 1, characterId: 1 }, { unique: true });

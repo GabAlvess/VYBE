@@ -4,7 +4,7 @@ import { randomBytes } from 'node:crypto';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { Account, Character, Comment, CommunityEvent, EventRSVP, Follow, Like, Notification, Post, Repost, SavedPost, Story, StoryView } from '../models/Social.js';
+import { Account, Character, Comment, CommunityEvent, EventRSVP, Follow, Like, Notification, Post, PostReport, PostView, Repost, SavedPost, Story, StoryView, type PostFields } from '../models/Social.js';
 import { CommunityAudit } from '../models/CommunityAudit.js';
 import { canJoinEvent, canSeeEvent, eventCreationDecision } from './eventPolicy.js';
 import { requireSession, tenantScope } from '../middleware/tenant.js';
@@ -33,8 +33,8 @@ function characterJson(character: { _id: mongoose.Types.ObjectId; username: stri
   return { id: character._id.toString(), username: character.username, displayName: character.displayName, communityFunction: character.communityFunction ?? '', bio: character.bio, avatarUrl: character.avatarUrl, coverUrl: character.coverUrl, followerCount: character.followerCount, followingCount: character.followingCount, postCount: character.postCount, verified: Boolean(character.verification?.verifiedAt && !character.verification.removedAt) };
 }
 
-function echoIdentity(character: Parameters<typeof characterJson>[0], profile?: { displayName?: string; bio?: string; avatarUrl?: string }) {
-  return { ...characterJson(character), displayName: profile?.displayName || character.displayName, bio: profile ? profile.bio ?? '' : character.bio, avatarUrl: profile?.avatarUrl || character.avatarUrl };
+function echoIdentity(character: Parameters<typeof characterJson>[0], profile?: { displayName?: string; bio?: string; avatarUrl?: string; coverUrl?: string }) {
+  return { ...characterJson(character), displayName: profile?.displayName || character.displayName, bio: profile ? profile.bio ?? '' : character.bio, avatarUrl: profile?.avatarUrl || character.avatarUrl, coverUrl: profile?.coverUrl || character.coverUrl };
 }
 
 function isCommunityAdmin(request: Request) {
@@ -104,9 +104,12 @@ async function saveEventImage(value: unknown, slug: string) {
   return `/media/${slug}/${filename}`;
 }
 
-function postJson(post: { _id: mongoose.Types.ObjectId; characterId: mongoose.Types.ObjectId; content: string; imageUrl: string; imageUrls?: string[]; kind: 'post' | 'pulse'; likesCount: number; commentsCount: number; createdAt: Date }, author: ReturnType<typeof characterJson> | undefined, liked: boolean, canDelete = false, saved = false, repostCount = 0, reposted = false) {
+function postJson(post: { _id: mongoose.Types.ObjectId; characterId: mongoose.Types.ObjectId; content: string; imageUrl: string; imageUrls?: string[]; kind: 'post' | 'pulse'; likesCount: number; commentsCount: number; viewsCount?: number; poll?: PostFields['poll']; createdAt: Date }, author: ReturnType<typeof characterJson> | undefined, liked: boolean, canDelete = false, saved = false, repostCount = 0, reposted = false, viewerCharacterId?: mongoose.Types.ObjectId) {
   const images = post.imageUrls?.length ? post.imageUrls : post.imageUrl ? [post.imageUrl] : [];
-  return { id: post._id.toString(), content: post.content, imageUrl: images[0] ?? '', imageUrls: images, kind: post.kind, likesCount: post.likesCount, commentsCount: post.commentsCount, repostCount, reposted, createdAt: post.createdAt, liked, saved, canDelete, author };
+  const hasPoll = Boolean(post.poll?.question?.trim() && post.poll.options.length >= 2);
+  const myVote = hasPoll && viewerCharacterId && post.poll?.votes.find((vote) => vote.characterId.equals(viewerCharacterId))?.optionId;
+  const poll = hasPoll && post.poll ? { question: post.poll.question, options: post.poll.options.map(({ id, text, votesCount }) => ({ id, text, votesCount })), myVote: myVote ?? null } : undefined;
+  return { id: post._id.toString(), content: post.content, imageUrl: images[0] ?? '', imageUrls: images, kind: post.kind, likesCount: post.likesCount, commentsCount: post.commentsCount, viewsCount: post.viewsCount ?? 0, repostCount, reposted, poll, createdAt: post.createdAt, liked, saved, canDelete, author };
 }
 
 async function feedResponse(request: Request, response: Response, kind: 'post' | 'pulse') {
@@ -150,7 +153,7 @@ async function feedResponse(request: Request, response: Response, kind: 'post' |
     const author = authorMap.get(post.characterId.toString());
     const repost = repostMap.get(post._id.toString());
     const identity = author ? kind === 'pulse' ? echoIdentity(author, echoProfileMap.get(author._id.toString())) : characterJson(author) : undefined;
-    return postJson(post, identity, likedSet.has(post._id.toString()), admin || author?.accountId.equals(request.vybeAccount!._id) === true, savedSet.has(post._id.toString()), repost?.count ?? 0, repost?.mine ?? false);
+    return postJson(post, identity, likedSet.has(post._id.toString()), admin || author?.accountId.equals(request.vybeAccount!._id) === true, savedSet.has(post._id.toString()), repost?.count ?? 0, repost?.mine ?? false, character._id);
   }));
 }
 
@@ -208,7 +211,7 @@ socialRouter.get('/echo/explore', async (request, response) => {
   const suggestedProfiles = await EchoAppProfile.find({ tenantId: tenant, characterId: { $in: suggested.map((item) => item._id) } }).lean();
   const suggestedProfileMap = new Map(suggestedProfiles.map((item) => [item.characterId.toString(), item]));
   const people = suggested.map((item) => ({ ...echoIdentity(item, suggestedProfileMap.get(item._id.toString())), following: followedSet.has(item._id.toString()) }));
-  response.json({ people, posts: posts.flatMap((post) => { const author = authorMap.get(post.characterId.toString()); const repost = repostMap.get(post._id.toString()); return author ? [postJson(post, echoIdentity(author, echoProfileMap.get(author._id.toString())), likedSet.has(post._id.toString()), author.accountId.equals(request.vybeAccount!._id) || isCommunityAdmin(request), savedSet.has(post._id.toString()), repost?.count ?? 0, repost?.mine ?? false)] : []; }) });
+  response.json({ people, posts: posts.flatMap((post) => { const author = authorMap.get(post.characterId.toString()); const repost = repostMap.get(post._id.toString()); return author ? [postJson(post, echoIdentity(author, echoProfileMap.get(author._id.toString())), likedSet.has(post._id.toString()), author.accountId.equals(request.vybeAccount!._id) || isCommunityAdmin(request), savedSet.has(post._id.toString()), repost?.count ?? 0, repost?.mine ?? false, current._id)] : []; }) });
 });
 
 socialRouter.get('/echo/profile', async (request, response) => {
@@ -234,7 +237,15 @@ socialRouter.patch('/echo/profile', async (request, response) => {
       catch (error) { badRequest(response, error instanceof Error ? error.message : 'Não foi possível salvar a foto.'); return; }
     }
   }
-  const profile = await EchoAppProfile.findOneAndUpdate({ tenantId: tenant, characterId: character._id }, { $set: { displayName, bio, avatarUrl } }, { upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true });
+  let coverUrl = current?.coverUrl ?? '';
+  if (Object.hasOwn(request.body ?? {}, 'cover')) {
+    if (request.body.cover === null) coverUrl = '';
+    else {
+      try { coverUrl = await saveEventImage(request.body.cover, request.vybeTenant!.slug); }
+      catch (error) { badRequest(response, error instanceof Error ? error.message : 'Não foi possível salvar a capa.'); return; }
+    }
+  }
+  const profile = await EchoAppProfile.findOneAndUpdate({ tenantId: tenant, characterId: character._id }, { $set: { displayName, bio, avatarUrl, coverUrl } }, { upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true });
   response.json({ profile: echoIdentity(character, profile) });
 });
 
@@ -260,7 +271,32 @@ socialRouter.get('/echo/profile/:username', async (request, response) => {
   ]);
   const likedSet = new Set(likes.map((item) => item.postId.toString())); const savedSet = new Set(saves.map((item) => item.postId.toString()));
   const repostMap = new Map(reposts.map((item) => [item._id.toString(), { count: item.count as number, mine: (item.mine as number) > 0 }]));
-  response.json({ profile: { ...identity, following: Boolean(follows) }, posts: posts.map((post) => { const repost = repostMap.get(post._id.toString()); return postJson(post, identity, likedSet.has(post._id.toString()), character.accountId.equals(request.vybeAccount!._id) || isCommunityAdmin(request), savedSet.has(post._id.toString()), repost?.count ?? 0, repost?.mine ?? false); }) });
+  const repostRows = await Repost.find({ tenantId: tenant, characterId: character._id }).sort({ createdAt: -1 }).limit(50).lean();
+  const repostTargets = await Post.find(tenantScope(tenant, { _id: { $in: repostRows.map((item) => item.postId) }, kind: 'pulse' })).sort({ createdAt: -1 }).lean();
+  const repostAuthorIds = [...new Set(repostTargets.map((item) => item.characterId.toString()))].map((id) => new mongoose.Types.ObjectId(id));
+  const repostAuthors = await Character.find(tenantScope(tenant, { _id: { $in: repostAuthorIds } })).lean();
+  const repostAuthorMap = new Map(repostAuthors.map((item) => [item._id.toString(), item]));
+  const repostEchoProfiles = await EchoAppProfile.find({ tenantId: tenant, characterId: { $in: repostAuthorIds } }).lean();
+  const repostEchoProfileMap = new Map(repostEchoProfiles.map((item) => [item.characterId.toString(), item]));
+  const repostTargetIds = repostTargets.map((item) => item._id);
+  const [repostLikes, repostSaves, repostStats] = await Promise.all([
+    Like.find({ tenantId: tenant, characterId: current._id, postId: { $in: repostTargetIds } }).select('postId').lean(),
+    SavedPost.find({ tenantId: tenant, characterId: current._id, postId: { $in: repostTargetIds } }).select('postId').lean(),
+    Repost.aggregate([{ $match: { tenantId: tenant, postId: { $in: repostTargetIds } } }, { $group: { _id: '$postId', count: { $sum: 1 }, mine: { $sum: { $cond: [{ $eq: ['$characterId', current._id] }, 1, 0] } } } }]),
+  ]);
+  const repostLikedSet = new Set(repostLikes.map((item) => item.postId.toString()));
+  const repostSavedSet = new Set(repostSaves.map((item) => item.postId.toString()));
+  const repostStatsMap = new Map(repostStats.map((item) => [item._id.toString(), { count: item.count as number, mine: (item.mine as number) > 0 }]));
+  const repostTargetMap = new Map(repostTargets.map((item) => [item._id.toString(), item]));
+  const repostedPosts = repostRows.flatMap((row) => {
+    const post = repostTargetMap.get(row.postId.toString());
+    const author = post && repostAuthorMap.get(post.characterId.toString());
+    if (!post || !author) return [];
+    const stats = repostStatsMap.get(post._id.toString());
+    const authorIdentity = echoIdentity(author, repostEchoProfileMap.get(author._id.toString()));
+    return [postJson(post, authorIdentity, repostLikedSet.has(post._id.toString()), author.accountId.equals(request.vybeAccount!._id) || isCommunityAdmin(request), repostSavedSet.has(post._id.toString()), stats?.count ?? 0, stats?.mine ?? false, current._id)];
+  });
+  response.json({ profile: { ...identity, following: Boolean(follows) }, posts: posts.map((post) => { const repost = repostMap.get(post._id.toString()); return postJson(post, identity, likedSet.has(post._id.toString()), character.accountId.equals(request.vybeAccount!._id) || isCommunityAdmin(request), savedSet.has(post._id.toString()), repost?.count ?? 0, repost?.mine ?? false, current._id); }), reposts: repostedPosts });
 });
 
 socialRouter.post('/posts', async (request, response) => createPost(request, response, 'post'));
@@ -286,16 +322,66 @@ socialRouter.delete('/posts/:postId/repost', async (request, response) => {
   response.json({ reposted: false });
 });
 
+socialRouter.post('/posts/:postId/view', async (request, response) => {
+  if (!mongoose.isValidObjectId(request.params.postId)) { badRequest(response, 'Publicação inválida.'); return; }
+  const tenant = tenantId(request);
+  const viewer = activeCharacter(request);
+  const post = await Post.findOne(tenantScope(tenant, { _id: request.params.postId, kind: 'pulse' }));
+  if (!post) { response.status(404).json({ error: 'Publicação não encontrada nesta comunidade.' }); return; }
+  if (!post.characterId.equals(viewer._id)) {
+    try {
+      await PostView.create({ tenantId: tenant, postId: post._id, characterId: viewer._id });
+      await Post.updateOne({ _id: post._id, tenantId: tenant }, { $inc: { viewsCount: 1 } });
+    } catch (error) {
+      if (!(error && typeof error === 'object' && 'code' in error && error.code === 11000)) throw error;
+    }
+  }
+  const current = await Post.findOne({ _id: post._id, tenantId: tenant }).select('viewsCount').lean();
+  response.json({ viewsCount: current?.viewsCount ?? 0 });
+});
+
+socialRouter.post('/posts/:postId/poll/vote', async (request, response) => {
+  if (!mongoose.isValidObjectId(request.params.postId)) { badRequest(response, 'Publicação inválida.'); return; }
+  const optionId = typeof request.body?.optionId === 'string' ? request.body.optionId : '';
+  if (!optionId) { badRequest(response, 'Escolha uma opção da enquete.'); return; }
+  const tenant = tenantId(request);
+  const voter = activeCharacter(request);
+  const post = await Post.findOneAndUpdate(
+    tenantScope(tenant, { _id: request.params.postId, kind: 'pulse', 'poll.options.id': optionId, 'poll.votes.characterId': { $ne: voter._id } }),
+    { $push: { 'poll.votes': { characterId: voter._id, optionId } }, $inc: { 'poll.options.$[option].votesCount': 1 } },
+    { new: true, arrayFilters: [{ 'option.id': optionId }] },
+  );
+  if (!post) {
+    const existing = await Post.findOne(tenantScope(tenant, { _id: request.params.postId, kind: 'pulse' }));
+    if (!existing?.poll) { response.status(404).json({ error: 'Enquete não encontrada nesta comunidade.' }); return; }
+    if (!existing.poll.options.some((option) => option.id === optionId)) { badRequest(response, 'Esta opção não pertence à enquete.'); return; }
+    response.status(409).json({ error: 'Você já votou nesta enquete.' }); return;
+  }
+  const myVote = post.poll?.votes.find((vote) => vote.characterId.equals(voter._id))?.optionId ?? null;
+  response.json({ poll: post.poll ? { question: post.poll.question, options: post.poll.options.map(({ id, text, votesCount }) => ({ id, text, votesCount })), myVote } : null });
+});
+
 async function createPost(request: Request, response: Response, kind: 'post' | 'pulse') {
   if (!request.vybeTenant!.settings?.features?.[kind === 'pulse' ? 'pulse' : 'feed']) { response.status(403).json({ error: `O ${kind === 'pulse' ? 'Echo' : 'Social'} está desativado nesta comunidade.` }); return; }
   const content = typeof request.body?.content === 'string' ? request.body.content.trim() : '';
+  let poll: PostFields['poll'];
+  if (request.body?.poll !== undefined) {
+    const question = typeof request.body.poll?.question === 'string' ? request.body.poll.question.trim() : '';
+    const options = Array.isArray(request.body.poll?.options) ? request.body.poll.options : [];
+    if (kind !== 'pulse' || question.length < 3 || question.length > 120 || options.length < 2 || options.length > 4 || options.some((option: unknown) => typeof option !== 'string' || option.trim().length < 1 || option.trim().length > 80)) {
+      badRequest(response, 'A enquete precisa de uma pergunta e de 2 a 4 opções válidas.'); return;
+    }
+    const normalizedOptions = options.map((option: string) => option.trim());
+    if (new Set(normalizedOptions.map((option: string) => option.toLocaleLowerCase('pt-BR'))).size !== normalizedOptions.length) { badRequest(response, 'As opções da enquete devem ser diferentes.'); return; }
+    poll = { question, options: normalizedOptions.map((text: string) => ({ id: randomBytes(8).toString('hex'), text, votesCount: 0 })), votes: [] };
+  }
   const configuredLimit = request.vybeTenant!.settings?.moderation?.maxPostLength ?? 5000;
   const limit = kind === 'pulse' ? Math.min(500, configuredLimit) : configuredLimit;
   const imageInputs: string[] = Array.isArray(request.body?.images)
     ? request.body.images
     : typeof request.body?.image === 'string' && request.body.image ? [request.body.image] : [];
   if (imageInputs.length > 4 || imageInputs.some((image) => typeof image !== 'string')) { badRequest(response, 'Escolha até 4 imagens para a publicação.'); return; }
-  if (content.length > limit || (!content && !imageInputs.length) || (kind === 'post' && !imageInputs.length)) { badRequest(response, `Adicione uma imagem${kind === 'post' ? '' : ' ou escreva um texto'} e use até ${limit} caracteres na legenda.`); return; }
+  if (content.length > limit || (!content && !imageInputs.length && !poll) || (kind === 'post' && !imageInputs.length)) { badRequest(response, `Adicione uma imagem${kind === 'post' ? '' : ' texto ou enquete'} e use até ${limit} caracteres na legenda.`); return; }
   const imageUrls: string[] = [];
   try {
     for (const image of imageInputs) imageUrls.push(await saveEventImage(image, request.vybeTenant!.slug));
@@ -306,10 +392,10 @@ async function createPost(request: Request, response: Response, kind: 'post' | '
   const character = activeCharacter(request);
   const owner = await Character.findOne({ _id: character._id, tenantId: tenant, accountId: request.vybeAccount!._id });
   if (!owner) { response.status(403).json({ error: 'Esta identidade não pertence à sua conta nesta comunidade.' }); return; }
-  const post = await Post.create({ tenantId: tenant, characterId: owner._id, content, imageUrl: imageUrls[0] ?? '', imageUrls, kind });
+  const post = await Post.create({ tenantId: tenant, characterId: owner._id, content, imageUrl: imageUrls[0] ?? '', imageUrls, kind, ...(poll ? { poll } : {}) });
   await Character.updateOne({ _id: owner._id, tenantId: tenant, accountId: request.vybeAccount!._id }, { $inc: { postCount: 1 } });
   await notifyMentions(tenant, content, owner._id, post._id, kind === 'pulse' ? 'echo_mention' : 'mention');
-  response.status(201).json(postJson(post, characterJson(owner), false, true));
+  response.status(201).json(postJson(post, characterJson(owner), false, true, false, 0, false, owner._id));
 }
 
 socialRouter.delete('/posts/:postId', async (request, response) => {
@@ -327,10 +413,28 @@ socialRouter.delete('/posts/:postId', async (request, response) => {
     Comment.deleteMany({ tenantId: tenant, postId: post._id }),
     SavedPost.deleteMany({ tenantId: tenant, postId: post._id }),
     Repost.deleteMany({ tenantId: tenant, postId: post._id }),
+    PostView.deleteMany({ tenantId: tenant, postId: post._id }),
     Notification.deleteMany({ tenantId: tenant, targetId: post._id, type: { $in: ['like', 'comment', 'echo_reply', 'repost', 'mention'] } }),
     Character.updateOne({ _id: post.characterId, tenantId: tenant, postCount: { $gt: 0 } }, { $inc: { postCount: -1 } }),
   ]);
   response.status(204).end();
+});
+
+socialRouter.post('/posts/:postId/report', async (request, response) => {
+  if (!mongoose.isValidObjectId(request.params.postId)) { badRequest(response, 'Publicação inválida.'); return; }
+  const reason = typeof request.body?.reason === 'string' ? request.body.reason.trim() : '';
+  if (reason.length < 3 || reason.length > 500) { badRequest(response, 'Descreva o motivo da denúncia.'); return; }
+  const tenant = tenantId(request);
+  const reporter = activeCharacter(request);
+  const post = await Post.findOne(tenantScope(tenant, { _id: request.params.postId }));
+  if (!post) { response.status(404).json({ error: 'Publicação não encontrada nesta comunidade.' }); return; }
+  if (post.characterId.equals(reporter._id)) { response.status(400).json({ error: 'Você não pode denunciar sua própria publicação.' }); return; }
+  await PostReport.updateOne(
+    { tenantId: tenant, postId: post._id, reporterId: reporter._id },
+    { $setOnInsert: { reason, status: 'open' } },
+    { upsert: true },
+  );
+  response.status(201).json({ reported: true });
 });
 
 socialRouter.put('/posts/:postId/like', async (request, response) => {
@@ -480,7 +584,7 @@ socialRouter.get('/explore', async (request, response) => {
     const matchingPeople = await Character.find(tenantScope(tenant, { accountId: { $in: activeIds }, $or: [{ displayName: expression }, { username: expression }] })).select('_id').lean();
     contentQuery.$and = [imageFilter, { $or: [{ content: expression }, { characterId: { $in: matchingPeople.map((item) => item._id) } }] }];
   }
-  const posts = await Post.find(contentQuery).sort({ createdAt: -1 }).limit(60).lean();
+  const posts = await Post.find(contentQuery).sort(expression ? { createdAt: -1 } : { likesCount: -1, createdAt: -1 }).limit(60).lean();
   const authorIds = [...new Set(posts.map((post) => post.characterId.toString()))].map((id) => new mongoose.Types.ObjectId(id));
   const authors = await Character.find(tenantScope(tenant, { _id: { $in: authorIds }, accountId: { $in: activeIds } })).lean();
   const authorMap = new Map(authors.map((author) => [author._id.toString(), author]));
@@ -502,7 +606,11 @@ socialRouter.get('/characters/:username', async (request, response) => {
   const character = await Character.findOne(tenantScope(tenant, { username: request.params.username.replace(/^@/, '').toLowerCase() }));
   if (!character) { response.status(404).json({ error: 'Perfil não encontrado nesta comunidade.' }); return; }
   if (!await Account.exists({ _id: character.accountId, tenantId: tenant, status: 'active' })) { response.status(404).json({ error: 'Perfil não encontrado nesta comunidade.' }); return; }
-  const posts = await Post.find({ tenantId: tenant, characterId: character._id, kind: 'post', $or: [{ imageUrl: { $ne: '' } }, { imageUrls: { $exists: true, $ne: [] } }] }).sort({ createdAt: -1 }).limit(60).lean();
+  const photoPostFilter = { tenantId: tenant, characterId: character._id, kind: 'post' as const, $or: [{ imageUrl: { $ne: '' } }, { imageUrls: { $exists: true, $ne: [] } }] };
+  const [posts, photoPostCount] = await Promise.all([
+    Post.find(photoPostFilter).sort({ createdAt: -1 }).limit(60).lean(),
+    Post.countDocuments(photoPostFilter),
+  ]);
   const follow = await Follow.exists({ tenantId: tenant, followerId: activeCharacter(request)._id, followedId: character._id });
   const [liked, saved] = await Promise.all([
     Like.find({ tenantId: tenant, characterId: activeCharacter(request)._id, postId: { $in: posts.map((post) => post._id) } }).select('postId').lean(),
@@ -512,7 +620,7 @@ socialRouter.get('/characters/:username', async (request, response) => {
   const savedSet = new Set(saved.map((item) => item.postId.toString()));
   const ownProfile = character.accountId.equals(request.vybeAccount!._id);
   const canDelete = ownProfile || isCommunityAdmin(request);
-  response.json({ character: { ...characterJson(character), own: ownProfile, following: Boolean(follow) }, posts: posts.map((post) => postJson(post, characterJson(character), likedSet.has(post._id.toString()), canDelete, savedSet.has(post._id.toString()))) });
+  response.json({ character: { ...characterJson(character), own: ownProfile, following: Boolean(follow), photoPostCount }, posts: posts.map((post) => postJson(post, characterJson(character), likedSet.has(post._id.toString()), canDelete, savedSet.has(post._id.toString()))) });
 });
 
 socialRouter.get('/characters/:username/followers', async (request, response) => {
@@ -599,8 +707,8 @@ socialRouter.get('/events', async (request, response) => {
   let filter: Record<string, unknown> = eventStatusPublic('approved') ? { status: { $in: ['approved', 'upcoming'] } } : {};
   if (view === 'past') filter = { status: { $in: ['approved', 'upcoming', 'completed'] }, startsAt: { $lt: new Date() } };
   else if (view === 'mine') {
-    const rsvps = await EventRSVP.find({ tenantId: tenant, characterId: current._id, status: { $in: ['going', 'maybe', 'not_going'] } }).select('eventId').lean();
-    filter = { $or: [{ creatorCharacterId: current._id }, { _id: { $in: rsvps.map((item) => item.eventId) } }] };
+    const rsvps = await EventRSVP.find({ tenantId: tenant, characterId: current._id, status: 'going' }).select('eventId').lean();
+    filter = { status: { $ne: 'cancelled' }, $or: [{ creatorCharacterId: current._id }, { _id: { $in: rsvps.map((item) => item.eventId) } }] };
   }
   else if (view === 'going') {
     const rsvps = await EventRSVP.find({ tenantId: tenant, characterId: current._id, status: { $in: ['going', 'maybe', 'not_going'] } }).select('eventId').lean();
@@ -608,9 +716,9 @@ socialRouter.get('/events', async (request, response) => {
   } else filter.startsAt = { $gte: new Date() };
   const from = typeof request.query.from === 'string' ? new Date(request.query.from) : null;
   const to = typeof request.query.to === 'string' ? new Date(request.query.to) : null;
-  if (from && Number.isFinite(from.getTime()) && to && Number.isFinite(to.getTime()) && to > from) filter = { status: { $in: ['approved', 'upcoming'] }, startsAt: { $gte: from, $lt: to } };
+  if (view === 'upcoming' && from && Number.isFinite(from.getTime()) && to && Number.isFinite(to.getTime()) && to > from) filter = { status: { $in: ['approved', 'upcoming'] }, startsAt: { $gte: from, $lt: to } };
   const requestedLimit = Number(request.query.limit);
-  const limit = Number.isFinite(requestedLimit) ? Math.max(1, Math.min(100, Math.floor(requestedLimit))) : 100;
+  const limit = Number.isFinite(requestedLimit) ? Math.max(1, Math.min(500, Math.floor(requestedLimit))) : 500;
   const events = await CommunityEvent.find(tenantScope(tenant, filter)).sort({ startsAt: view === 'past' ? -1 : 1 }).limit(limit).lean();
   response.json(await Promise.all(events.map((event) => eventSummary(event, request))));
 });
@@ -741,11 +849,42 @@ socialRouter.post('/events/:eventId/cancel', async (request, response) => {
   response.json(await eventSummary(event.toObject(), request));
 });
 
+socialRouter.delete('/events/:eventId', async (request, response) => {
+  if (!mongoose.isValidObjectId(request.params.eventId)) { badRequest(response, 'Evento inválido.'); return; }
+  const tenant = tenantId(request);
+  const event = await CommunityEvent.findOne(tenantScope(tenant, { _id: request.params.eventId }));
+  if (!event) { response.status(404).json({ error: 'Evento não encontrado nesta comunidade.' }); return; }
+  const actor = activeCharacter(request);
+  if (!isOwnerOrAdmin(request) && !event.creatorCharacterId?.equals(actor._id)) { response.status(403).json({ error: 'Você não pode excluir este evento.' }); return; }
+  if (event.status === 'completed' || event.status === 'cancelled') { badRequest(response, 'Este evento já foi encerrado.'); return; }
+  const reason = typeof request.body?.reason === 'string' ? request.body.reason.trim().slice(0, 500) : '';
+  const participants = eventStatusPublic(event.status)
+    ? await EventRSVP.find({ tenantId: tenant, eventId: event._id, status: 'going' }).select('characterId').lean()
+    : [];
+  const isPublic = eventStatusPublic(event.status);
+  if (isPublic) {
+    event.status = 'cancelled';
+    event.cancellationReason = reason || 'Evento excluído pelo organizador.';
+    event.cancelledAt = new Date();
+    event.cancelledBy = request.vybeAccount!._id;
+    await event.save();
+  } else {
+    await EventRSVP.deleteMany({ tenantId: tenant, eventId: event._id });
+    await CommunityEvent.deleteOne({ _id: event._id, tenantId: tenant });
+  }
+  await CommunityAudit.create({ tenantId: tenant, actorId: request.vybeAccount!._id, action: isPublic ? 'event.deleted.cancelled' : 'event.deleted', details: { eventId: event._id.toString(), title: event.title, reason, notifiedParticipants: participants.length } });
+  if (participants.length) await notifyCharacters(tenant, actor._id, event._id, 'event_cancelled', participants.map((item) => item.characterId));
+  if (isPublic) response.json(await eventSummary(event.toObject(), request));
+  else response.json({ deleted: true, id: event._id.toString() });
+});
+
 socialRouter.get('/notifications', async (request, response) => {
   const tenant = tenantId(request);
   const requestedLimit = Number(request.query.limit);
   const limit = Number.isFinite(requestedLimit) ? Math.max(1, Math.min(50, Math.floor(requestedLimit))) : 50;
-  const notifications = await Notification.find({ tenantId: tenant, characterId: activeCharacter(request)._id }).sort({ createdAt: -1 }).limit(limit).lean();
+  const bankTypes = ['bank_transfer_received', 'bank_admin_credit_received'];
+  const scope = request.query.scope === 'bank' ? { type: { $in: bankTypes } } : {};
+  const notifications = await Notification.find({ tenantId: tenant, characterId: activeCharacter(request)._id, ...scope }).sort({ createdAt: -1 }).limit(limit).lean();
   const actorIds = notifications.map((notification) => notification.actorId);
   const actors = await Character.find({ _id: { $in: actorIds }, tenantId: tenant }).lean();
   const actorMap = new Map(actors.map((actor) => [actor._id.toString(), actor]));
@@ -753,7 +892,6 @@ socialRouter.get('/notifications', async (request, response) => {
   const eventIds = notifications.filter((item) => eventTypes.includes(item.type)).map((item) => item.targetId);
   const events = await CommunityEvent.find(tenantScope(tenant, { _id: { $in: eventIds } })).select('title').lean();
   const eventMap = new Map(events.map((event) => [event._id.toString(), event.title]));
-  const bankTypes = ['bank_transfer_received', 'bank_admin_credit_received'];
   const bankTransactions = await WalletTransaction.find(tenantScope(tenant, { _id: { $in: notifications.filter((item) => bankTypes.includes(item.type)).map((item) => item.targetId) } })).select('amountCents description').lean();
   const bankMap = new Map((bankTransactions as unknown as Array<{ _id: mongoose.Types.ObjectId; amountCents: number; description: string }>).map((item) => [item._id.toString(), item]));
   const joinUpdates = await CommunityJoinRequest.find({ _id: { $in: notifications.filter((item) => item.type === 'community_join_update').map((item) => item.targetId) }, sourceTenantId: tenant, accountId: request.vybeAccount!._id }).select('communityId status adminMessage rejectionReason').lean();
@@ -766,7 +904,8 @@ socialRouter.get('/notifications', async (request, response) => {
 
 socialRouter.patch('/notifications/read', async (request, response) => {
   const echoTypes = ['follow', 'echo_like', 'echo_mention', 'repost', 'echo_reply'];
-  const scope = request.query.scope === 'echo' ? { type: { $in: echoTypes } } : {};
+  const bankTypes = ['bank_transfer_received', 'bank_admin_credit_received'];
+  const scope = request.query.scope === 'echo' ? { type: { $in: echoTypes } } : request.query.scope === 'bank' ? { type: { $in: bankTypes } } : {};
   const result = await Notification.updateMany({ tenantId: tenantId(request), characterId: activeCharacter(request)._id, readAt: { $exists: false }, ...scope }, { $set: { readAt: new Date() } });
   response.json({ updated: result.modifiedCount });
 });

@@ -5,7 +5,7 @@ import { randomBytes, scryptSync } from 'node:crypto';
 import mongoose from 'mongoose';
 import { Community } from '../models/Community.js';
 import { CommunityRequest } from '../models/CommunityRequest.js';
-import { Account, Character, Comment, CommunityEvent, EventRSVP, Follow, Like, Notification, Post, Session } from '../models/Social.js';
+import { Account, Character, Comment, CommunityEvent, EventRSVP, Follow, Like, Notification, Post, PostView, Session } from '../models/Social.js';
 import { CommunityChannel, CommunityMessage, CommunityMessageReport, DirectMessage } from '../models/Chat.js';
 
 config({ path: resolve(dirname(fileURLToPath(import.meta.url)), '../../../../.env') });
@@ -63,7 +63,7 @@ const demoPosts = [
 try {
   await mongoose.connect(uri, { dbName: developmentDatabase, autoIndex: false });
 
-  const models = [Community, CommunityRequest, Account, Character, Session, Post, Like, Comment, Follow, Notification, CommunityEvent, EventRSVP, CommunityChannel, CommunityMessage, CommunityMessageReport, DirectMessage];
+  const models = [Community, CommunityRequest, Account, Character, Session, Post, PostView, Like, Comment, Follow, Notification, CommunityEvent, EventRSVP, CommunityChannel, CommunityMessage, CommunityMessageReport, DirectMessage];
   for (const model of models) {
     const exists = await mongoose.connection.db!.listCollections({ name: model.collection.collectionName }).hasNext();
     if (!exists) continue;

@@ -4,6 +4,7 @@ import { MaterialIcon } from './MaterialIcon';
 import { notifySnack } from './SnackMessage';
 import { UniverseBackLink } from './UniverseBackLink';
 import { VybeLogo } from './VybeLogo';
+import { connectConversationRealtime } from './conversationRealtime';
 import './MatchApp.css';
 
 type MatchProfileData = { enabled: boolean; age: number | null; bio: string; location: string; interests: string[]; photos: string[] };
@@ -134,16 +135,27 @@ function MatchMessages({ selectedId }: { selectedId?: string }) {
   const [error, setError] = useState('');
   const [menu, setMenu] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
+  const selectedIdRef = useRef(selectedId);
+  selectedIdRef.current = selectedId;
   const selected = matches.find((item) => item.id === selectedId);
   async function loadMatches() { setMatches(await matchRequest<MatchSummary[]>('/api/match/matches')); }
   async function loadMessages(id: string) { const result = await matchRequest<MatchMessageData[]>(`/api/match/matches/${id}/messages`); setMessages(result); }
   useEffect(() => { void loadMatches().catch((reason) => setError(reason instanceof Error ? reason.message : 'Não foi possível carregar as conversas.')); }, []);
   useEffect(() => {
-    if (!selectedId) { setMessages([]); return; }
-    void loadMessages(selectedId).catch((reason) => setError(reason instanceof Error ? reason.message : 'Esta conversa não está disponível.'));
-    const timer = window.setInterval(() => { void loadMessages(selectedId).catch(() => undefined); void loadMatches().catch(() => undefined); }, 4000);
-    return () => window.clearInterval(timer);
+    if (selectedId) void loadMessages(selectedId).catch((reason) => setError(reason instanceof Error ? reason.message : 'Esta conversa não está disponível.'));
+    else setMessages([]);
   }, [selectedId]);
+  useEffect(() => connectConversationRealtime((event) => {
+    if (event.type === 'ready') {
+      void loadMatches().catch(() => undefined);
+      if (selectedIdRef.current) void loadMessages(selectedIdRef.current).catch(() => undefined);
+      return;
+    }
+    if (event.type === 'match:message') {
+      void loadMatches().catch(() => undefined);
+      if (event.matchId && event.matchId === selectedIdRef.current) void loadMessages(event.matchId).catch(() => undefined);
+    }
+  }), []);
   useEffect(() => { if (listRef.current) listRef.current.scrollTop = listRef.current.scrollHeight; }, [messages]);
   async function send(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); if (!selectedId || !draft.trim()) return;

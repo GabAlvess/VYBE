@@ -1,4 +1,5 @@
-import { lazy, Suspense, useEffect, useRef, useState, type RefObject } from 'react';
+import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState, type RefObject } from 'react';
+import { createPortal } from 'react-dom';
 import type { Categories as PickerCategory, EmojiClickData } from 'emoji-picker-react';
 import portugueseEmojiData from 'emoji-picker-react/data/emojis-pt';
 import { MaterialIcon } from './MaterialIcon';
@@ -61,14 +62,39 @@ function readRecentEmojis() {
 
 export function EmojiButton({ onSelect, onBeforeOpen, label = 'Adicionar emoji' }: { onSelect: (emoji: string) => void; onBeforeOpen: () => void; label?: string }) {
   const [open, setOpen] = useState(false);
+  const [popupPosition, setPopupPosition] = useState<{ top: number; left: number; width: number } | null>(null);
   const [recent, setRecent] = useState<string[]>(readRecentEmojis);
   const rootRef = useRef<HTMLSpanElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const popoverRef = useRef<HTMLSpanElement>(null);
+
+  useLayoutEffect(() => {
+    if (!open) return;
+    const positionPopup = () => {
+      const anchor = buttonRef.current?.getBoundingClientRect();
+      const popup = popoverRef.current;
+      if (!anchor || !popup) return;
+      const width = Math.min(360, window.innerWidth - 24);
+      const height = popup.getBoundingClientRect().height || 360;
+      const left = Math.max(12, Math.min(anchor.right - width, window.innerWidth - width - 12));
+      const above = anchor.top - height - 8;
+      const top = above >= 12 ? above : Math.min(anchor.bottom + 8, window.innerHeight - height - 12);
+      setPopupPosition({ top: Math.max(12, top), left, width });
+    };
+    positionPopup();
+    window.addEventListener('resize', positionPopup);
+    window.addEventListener('scroll', positionPopup, true);
+    return () => {
+      window.removeEventListener('resize', positionPopup);
+      window.removeEventListener('scroll', positionPopup, true);
+    };
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
     const closeOutside = (event: PointerEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
+      const target = event.target as Node;
+      if (!rootRef.current?.contains(target) && !popoverRef.current?.contains(target)) setOpen(false);
     };
     const closeEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') { setOpen(false); buttonRef.current?.focus(); }
@@ -91,7 +117,7 @@ export function EmojiButton({ onSelect, onBeforeOpen, label = 'Adicionar emoji' 
 
   return <span className="vybe-emoji-anchor" ref={rootRef}>
     <button ref={buttonRef} type="button" className="vybe-emoji-trigger" aria-label={label} aria-expanded={open} aria-haspopup="dialog" onMouseDown={(event) => { onBeforeOpen(); event.preventDefault(); }} onClick={() => setOpen((value) => !value)}><MaterialIcon name="sentiment_satisfied"/></button>
-    {open && <span className="vybe-emoji-popover" role="dialog" aria-label="Seletor de emojis"><Suspense fallback={<span className="emoji-loading">Carregando emojis…</span>}><EmojiPickerView
+    {open && createPortal(<span ref={popoverRef} className="vybe-emoji-popover" role="dialog" aria-label="Seletor de emojis" style={popupPosition ? { top: popupPosition.top, left: popupPosition.left, width: popupPosition.width } : undefined}><Suspense fallback={<span className="emoji-loading">Carregando emojis…</span>}><EmojiPickerView
       theme="light"
       emojiStyle="native"
       emojiData={portugueseEmojiData}
@@ -105,6 +131,6 @@ export function EmojiButton({ onSelect, onBeforeOpen, label = 'Adicionar emoji' 
       width={340}
       height={340}
       onEmojiClick={chooseEmoji}
-    /></Suspense></span>}
+    /></Suspense></span>, document.body)}
   </span>;
 }

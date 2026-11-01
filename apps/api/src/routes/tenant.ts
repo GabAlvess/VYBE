@@ -13,13 +13,11 @@ import { clearGlobalSessionCookie, clearSessionCookie, hashSessionToken, require
 import { socialRouter } from './social.js';
 import { chatRouter } from './chat.js';
 import { communitySettingsRouter } from './communitySettings.js';
-import { verificationRouter } from './verification.js';
 import { matchRouter } from './match.js';
 import { messagesAppRouter } from './messagesApp.js';
 import { bankRouter } from './bank.js';
 import { academicRouter } from './academic.js';
 import { newsRouter } from './news.js';
-import { careerRouter } from './career.js';
 import { isCommunityOwner, isPlatformAppCreator } from './communityAdminPolicy.js';
 import { CommunitySanction } from '../models/CommunitySanction.js';
 import { VybeSession } from '../models/VybeSession.js';
@@ -203,11 +201,9 @@ tenantRouter.get('/community/admin-access', (request, response) => {
 tenantRouter.use(communityRequestsRouter);
 tenantRouter.use(communityJoinRequestsRouter);
 tenantRouter.use(communitySettingsRouter);
-tenantRouter.use(verificationRouter);
 tenantRouter.use('/bank', bankRouter);
 tenantRouter.use('/academic', academicRouter);
 tenantRouter.use('/news', newsRouter);
-tenantRouter.use(careerRouter);
 
 tenantRouter.get('/me/character', (request, response) => response.json(publicCharacter(sessionCharacter(request))));
 

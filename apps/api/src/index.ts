@@ -9,6 +9,7 @@ import { resolveTenant } from './middleware/tenant.js';
 import { mediaRouter } from './routes/media.js';
 import { tenantRouter } from './routes/tenant.js';
 import { platformRouter } from './routes/platform.js';
+import { attachChatWebSocket, closeChatWebSockets } from './realtime/chatWebSocket.js';
 
 config({ path: resolve(dirname(fileURLToPath(import.meta.url)), '../../../.env') });
 
@@ -41,6 +42,7 @@ app.use('/api', tenantRouter);
 const server = app.listen(port, host, () => {
   console.log(`VYBE API listening at http://${host}:${port}`);
 });
+attachChatWebSocket(server);
 
 const mongoUri = process.env.MONGODB_URI;
 if (mongoUri) {
@@ -59,6 +61,7 @@ if (mongoUri) {
 
 for (const signal of ['SIGINT', 'SIGTERM'] as const) {
   process.on(signal, () => {
+    closeChatWebSockets();
     server.close(() => {
       void mongoose.disconnect().finally(() => process.exit(0));
     });

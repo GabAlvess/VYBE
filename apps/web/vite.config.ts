@@ -5,7 +5,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/api': 'http://127.0.0.1:3001',
+      '/api': { target: 'http://127.0.0.1:3001', ws: true },
       '/media': 'http://127.0.0.1:3001',
     },
   },

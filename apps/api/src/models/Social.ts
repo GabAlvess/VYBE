@@ -114,6 +114,12 @@ export interface PostFields {
   kind: 'post' | 'pulse';
   likesCount: number;
   commentsCount: number;
+  viewsCount: number;
+  poll?: {
+    question: string;
+    options: Array<{ id: string; text: string; votesCount: number }>;
+    votes: Array<{ characterId: mongoose.Types.ObjectId; optionId: string }>;
+  };
   seedKey?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -128,10 +134,44 @@ const postSchema = new mongoose.Schema<PostFields>({
   kind: { type: String, enum: ['post', 'pulse'], default: 'post', index: true },
   likesCount: { type: Number, min: 0, default: 0 },
   commentsCount: { type: Number, min: 0, default: 0 },
+  viewsCount: { type: Number, min: 0, default: 0 },
+  poll: {
+    question: { type: String, trim: true, maxlength: 120 },
+    options: [{ _id: false, id: { type: String, required: true }, text: { type: String, required: true, trim: true, maxlength: 80 }, votesCount: { type: Number, min: 0, default: 0 } }],
+    votes: [{ _id: false, characterId: { type: mongoose.Schema.Types.ObjectId, required: true }, optionId: { type: String, required: true } }],
+  },
   seedKey: { type: String, default: undefined },
 }, { timestamps: true });
 postSchema.index({ tenantId: 1, createdAt: -1 });
 postSchema.index({ tenantId: 1, seedKey: 1 }, { unique: true, partialFilterExpression: { seedKey: { $type: 'string' } } });
+
+export interface PostReportFields {
+  tenantId: mongoose.Types.ObjectId;
+  postId: mongoose.Types.ObjectId;
+  reporterId: mongoose.Types.ObjectId;
+  reason: string;
+  status: 'open' | 'resolved';
+}
+const postReportSchema = new mongoose.Schema<PostReportFields>({
+  tenantId: { type: mongoose.Schema.Types.ObjectId, required: true, index: true },
+  postId: { type: mongoose.Schema.Types.ObjectId, required: true },
+  reporterId: { type: mongoose.Schema.Types.ObjectId, required: true },
+  reason: { type: String, required: true, trim: true, maxlength: 500 },
+  status: { type: String, enum: ['open', 'resolved'], default: 'open' },
+}, { timestamps: true, collection: 'community_post_reports' });
+postReportSchema.index({ tenantId: 1, postId: 1, reporterId: 1 }, { unique: true });
+
+export interface PostViewFields {
+  tenantId: mongoose.Types.ObjectId;
+  postId: mongoose.Types.ObjectId;
+  characterId: mongoose.Types.ObjectId;
+}
+const postViewSchema = new mongoose.Schema<PostViewFields>({
+  tenantId: { type: mongoose.Schema.Types.ObjectId, required: true, index: true },
+  postId: { type: mongoose.Schema.Types.ObjectId, required: true },
+  characterId: { type: mongoose.Schema.Types.ObjectId, required: true },
+}, { timestamps: true, collection: 'post_views' });
+postViewSchema.index({ tenantId: 1, postId: 1, characterId: 1 }, { unique: true });
 
 export interface LikeFields { tenantId: mongoose.Types.ObjectId; postId: mongoose.Types.ObjectId; characterId: mongoose.Types.ObjectId; }
 const likeSchema = new mongoose.Schema<LikeFields>({
@@ -300,6 +340,8 @@ export const Account = model<AccountFields>('Account', accountSchema);
 export const Character = model<CharacterFields>('Character', characterSchema);
 export const Session = model<SessionFields>('Session', sessionSchema);
 export const Post = model<PostFields>('Post', postSchema);
+export const PostReport = model<PostReportFields>('PostReport', postReportSchema);
+export const PostView = model<PostViewFields>('PostView', postViewSchema);
 export const Like = model<LikeFields>('Like', likeSchema);
 export const SavedPost = model<SavedPostFields>('SavedPost', savedPostSchema);
 export const Repost = model<RepostFields>('Repost', repostSchema);

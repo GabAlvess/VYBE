@@ -6,7 +6,6 @@ import { MaterialIcon } from './MaterialIcon';
 import { LEGAL_PRIVACY_VERSION, LEGAL_TERMS_VERSION } from '@vybe/shared';
 import { PrivacyPolicyPage, TermsOfUsePage } from './LegalPages';
 import { VybeLogo } from './VybeLogo';
-import { CareerApp } from './CareerApp';
 import { CommunityJoinPage } from './CommunityJoinPage';
 import { activateLocalCommunity, communityHomeHref } from './communityNavigation';
 
@@ -14,6 +13,18 @@ type AuthPayload = { account: { id: string; email: string }; character: SocialCh
 
 function Logo() {
   return <a className="brand" href="/" aria-label="VYBE"><VybeLogo className="brand-reference-image"/></a>;
+}
+
+function AppLoading() {
+  const section = window.location.pathname.split('/').filter(Boolean)[0] ?? '';
+  const appNames: Record<string, string> = { carreira: 'Carreira', eventos: 'Eventos', banco: 'Banco', match: 'Match', mensagens: 'Mensagens', academico: 'Acadêmico', noticias: 'Notícias', empresas: 'Empresas', echo: 'Echo', pulso: 'Echo' };
+  const appName = appNames[section];
+  return <main className="vybe-loading-screen" role="status" aria-live="polite"><div className="vybe-loading-card"><span className="vybe-loading-mark"><VybeLogo variant="symbol" label="VYBE"/></span><span className="vybe-loading-spinner" aria-hidden="true"/><span className="vybe-loading-copy"><strong>{appName ? `Abrindo ${appName}` : 'Preparando seu universo'}</strong><small>Estamos preparando seu espaço no VYBE.</small></span></div></main>;
+}
+
+function CareerUnavailableRedirect() {
+  useEffect(() => { window.location.replace('/'); }, []);
+  return <AppLoading/>;
 }
 
 function PlatformHome() {
@@ -273,14 +284,14 @@ export function App() {
   const pathname = window.location.pathname;
   if (pathname === '/termos-de-uso') return <TermsOfUsePage/>;
   if (pathname === '/politica-de-privacidade') return <PrivacyPolicyPage/>;
-  if (checkingSession) return <main className="auth-loading">Preparando seu universo…</main>;
+  if (checkingSession) return <AppLoading/>;
   if (isPlatformDomain && !session && !new URLSearchParams(window.location.search).has('auth')) return <PlatformHome/>;
   if ((isPlatformDomain || isLocalDevelopmentHost) && session && pathname === '/' && (!isLocalDevelopmentHost || !sessionStorage.getItem('vybe_active_community'))) return <CommunityPickerPage character={session.character} onLogout={() => void logout()}/>;
   const joinRoute = pathname.match(/^\/comunidades\/([a-z0-9-]+)\/solicitar-entrada$/);
   if (session && joinRoute) return <CommunityJoinPage slug={joinRoute[1]}/>;
   if (isPlatformDomain && session) return <CommunityPickerPage character={session.character} onLogout={() => void logout()}/>;
   if (session && ['/comunidades', '/minhas-solicitacoes', '/administracao-vybe'].includes(pathname)) return <CommunityPickerPage character={session.character} onLogout={() => void logout()}/>;
-  if (session && pathname.startsWith('/carreira')) return <CareerApp character={session.character}/>;
+  if (session && pathname.startsWith('/carreira')) return <CareerUnavailableRedirect/>;
   if (session) return <SocialApp character={session.character} onCharacterUpdated={(character) => setSession({ ...session, character })} onLogout={() => void logout()}/>;
 
   return <main className={`login-page auth-split ${registerMode ? 'is-register' : ''}`}>
@@ -307,11 +318,11 @@ export function App() {
         </div>
         <footer className="auth-footer">
           <div className="auth-apps" aria-label="Aplicativos VYBE">
-            <div className="auth-app auth-app-social"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8.5h3l1.4-2h7.2l1.4 2h3A2 2 0 0 1 22 10.5v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2Z"/><circle cx="12" cy="14" r="4"/><path d="M18 11h.01"/></svg></span><small>Social</small></div>
-            <div className="auth-app auth-app-pulse"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13h4l2.2-7 4.2 13 2.2-7H21"/><path d="M4 20h16"/></svg></span><small>Echo</small></div>
-            <div className="auth-app auth-app-match"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 8.8c0 5-8.8 10.2-8.8 10.2S3.2 13.8 3.2 8.8A4.6 4.6 0 0 1 12 6.5a4.6 4.6 0 0 1 8.8 2.3Z"/></svg></span><small>Match</small></div>
-            <div className="auth-app auth-app-messages"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H6l-3 2v-5.5A7.5 7.5 0 1 1 20 11.5Z"/><path d="M8 11.5h.01M12 11.5h.01M16 11.5h.01"/></svg></span><small>Mensagens</small></div>
-            <div className="auth-app auth-app-bank"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 9 9-5 9 5v2H3V9ZM5 12v6m4-6v6m6-6v6m4-6v6M3 20h18"/></svg></span><small>Banco</small></div>
+            <div className="auth-app auth-app-social"><span><MaterialIcon name="photo_camera"/></span><small>Social</small></div>
+            <div className="auth-app auth-app-pulse"><span><MaterialIcon name="graphic_eq"/></span><small>Echo</small></div>
+            <div className="auth-app auth-app-match"><span><MaterialIcon name="favorite"/></span><small>Match</small></div>
+            <div className="auth-app auth-app-messages"><span><MaterialIcon name="chat_bubble"/></span><small>Mensagens</small></div>
+            <div className="auth-app auth-app-bank"><span><MaterialIcon name="credit_card"/></span><small>Banco</small></div>
           </div>
           <p className="auth-tagline">CONEXÕES, MOMENTOS E NOVAS HISTÓRIAS EM UM SÓ LUGAR.</p>
         </footer>

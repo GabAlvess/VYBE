@@ -6,6 +6,7 @@ import { Conversation, ConversationMessage } from '../models/Conversation.js';
 import { requireSession } from '../middleware/tenant.js';
 import { canAccessMatch, canonicalProfilePair, createsMutualMatch, isPositiveMatchReaction, matchDiscoveryFilter, matchFeatureIsEnabled, validMatchAge, type MatchReactionType } from './matchPolicy.js';
 import { getOrCreateMatchConversation } from './conversationService.js';
+import { emitToProfiles } from '../realtime/chatWebSocket.js';
 
 export const matchRouter = Router();
 matchRouter.use(requireSession);
@@ -256,6 +257,7 @@ matchRouter.post('/matches/:matchId/messages', async (request, response) => {
   if (denied || !message) { response.status(403).json({ error: 'Esta conversa não está disponível.' }); return; }
   const recipientParticipant = conversation.participants.find((item) => item.profileId.equals(recipientId));
   if (!recipientParticipant?.mutedAt) await Notification.create({ tenantId: tenantId(request), characterId: recipientId, actorId: me, type: 'message', targetId: message._id });
+  emitToProfiles(tenantId(request).toString(), [me, recipientId], { type: 'match:message', matchId: match._id.toString(), conversationId: conversation._id.toString(), messageId: message._id.toString() });
   response.status(201).json({ id: message._id.toString(), senderProfileId: me.toString(), recipientProfileId: recipientId.toString(), content: message.content, createdAt: message.createdAt, readAt: null, own: true });
 });
 

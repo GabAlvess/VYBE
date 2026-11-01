@@ -169,8 +169,19 @@ bankRouter.get('/admin/summary', async (request, response) => {
   if (!adminAllowed(request)) { bad(response, 'Apenas administradores da comunidade podem acessar as carteiras.', 403); return; }
   const community = tenant(request);
   const activeAccounts = await Account.find({ tenantId: community._id, status: 'active' }).select('_id').lean();
-  const memberCount = await Character.countDocuments({ tenantId: community._id, accountId: { $in: activeAccounts.map((item) => item._id) } });
-  response.json({ memberCount, maxBulkMembers: 500 });
+  const characters = await Character.find({ tenantId: community._id, accountId: { $in: activeAccounts.map((item) => item._id) } }).select('_id').lean();
+  const memberCount = characters.length;
+  const requestedWithdrawAmount = typeof request.query.withdrawAmountCents === 'string' ? Number(request.query.withdrawAmountCents) : null;
+  if (requestedWithdrawAmount !== null && (!Number.isSafeInteger(requestedWithdrawAmount) || requestedWithdrawAmount <= 0)) { bad(response, 'Informe um valor de retirada válido.'); return; }
+  const walletFilter = { tenantId: community._id, characterId: { $in: characters.map((item) => item._id) }, balanceCents: requestedWithdrawAmount === null ? { $gt: 0 } : { $gte: requestedWithdrawAmount } };
+  const [withdrawal] = await Wallet.aggregate<{ memberCount: number; totalCents: number }>([
+    { $match: walletFilter },
+    { $group: { _id: null, memberCount: { $sum: 1 }, totalCents: { $sum: '$balanceCents' } } },
+  ]);
+  const withdrawMemberCount = requestedWithdrawAmount === null ? withdrawal?.memberCount ?? 0 : memberCount;
+  const withdrawTotalCents = requestedWithdrawAmount === null ? withdrawal?.totalCents ?? 0 : requestedWithdrawAmount * memberCount;
+  if (!Number.isSafeInteger(withdrawTotalCents)) { bad(response, 'O total do ajuste ultrapassa o limite seguro.'); return; }
+  response.json({ memberCount, maxBulkMembers: 500, withdrawMemberCount, withdrawTotalCents });
 });
 
 bankRouter.post('/admin/credits/all', async (request, response) => {
@@ -224,6 +235,53 @@ bankRouter.post('/admin/credits/all', async (request, response) => {
   response.status(201).json({ duplicate: false, recipientCount: characters.length, amountPerWalletCents: amountCents, totalCents });
 });
 
+bankRouter.post('/admin/debits/all', async (request, response) => {
+  if (!adminAllowed(request)) { bad(response, 'Apenas administradores da comunidade podem retirar saldo das carteiras.', 403); return; }
+  const community = tenant(request);
+  const { reason, mode = 'all', amountCents } = request.body ?? {};
+  const batchKey = request.get('Idempotency-Key') ?? request.body?.idempotencyKey;
+  if (!['all', 'fixed'].includes(mode) || (mode === 'fixed' && (!isValidCents(amountCents) || amountCents > 100_000_000))) { bad(response, 'Informe um modo e valor válidos para a retirada.'); return; }
+  if (typeof reason !== 'string' || reason.trim().length < 3 || reason.trim().length > 160) { bad(response, 'Informe um motivo entre 3 e 160 caracteres.'); return; }
+  if (typeof batchKey !== 'string' || batchKey.length < 8 || batchKey.length > 100) { bad(response, 'Não foi possível confirmar a retirada em lote. Tente novamente.'); return; }
+  const priorBatch = await CommunityAudit.findOne({ tenantId: community._id, action: 'bank.bulk_debit', 'details.idempotencyKey': batchKey });
+  if (priorBatch) {
+    if (!priorBatch.actorId.equals(account(request)._id) || priorBatch.details.reason !== reason.trim() || priorBatch.details.mode !== mode || (mode === 'fixed' && priorBatch.details.amountCents !== amountCents)) { bad(response, 'Esta chave já foi usada em outro ajuste.', 409); return; }
+    response.json({ duplicate: true, recipientCount: priorBatch.details.recipientCount, totalCents: priorBatch.details.totalCents });
+    return;
+  }
+  const activeAccounts = await Account.find({ tenantId: community._id, status: 'active' }).select('_id').lean();
+  const characters = await Character.find({ tenantId: community._id, accountId: { $in: activeAccounts.map((item) => item._id) } }).select('_id').lean();
+  if (characters.length > 500) { bad(response, 'A retirada atômica em lote suporta até 500 membros por operação.', 413); return; }
+  const session = await mongoose.startSession();
+  let recipientCount = 0;
+  let totalCents = 0;
+  try {
+    await session.withTransaction(async () => {
+      if (mode === 'fixed') {
+        await Wallet.bulkWrite(characters.map((character) => ({ updateOne: { filter: { tenantId: community._id, characterId: character._id }, update: { $setOnInsert: { tenantId: community._id, characterId: character._id, balanceCents: 0, limitCents: null, cardLast4: String(randomBytes(2).readUInt16BE() % 10_000).padStart(4, '0') } }, upsert: true } })), { session, ordered: true });
+      }
+      const allWallets = await Wallet.find({ tenantId: community._id, characterId: { $in: characters.map((item) => item._id) } }).session(session);
+      const wallets = mode === 'all' ? allWallets.filter((wallet) => wallet.balanceCents > 0) : allWallets;
+      recipientCount = wallets.length;
+      totalCents = wallets.reduce((total, wallet) => total + (mode === 'all' ? wallet.balanceCents : amountCents), 0);
+      if (!recipientCount || !Number.isSafeInteger(totalCents)) throw new Error('Não há saldo disponível para retirar.');
+      const updates = await Wallet.bulkWrite(wallets.map((wallet) => { const debitCents = mode === 'all' ? wallet.balanceCents : amountCents; return { updateOne: { filter: { _id: wallet._id, tenantId: community._id, balanceCents: wallet.balanceCents }, update: { $inc: { balanceCents: -debitCents } } } }; }), { session, ordered: true });
+      if (updates.modifiedCount !== wallets.length) throw new Error('Os saldos mudaram durante a operação. Tente revisar novamente.');
+      await WalletTransaction.insertMany(wallets.map((wallet) => ({ tenantId: community._id, type: (mode === 'fixed' ? 'ADMIN_TAX' : 'ADMIN_DEBIT') as 'ADMIN_TAX' | 'ADMIN_DEBIT', amountCents: mode === 'all' ? wallet.balanceCents : amountCents, senderWalletId: wallet._id, actorAccountId: account(request)._id, description: reason.trim(), status: 'COMPLETED' as const, idempotencyKey: bulkCreditTransactionKey(batchKey, wallet.characterId.toString()), reference: reference() })), { session, ordered: true });
+      await CommunityAudit.create([{ tenantId: community._id, actorId: account(request)._id, action: 'bank.bulk_debit', details: { idempotencyKey: batchKey, mode, amountCents: mode === 'fixed' ? amountCents : null, totalCents, recipientCount, reason: reason.trim() } }], { session });
+    });
+  } catch (error) {
+    const duplicate = error && typeof error === 'object' && 'code' in error && error.code === 11000;
+    const committedBatch = duplicate ? await CommunityAudit.findOne({ tenantId: community._id, action: 'bank.bulk_debit', 'details.idempotencyKey': batchKey }) : null;
+    if (committedBatch?.actorId.equals(account(request)._id)) { response.json({ duplicate: true, recipientCount: committedBatch.details.recipientCount, totalCents: committedBatch.details.totalCents }); return; }
+    if (error instanceof Error && error.message.includes('Não há saldo disponível')) { bad(response, error.message, 409); return; }
+    if (error instanceof Error && error.message.includes('saldos mudaram')) { bad(response, error.message, 409); return; }
+    if (error instanceof Error && error.message.includes('Transaction numbers are only allowed')) { bad(response, 'A retirada em lote requer MongoDB configurado com replica set para ajustar todas as carteiras juntas.', 503); return; }
+    throw error;
+  } finally { await session.endSession(); }
+  response.status(201).json({ duplicate: false, recipientCount, totalCents });
+});
+
 bankRouter.get('/admin/audit', async (request, response) => {
   if (!adminAllowed(request)) { bad(response, 'Apenas administradores da comunidade podem consultar a auditoria do Banco.', 403); return; }
   const logs = await CommunityAudit.find({ tenantId: tenant(request)._id, action: /^bank\./ }).sort({ createdAt: -1 }).limit(100).lean();
@@ -257,7 +315,8 @@ bankRouter.post('/admin/wallets/:characterId/adjustment', async (request, respon
   if (!adminAllowed(request)) { bad(response, 'Apenas administradores da comunidade podem ajustar carteiras.', 403); return; }
   const community = tenant(request);
   const { amountCents, direction, reason } = request.body ?? {};
-  if (!mongoose.isValidObjectId(request.params.characterId) || !isValidCents(amountCents) || amountCents > 100_000_000 || !['credit', 'debit'].includes(direction) || typeof reason !== 'string' || reason.trim().length < 3 || reason.trim().length > 160) { bad(response, 'Informe valor, tipo de ajuste e motivo válidos.'); return; }
+  const withdrawAll = direction === 'withdraw_all';
+  if (!mongoose.isValidObjectId(request.params.characterId) || (!withdrawAll && (!isValidCents(amountCents) || amountCents > 100_000_000)) || !['credit', 'debit', 'withdraw_all'].includes(direction) || typeof reason !== 'string' || reason.trim().length < 3 || reason.trim().length > 160) { bad(response, 'Informe valor, tipo de ajuste e motivo válidos.'); return; }
   const character = await Character.findOne({ tenantId: community._id, _id: request.params.characterId });
   if (!character) { bad(response, 'Perfil não encontrado nesta comunidade.', 404); return; }
   const wallet = await getWallet(character._id, community._id);
@@ -265,18 +324,23 @@ bankRouter.post('/admin/wallets/:characterId/adjustment', async (request, respon
   const isCredit = direction === 'credit';
   const session = await mongoose.startSession();
   let created: InstanceType<typeof WalletTransaction> | null = null;
+  let adjustedAmountCents = Number(amountCents);
   try {
     await session.withTransaction(async () => {
-      const update = isCredit
-        ? await Wallet.updateOne({ _id: wallet._id, tenantId: community._id }, { $inc: { balanceCents: amountCents } }, { session })
-        : await Wallet.updateOne({ _id: wallet._id, tenantId: community._id, balanceCents: { $gte: amountCents } }, { $inc: { balanceCents: -amountCents } }, { session });
-      if (!update.modifiedCount) throw new Error('O débito não pode deixar o saldo da carteira negativo.');
-      const [item] = await WalletTransaction.create([{ tenantId: community._id, type: isCredit ? 'ADMIN_CREDIT' : 'ADMIN_DEBIT', amountCents, ...(isCredit ? { recipientWalletId: wallet._id } : { senderWalletId: wallet._id }), actorAccountId: account(request)._id, description: reason.trim(), status: 'COMPLETED', reference: reference() }], { session });
+      if (withdrawAll) {
+        const currentWallet = await Wallet.findOne({ _id: wallet._id, tenantId: community._id }).session(session);
+        if (!currentWallet || currentWallet.balanceCents <= 0) throw new Error('A carteira não possui saldo disponível para retirar.');
+        adjustedAmountCents = currentWallet.balanceCents;
+      }
+      const update = await Wallet.updateOne({ _id: wallet._id, tenantId: community._id }, { $inc: { balanceCents: isCredit ? adjustedAmountCents : -adjustedAmountCents } }, { session });
+      if (!update.modifiedCount) throw new Error('Não foi possível ajustar o saldo da carteira.');
+      const [item] = await WalletTransaction.create([{ tenantId: community._id, type: isCredit ? 'ADMIN_CREDIT' : 'ADMIN_DEBIT', amountCents: adjustedAmountCents, ...(isCredit ? { recipientWalletId: wallet._id } : { senderWalletId: wallet._id }), actorAccountId: account(request)._id, description: reason.trim(), status: 'COMPLETED', reference: reference() }], { session });
       created = item;
-      await CommunityAudit.create([{ tenantId: community._id, actorId: account(request)._id, action: isCredit ? 'bank.admin_credit' : 'bank.admin_debit', details: { walletId: wallet._id.toString(), characterId: character._id.toString(), amountCents, reason: reason.trim(), transactionId: item._id.toString() } }], { session });
+      await CommunityAudit.create([{ tenantId: community._id, actorId: account(request)._id, action: isCredit ? 'bank.admin_credit' : withdrawAll ? 'bank.admin_withdraw_all' : 'bank.admin_debit', details: { walletId: wallet._id.toString(), characterId: character._id.toString(), amountCents: adjustedAmountCents, reason: reason.trim(), transactionId: item._id.toString() } }], { session });
       if (isCredit) await Notification.create([{ tenantId: community._id, characterId: character._id, actorId: profile(request)._id, type: 'bank_admin_credit_received', targetId: item._id }], { session });
     });
   } catch (error) {
+    if (error instanceof Error && error.message.includes('não possui saldo disponível')) { bad(response, error.message, 409); return; }
     if (error instanceof Error && error.message.includes('saldo da carteira negativo')) { bad(response, error.message, 409); return; }
     if (error instanceof Error && error.message.includes('Transaction numbers are only allowed')) { bad(response, 'O Banco requer MongoDB configurado com replica set para garantir ajustes atômicos.', 503); return; }
     throw error;

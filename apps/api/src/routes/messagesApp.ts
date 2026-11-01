@@ -12,6 +12,7 @@ import { Match, MatchBlock } from '../models/Match.js';
 import { requireSession } from '../middleware/tenant.js';
 import { canAccessConversation, canDeleteMessage, canManageConversation, canSendDirect, conversationDirectKey, isActiveParticipant } from './conversationPolicy.js';
 import { getOrCreateMatchConversation } from './conversationService.js';
+import { emitToProfiles } from '../realtime/chatWebSocket.js';
 
 export const messagesAppRouter = Router();
 messagesAppRouter.use(requireSession);
@@ -94,7 +95,12 @@ async function summary(request: Request, conversation: any) {
   const directPerson = map.get(ids[0]?.toString());
   const match = conversation.matchId ? await Match.findOne({ _id: conversation.matchId, tenantId: tenantId(request), status: 'active' }).lean() : null;
   const peerLastReadAt = conversation.kind === 'direct' ? conversation.participants.find((p: any) => !p.profileId.equals(me) && !p.leftAt)?.lastReadAt ?? null : null;
-  return { id: conversation._id.toString(), kind: conversation.kind, name: conversation.kind === 'group' ? conversation.name : directPerson?.displayName ?? 'Conversa', description: conversation.description, photoUrl: conversation.kind === 'group' ? conversation.photoUrl : directPerson?.avatarUrl ?? '', participants: others.map((p: any) => ({ ...(map.get(p.profileId.toString()) ?? { id: p.profileId.toString(), username: '', displayName: 'Membro', avatarUrl: '', bio: '', statusMessage: '' }), role: p.role })), lastMessage: last ? (last.attachment?.name || last.content || (last.messageType === 'image' ? 'Imagem' : 'Arquivo')) : '', lastMessageAt: last?.createdAt ?? conversation.updatedAt, unreadCount, muted: Boolean(participant?.mutedAt), favorite: Boolean(participant?.favorite), typing, peerLastReadAt, currentRole: participant?.role ?? 'member', matchId: match?._id.toString() ?? null, createdBy: conversation.createdBy.toString() };
+  const peerId = conversation.kind === 'direct' ? others[0]?.profileId : null;
+  const [blockedByMe, blockedByThem] = peerId ? await Promise.all([
+    ConversationBlock.exists({ tenantId: tenantId(request), blockerId: me, blockedId: peerId }),
+    ConversationBlock.exists({ tenantId: tenantId(request), blockerId: peerId, blockedId: me }),
+  ]) : [false, false];
+  return { id: conversation._id.toString(), kind: conversation.kind, name: conversation.kind === 'group' ? conversation.name : directPerson?.displayName ?? 'Conversa', description: conversation.description, photoUrl: conversation.kind === 'group' ? conversation.photoUrl : directPerson?.avatarUrl ?? '', participants: others.map((p: any) => ({ ...(map.get(p.profileId.toString()) ?? { id: p.profileId.toString(), username: '', displayName: 'Membro', avatarUrl: '', bio: '', statusMessage: '' }), role: p.role })), lastMessage: last ? (last.attachment?.name || last.content || (last.messageType === 'image' ? 'Imagem' : 'Arquivo')) : '', lastMessageAt: last?.createdAt ?? conversation.updatedAt, unreadCount, muted: Boolean(participant?.mutedAt), favorite: Boolean(participant?.favorite), typing, peerLastReadAt, blockedByMe: Boolean(blockedByMe), blockedByThem: Boolean(blockedByThem), currentRole: participant?.role ?? 'member', matchId: match?._id.toString() ?? null, createdBy: conversation.createdBy.toString() };
 }
 
 messagesAppRouter.get('/profile', async (request, response) => {
@@ -206,7 +212,9 @@ messagesAppRouter.post('/conversations/:conversationId/typing', async (request, 
   if (!conversation) { response.status(404).json({ error: 'Conversa não encontrada.' }); return; }
   const participant = conversation.participants.find((p) => p.profileId.equals(selfId(request)) && !p.leftAt)!;
   participant.typingAt = request.body?.typing === true ? new Date() : undefined;
-  await conversation.save(); response.json({ typing: Boolean(participant.typingAt) });
+  await conversation.save();
+  emitToProfiles(tenantId(request).toString(), conversation.participants.filter((item) => !item.profileId.equals(selfId(request)) && !item.leftAt).map((item) => item.profileId), { type: 'typing', conversationId: conversation._id.toString(), profileId: selfId(request).toString(), typing: Boolean(participant.typingAt) });
+  response.json({ typing: Boolean(participant.typingAt) });
 });
 
 messagesAppRouter.post('/conversations/:conversationId/messages', async (request, response) => {
@@ -226,6 +234,11 @@ messagesAppRouter.post('/conversations/:conversationId/messages', async (request
   conversation.lastMessageAt = message.createdAt; await conversation.save();
   const notifyIds = conversation.participants.filter((participant) => !participant.profileId.equals(me) && !participant.leftAt && !participant.mutedAt).map((participant) => participant.profileId);
   if (notifyIds.length) await Notification.insertMany(notifyIds.map((characterId) => ({ tenantId: tenantId(request), characterId, actorId: me, type: 'message' as const, targetId: message._id })));
+  emitToProfiles(tenantId(request).toString(), conversation.participants.filter((participant) => !participant.leftAt).map((participant) => participant.profileId), { type: 'message:new', conversationId: conversation._id.toString(), messageId: message._id.toString() });
+  if (conversation.kind === 'direct' && recipients[0]) {
+    emitToProfiles(tenantId(request).toString(), [me], { type: 'direct:message', otherProfileId: recipients[0].toString(), messageId: message._id.toString() });
+    emitToProfiles(tenantId(request).toString(), [recipients[0]], { type: 'direct:message', otherProfileId: me.toString(), messageId: message._id.toString() });
+  }
   response.status(201).json(messageJson(message, me));
 });
 
@@ -316,4 +329,16 @@ messagesAppRouter.post('/conversations/:conversationId/block', async (request, r
   await MatchBlock.updateOne({ tenantId: tenantId(request), blockerId: selfId(request), blockedId: other }, { $setOnInsert: { tenantId: tenantId(request), blockerId: selfId(request), blockedId: other } }, { upsert: true });
   await Match.updateMany({ tenantId: tenantId(request), status: 'active', $or: [{ profileAId: selfId(request), profileBId: other }, { profileAId: other, profileBId: selfId(request) }] }, { $set: { status: 'blocked' } });
   response.json({ blocked: true });
+});
+
+messagesAppRouter.post('/conversations/:conversationId/unblock', async (request, response) => {
+  const conversation = await accessibleConversation(request, request.params.conversationId);
+  if (!conversation || conversation.kind !== 'direct') { response.status(404).json({ error: 'Conversa individual não encontrada.' }); return; }
+  const other = conversation.participants.find((p) => !p.profileId.equals(selfId(request)))?.profileId;
+  if (!other) { response.status(404).json({ error: 'Contato não encontrado.' }); return; }
+  await Promise.all([
+    ConversationBlock.deleteOne({ tenantId: tenantId(request), blockerId: selfId(request), blockedId: other }),
+    MatchBlock.deleteOne({ tenantId: tenantId(request), blockerId: selfId(request), blockedId: other }),
+  ]);
+  response.json({ blocked: false });
 });

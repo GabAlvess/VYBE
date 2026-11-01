@@ -1,7 +1,7 @@
-export type AcademicRoleName = 'STUDENT' | 'TEACHER' | 'ACADEMIC_ADMIN';
+export type AcademicRoleName = 'STUDENT' | 'TEACHER' | 'DIRECTOR' | 'ACADEMIC_ADMIN';
 
 export function mayAccessTeacherArea(roles: readonly AcademicRoleName[]) {
-  return roles.includes('TEACHER') || roles.includes('ACADEMIC_ADMIN');
+  return roles.includes('TEACHER') || roles.includes('DIRECTOR') || roles.includes('ACADEMIC_ADMIN');
 }
 
 export function mayManageAcademic(roles: readonly AcademicRoleName[]) {
