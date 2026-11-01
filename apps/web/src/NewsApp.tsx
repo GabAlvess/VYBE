@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { MaterialIcon } from './MaterialIcon';
 import { UniverseBackLink } from './UniverseBackLink';
 import './NewsApp.css';
