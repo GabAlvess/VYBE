@@ -1,1 +1,333 @@
-YªçŠx-®éÜj×¢ëiºÚ+Š§j[h‘éÜ¢éí×Nõí:-jZ.¶›­–)Ş³V–×÷'B²W6TVffV7BÂW6U&VbÂW6U7FFRÂG—Rf÷&ÔWfVçBÒg&öÒw&V7Bs°¦–×÷'B²6ö6–ÄÂG—R6ö6–Ä6†&7FW"Òg&öÒrâõ6ö6–Äs°¦–×÷'Brâô6öÖ×Væ—G•–6¶W%vRæ772s°¦–×÷'B²æ÷F–g•6æ6²Òg&öÒrâõ6æ6´ÖW76vRs°¦–×÷'B²ÖFW&–Ä–6öâÒg&öÒrâôÖFW&–Ä–6öâs°¦–×÷'B²ÄTtÅõ$•d5•õdU%4”ôâÂÄTtÅõDU$Õ5õdU%4”ôâÒg&öÒtg–&R÷6†&VBs°¦–×÷'B²&—f7•öÆ–7•vRÂFW&×4öeW6UvRÒg&öÒrâôÆVvÅvW2s°¦–×÷'B²g–&TÆövòÒg&öÒrâõg–&TÆövòs°¦–×÷'B²6öÖ×Væ—G”¦ö–åvRÒg&öÒrâô6öÖ×Væ—G”¦ö–åvRs°¦–×÷'B²7F—fFTÆö6Ä6öÖ×Væ—G’Â6öÖ×Væ—G”†öÖT‡&VbÒg&öÒrâö6öÖ×Væ—G”æf–vF–öâs° §G—RWF…–ÆöBÒ²66÷VçC¢²–C¢7G&–æs²VÖ–Ã¢7G&–ærÓ²6†&7FW#¢6ö6–Ä6†&7FW#²vÆö&Ä66÷VçCó¢&ööÆVâÓ° ¦gVæ7F–öâÆövò‚’°¢&WGW&âÆ6Æ74æÖSÒ&'&æB"‡&VcÒ"ò"&–ÖÆ&VÃÒ%e”$R#ãÅg–&TÆövò6Æ74æÖSÒ&'&æB×&VfW&Væ6RÖ–ÖvR"óãÂöã°§Ğ ¦gVæ7F–öâÆöF–ær‚’°¢6öç7B6V7F–öâÒv–æF÷ræÆö6F–öâçF†æÖRç7Æ—B‚ròr’æf–ÇFW"„&ööÆVâ•³Òóòrs°¢6öç7BæÖW3¢&V6÷&CÇ7G&–ærÂ7G&–æsâÒ²WfVçF÷3¢tWfVçF÷2rÂ&æ6ó¢t&æ6òrÂÖF6ƒ¢tÖF6‚rÂÖVç6vVç3¢tÖVç6vVç2rÂ6FVÖ–6ó¢t6L:¦Ö–6òrÂæ÷F–6–3¢tæ÷L:Ö6–2rÂV×&W63¢tV×&W62rÂV6†ó¢tV6†òrÂVÇ6ó¢tV6†òrÓ°¢6öç7BæÖRÒæÖW5·6V7F–öåÓ°¢&WGW&âÆÖ–â6Æ74æÖSÒ'g–&RÖÆöF–ær×67&VVâ"&öÆSÒ'7FGW2"&–ÖÆ—fSÒ'öÆ—FR#ãÆF—b6Æ74æÖSÒ'g–&RÖÆöF–ærÖ6&B#ãÇ7â6Æ74æÖSÒ'g–&RÖÆöF–ærÖÖ&²#ãÅg–&TÆövòf&–çCÒ'7–Ö&öÂ"Æ&VÃÒ%e”$R"óãÂ÷7ããÇ7â6Æ74æÖSÒ'g–&RÖÆöF–ær×7–ææW""&–Ö†–FFVãÒ'G'VR"óãÇ7â6Æ74æÖSÒ'g–&RÖÆöF–ærÖ6÷’#ãÇ7G&öæsç¶æÖRò'&–æFòG¶æÖWÖ¢u&W&æFò6WRVæ—fW'6òwÓÂ÷7G&öæsãÇ6ÖÆÃäW7FÖ÷2&W&æFò6WRW7:vòæòe”$RãÂ÷6ÖÆÃãÂ÷7ããÂöF—cãÂöÖ–ãã°§Ğ ¦gVæ7F–öâ6öÖ×Væ—G”†öÖU&VF—&V7B‚’°¢W6TVffV7B‚‚’Óâ²v–æF÷ræÆö6F–öâç&WÆ6R‚ròr“²ÒÂµÒ“°¢&WGW&âÄÆöF–æróã°§Ğ ¦gVæ7F–öâÆFf÷&Ô†öÖR‚’°¢&WGW&âÆÖ–â6Æ74æÖSÒ'ÆFf÷&ÒÖ†öÖR#ãÆ†VFW#ãÄÆövòóãÇ7ãäÆFf÷&Ö&6ö×Væ–FFW2FR%sÂ÷7ããÆæcãÆ‡&VcÒ"óöWFƒÖÆöv–â#äVçG&#ÂöãÆ‡&VcÒ"óöWFƒ×&Vv—7FW"#ä7&–"6öçFÂöãÂöæcãÂö†VFW#ãÇ6V7F–öããÇåTÒTä•dU%4òÂÕT•D2„•5L95$”3Â÷ãÆƒä6ö×Væ–FFW2FR%sÆ'"óæ6öÒf–F,;7&–ãÂöƒãÇ7ãä7&–R7V6öçFe”$RRW66öÆ†VÒV—26ö×Væ–FFW2FW6V¦'F–6—"ãÂ÷7ããÆ‡&VcÒ"óöWFƒ×&Vv—7FW"#ä7&–"Ö–æ†6öçFe”$RÆ#ãÄÖFW&–Ä–6öâæÖSÒ&'&÷uöf÷'v&B"óãÂö#ãÂöãÂ÷6V7F–öããÆfö÷FW#åe”$R+rÆFf÷&Ö&–æ6—ÃÂöfö÷FW#ãÂöÖ–ãã°§Ğ §G—R6öÖ×Væ—G•7VÖÖ'’Ò²–C¢7G&–æs²æÖS¢7G&–æs²6ÇVs¢7G&–æs²7V&FöÖ–ã¢7G&–æs²FW67&—F–öã¢7G&–æs²6÷fW%W&Ã¢7G&–æs²ÆövõW&Ã¢7G&–æs²ÖVÖ&W$6÷VçC¢çVÖ&W#²&WV—&W4&÷fÃó¢&ööÆVã²¦ö–å7FGW3ó¢tÔTÔ$U"rÂtäôäRrÂuTäD”ärrÂtäTTE5ô”ädõ$ÔD”ôârÂu$T¤T5DTBrÓ°§G—R6öÖ×Væ—G•&WVW7E7VÖÖ'’Ò²–C¢7G&–æs²'tæÖS¢7G&–æs²6ÇVs¢7G&–æs²FW67&—F–öã¢7G&–æs²7FGW3¢wVæF–ærrÂv&÷fVBrÂw&V¦V7FVBs²7&VFVDC¢7G&–æs²WFFVDCó¢7G&–æs²†÷FõW&Ãó¢7G&–ærÓ°§G—R×”¦ö–å&WVW7BÒ²–C¢7G&–æs²6öÖ×Væ—G”–C¢7G&–æs²6öÖ×Væ—G•6ÇVs¢7G&–æs²6†&7FW$æÖS¢7G&–æs²&WVW7FVEW6W&æÖS¢7G&–æs²7FGW3¢uTäD”ärrÂtäTTE5ô”ädõ$ÔD”ôârÂt$õdTBrÂu$T¤T5DTBs²FÖ–äÖW76vS¢7G&–æs²&V¦V7F–öå&V6öã¢7G&–æs²7&VFVDC¢7G&–æs²WFFVDC¢7G&–ærÓ°§G—R¦ö–äæ÷F–6RÒ²–C¢7G&–æs²7FGW3¢täTTE5ô”ädõ$ÔD”ôârÂt$õdTBrÂu$T¤T5DTBs²ÖW76vS¢7G&–æs²7&VFVDC¢7G&–æs²6öÖ×Væ—G”æÖS¢7G&–æs²6öÖ×Væ—G•6ÇVs¢7G&–ærÓ°§G—RFÖ–ä6öÖ×Væ—G•&WVW7BÒ6öÖ×Væ—G•&WVW7E7VÖÖ'’b²Æ–6çC¢²F—7Æ”æÖS¢7G&–æs²W6W&æÖS¢7G&–ærÒÂçVÆÃ²†÷FõW&Ã¢7G&–ærÓ°§G—RÖævVD6öÖ×Væ—G’ÒöÖ—CÄ6öÖ×Væ—G•7VÖÖ'’Âv6÷fW%W&Âsâb²6÷fW%W&Ã¢7G&–æs²7FGW3¢v7F—fRrÂv&6†—fVBrÂw7W7VæFVBrÓ° ¦7–æ2gVæ7F–öâ&VDf–ÆT4FFW&Â†f–ÆS¢f–ÆR’°¢&WGW&âv—BæWr&öÖ—6SÇ7G&–æsâ‚‡&W6öÇfRÂ&V¦V7B’Óâ°¢6öç7B&VFW"ÒæWrf–ÆU&VFW"‚“°¢&VFW"æöæÆöBÒ‚’ÓâG—Vöb&VFW"ç&W7VÇBÓÓÒw7G&–ærrò&W6öÇfR‡&VFW"ç&W7VÇB’¢&V¦V7B†æWrW'&÷"‚tì:6òfö’÷7<:×fVÂÆW"–ÖvVÒâr’“°¢&VFW"æöæW'&÷"Ò‚’Óâ&V¦V7B†æWrW'&÷"‚tì:6òfö’÷7<:×fVÂÆW"–ÖvVÒâr’“°¢&VFW"ç&VD4FFU$Â†f–ÆR“°¢Ò“°§Ğ ¦7–æ2gVæ7F–öâfWF6„§6öãÅCâ‡Fƒ¢7G&–ærÂ–æ—Có¢&WVW7D–æ—B“¢&öÖ—6SÅCâ°¢6öç7B&W7öç6RÒv—BfWF6‚‡F‚Â²7&VFVçF–Ç3¢w6ÖRÖ÷&–v–ârÂââæ–æ—BÒ“°¢6öç7B&öG’Òv—B&W7öç6Ræ§6öâ‚’æ6F6‚‚‚’ÓâçVÆÂ’2…Bb²W'&÷#ó¢7G&–æs²ÖW76vSó¢7G&–ærÒ’ÂçVÆÃ°¢–b‚&W7öç6Ræö²’F‡&÷ræWrW'&÷"†&öG“òæW'&÷"óò&öG“òæÖW76vRóòtì:6òfö’÷7<:×fVÂ6öæ6ÇV—"6öÆ–6—F:|:6òâr“°¢&WGW&â&öG’2C°§Ğ ¦gVæ7F–öâ6öÖ×Væ—G•–6¶W%vR‡²6†&7FW"ÂöäÆöv÷WBÓ¢²6†&7FW#¢6ö6–Ä6†&7FW#²öäÆöv÷WC¢‚’Óâfö–BÒ’°¢6öç7B¶6öÖ×Væ—F–W2Â6WD6öÖ×Væ—F–W5ÒÒW6U7FFSÄ6öÖ×Væ—G•7VÖÖ'•µÓâ…µÒ“°¢6öç7B¶7W'&VçEFVæçE6ÇVrÂ6WD7W'&VçEFVæçE6ÇVuÒÒW6U7FFR‚v6öÖ×Væ—G’r“°¢6öç7B·&WVW7G2Â6WE&WVW7G5ÒÒW6U7FFSÄ6öÖ×Væ—G•&WVW7E7VÖÖ'•µÓâ…µÒ“°¢6öç7B¶¦ö–å&WVW7G2Â6WD¦ö–å&WVW7G5ÒÒW6U7FFSÄ×”¦ö–å&WVW7EµÓâ…µÒ“°¢6öç7B¶¦ö–äæ÷F–6W2Â6WD¦ö–äæ÷F–6W5ÒÒW6U7FFSÄ¦ö–äæ÷F–6UµÓâ…µÒ“°¢6öç7B·&Wf–WuVWVRÂ6WE&Wf–WuVWVUÒÒW6U7FFSÄFÖ–ä6öÖ×Væ—G•&WVW7EµÓâ…µÒ“°¢6öç7B¶ÖævVD6öÖ×Væ—F–W2Â6WDÖævVD6öÖ×Væ—F–W5ÒÒW6U7FFSÄÖævVD6öÖ×Væ—G•µÓâ…µÒ“°¢6öç7B¶6å&Wf–WrÂ6WD6å&Wf–WuÒÒW6U7FFR†fÇ6R“°¢6öç7B¶ÆöF–ærÂ6WDÆöF–æuÒÒW6U7FFR‡G'VR“°¢6öç7B·VW'’Â6WEVW'•ÒÒW6U7FFR‚rr“°¢6öç7B¶W'&÷"Â6WDW'&÷%ÒÒW6U7FFR‚rr“°¢6öç7B·6†÷u&WVW7Df÷&ÒÂ6WE6†÷u&WVW7Df÷&ÕÒÒW6U7FFR†fÇ6R“°¢6öç7B·†÷Fõ&Wf–WrÂ6WE†÷Fõ&Wf–WuÒÒW6U7FFR‚rr“°¢6öç7B·7V&Ö—GF–ærÂ6WE7V&Ö—GF–æuÒÒW6U7FFR†fÇ6R“°¢6öç7B·&WVW7DÖW76vRÂ6WE&WVW7DÖW76vUÒÒW6U7FFR‚rr“°¢6öç7B·&Wf–Wv–æt–BÂ6WE&Wf–Wv–æt–EÒÒW6U7FFR‚rr“°¢6öç7B—5&WVW7G5vRÒv–æF÷ræÆö6F–öâçF†æÖRÓÓÒröÖ–æ†2×6öÆ–6—F6öW2s°¢6öç7B—4FÖ–åvRÒv–æF÷ræÆö6F–öâçF†æÖRÓÓÒröFÖ–æ—7G&6ò×g–&Rs°¢6öç7B—5ÆFf÷&Ô†÷7BÒ²wg–&Ræ6öÒæ'"rÂwwwrçg–&Ræ6öÒæ'"uÒæ–æ6ÇVFW2‡v–æF÷ræÆö6F–öâæ†÷7FæÖRçFôÆ÷vW$66R‚’“°¢6öç7B—4Æö6Ä†÷7BÒ²vÆö6Æ†÷7BrÂs#rãããuÒæ–æ6ÇVFW2‡v–æF÷ræÆö6F–öâæ†÷7FæÖRçFôÆ÷vW$66R‚’“° ¢W6TVffV7B‚‚’Óâ‚’Óâ²–b‡†÷Fõ&Wf–Wr’U$Âç&Wfö¶Tö&¦V7EU$Â‡†÷Fõ&Wf–Wr“²ÒÂ·†÷Fõ&Wf–WuÒ“° ¢7–æ2gVæ7F–öâÆöEvR‚’°¢6WDÆöF–ær‡G'VR“°¢G'’°¢6öç7B¶F—&V7F÷'’Â÷vå&WVW7G2Â÷vä¦ö–å&WVW7G2Âæ÷F–6W5ÒÒv—B&öÖ—6RæÆÂ…°¢fWF6„§6öãÇ²7W'&VçEFVæçE6ÇVs¢7G&–æs²6öÖ×Væ—F–W3¢6öÖ×Væ—G•7VÖÖ'•µÒÓâ‚rö’ö6öÖ×Væ—F–W2r’À¢fWF6„§6öãÄ6öÖ×Væ—G•&WVW7E7VÖÖ'•µÓâ‚rö’ö6öÖ×Væ—G’×&WVW7G2r’À¢fWF6„§6öãÄ×”¦ö–å&WVW7EµÓâ‚rö’ö×’ö6öÖ×Væ—G’Ö¦ö–â×&WVW7G2r’À¢—5ÆFf÷&Ô†÷7BòfWF6„§6öãÄ¦ö–äæ÷F–6UµÓâ‚rö’öæ÷F–f–6F–öç2r’¢&öÖ—6Rç&W6öÇfR…µÒ’À¢Ò“°¢6WD6öÖ×Væ—F–W2†F—&V7F÷'’æ6öÖ×Væ—F–W2“°¢6WD7W'&VçEFVæçE6ÇVr†F—&V7F÷'’æ7W'&VçEFVæçE6ÇVr“°¢6WE&WVW7G2†÷vå&WVW7G2“°¢6WD¦ö–å&WVW7G2†÷vä¦ö–å&WVW7G2“°¢6WD¦ö–äæ÷F–6W2†æ÷F–6W2“°¢6WDW'&÷"‚rr“°¢Ò6F6‚‡&V6öâ’°¢6öç7BÖW76vRÒ&V6öâ–ç7Fæ6VöbW'&÷"ò&V6öâæÖW76vR¢tì:6òfö’÷7<:×fVÂ6'&Vv"26ö×Væ–FFW2âs°¢6WDW'&÷"†ÖW76vR“°¢æ÷F–g•6æ6²†ÖW76vR“°¢Òf–æÆÇ’²6WDÆöF–ær†fÇ6R“²Ğ¢G'’°¢6öç7BVWVRÒv—BfWF6„§6öãÄFÖ–ä6öÖ×Væ—G•&WVW7EµÓâ‚rö’÷ÆFf÷&Òö6öÖ×Væ—G’×&WVW7G2r“°¢6öç7BÖævVBÒv—BfWF6„§6öãÄÖævVD6öÖ×Væ—G•µÓâ‚rö’÷ÆFf÷&Òö6öÖ×Væ—F–W2r“°¢6WE&Wf–WuVWVR‡VWVR“°¢6WDÖævVD6öÖ×Væ—F–W2†ÖævVB“°¢6WD6å&Wf–Wr‡G'VR“°¢Ò6F6‚‡&V6öâ’°¢6WD6å&Wf–Wr†fÇ6R“°¢6WE&Wf–WuVWVR…µÒ“°¢6WDÖævVD6öÖ×Væ—F–W2…µÒ“°¢Ğ¢Ğ ¢W6TVffV7B‚‚’Óâ°¢fö–BÆöEvR‚“°¢ÒÂµÒ“° ¢7–æ2gVæ7F–öâ7V&Ö—D6öÖ×Væ—G•&WVW7B†WfVçC¢f÷&ÔWfVçCÄ…DÔÄf÷&ÔVÆVÖVçCâ’°¢WfVçBç&WfVçDFVfVÇB‚“°¢6öç7Bf÷&ÒÒWfVçBæ7W'&VçEF&vWC°¢6öç7BfÇVW2ÒæWrf÷&ÔFF†f÷&Ò{×»h‘éì¶»§q«^t€œ½…Á¤½…ÕÑ ½±½¥¸œ°ì(€€€€€€€µ•Ñ¡½è€A=MPœ°É•‘•¹Ñ¥…±Ìè€Í…µ”µ½É¥¥¸œ°¡•…‘•ÉÌèì€½¹Ñ•¹ĞµQåÁ”œè€…ÁÁ±¥…Ñ¥½¸½©Í½¸œô°‰½‘äè)M=8¹ÍÑÉ¥¹¥™ä¡Á…å±½…¤°(€€€€€ô¤ì(€€€€€½¹ÍĞ‰½‘ä€ô…İ…¥ĞÉ•ÍÁ½¹Í”¹©Í½¸ ¤¹…Ñ   ¤€ôø¹Õ±°¤…ÌÕÑ¡A…å±½…ğì•ÉÉ½ÈüèÍÑÉ¥¹œìµ•ÍÍ…”üèÍÑÉ¥¹œìÁ•¹‘¥¹œüè‰½½±•…¸ôğ¹Õ±°ì(€€€€€¥˜€ …É•ÍÁ½¹Í”¹½¬¤Ñ¡É½Ü¹•ÜÉÉ½È¡‰½‘ä€˜˜€ •ÉÉ½Èœ¥¸‰½‘äñğ€µ•ÍÍ…”œ¥¸‰½‘ä¤€ü‰½‘ä¹•ÉÉ½È€üü‰½‘ä¹µ•ÍÍ…”€è€;¼™½¤Á½ÍÏµÙ•°…•ÍÍ…ÈÍÕ„½¹Ñ„¸œ¤ì(€€€€€¥˜€¡‰½‘ä€˜˜€Á•¹‘¥¹œœ¥¸‰½‘ä€˜˜‰½‘ä¹Á•¹‘¥¹œ¤ì(€€€€€€€½¹ÍĞÁ•¹‘¥¹5•ÍÍ…”€ô‰½‘ä¹µ•ÍÍ…”€üü€M•ÔÁ•‘¥‘¼‘”•¹ÑÉ…‘„•ÍÓ„…Õ…É‘…¹‘¼…ÁÉ½Ù‡Ÿ¼‘„•ÅÕ¥Á”¸œì(€€€€€€€Í•Ñ5•ÍÍ…”¡Á•¹‘¥¹5•ÍÍ…”¤ì(€€€€€€€¹½Ñ¥™åM¹…¬¡Á•¹‘¥¹5•ÍÍ…”¤ì(€€€€€€€É•ÑÕÉ¸ì(€€€€€ô(€€€€€Í•ÑM•ÍÍ¥½¸¡‰½‘ä…ÌÕÑ¡A…å±½…¤ì(€€€€€İ¥¹‘½Ü¹±½…Ñ¥½¸¹…ÍÍ¥¸ œ½½µÕ¹¥‘…‘•Ìœ¤ì(€€€ô…Ñ €¡•ÉÉ½È¤ì(€€€€€½¹ÍĞ•ÉÉ½É5•ÍÍ…”€ô•ÉÉ½È¥¹ÍÑ…¹•½˜QåÁ•ÉÉ½È(€€€€€€€€ü€;¼™½¤Á½ÍÏµÙ•°½¹•Ñ…È…¼Í•ÉÙ¥‘½È¸Y•É¥™¥ÅÕ”ÍÕ„½¹•ã¼”Ñ•¹Ñ”¹½Ù…µ•¹Ñ”¸œ(€€€€€€€€è•ÉÉ½È¥¹ÍÑ…¹•½˜ÉÉ½È€ü•ÉÉ½È¹µ•ÍÍ…”€è€;¼™½¤Á½ÍÏµÙ•°…•ÍÍ…ÈÍÕ„½¹Ñ„¸œì(€€€€€Í•Ñ5•ÍÍ…”¡•ÉÉ½É5•ÍÍ…”¤ì(€€€€€¹½Ñ¥™åM¹…¬¡•ÉÉ½É5•ÍÍ…”¤ì(€€€ô™¥¹…±±äì(€€€€€Í•ÑMÕ‰µ¥ÑÑ¥¹œ¡™…±Í”¤ì(€€€ô(€ô((€…Íå¹Œ™Õ¹Ñ¥½¸±½½ÕĞ ¤ì(€€€…İ…¥Ğ™•Ñ  œ½…Á¤½…ÕÑ ½±½½ÕĞœ°ìµ•Ñ¡½è€A=MPœ°É•‘•¹Ñ¥…±Ìè€Í…µ”µ½É¥¥¸œô¤¹…Ñ   ¤€ôøÕ¹‘•™¥¹•¤ì(€€€Í•ÍÍ¥½¹MÑ½É…”¹É•µ½Ù•%Ñ•´ Ùå‰•}…Ñ¥Ù•}½µµÕ¹¥Ñäœ¤ì(€€€Í•ÑM•ÍÍ¥½¸¡¹Õ±°¤ì(€€€İ¥¹‘½Ü¹±½…Ñ¥½¸¹…ÍÍ¥¸ œ¼œ¤ì(€ô((€½¹ÍĞÁ…Ñ¡¹…µ”€ôİ¥¹‘½Ü¹±½…Ñ¥½¸¹Á…Ñ¡¹…µ”ì(€¥˜€¡Á…Ñ¡¹…µ”€ôôô€œ½Ñ•Éµ½Ìµ‘”µÕÍ¼œ¤É•ÑÕÉ¸€ñQ•ÉµÍ=™UÍ•A…”¼øì(€¥˜€¡Á…Ñ¡¹…µ”€ôôô€œ½Á½±¥Ñ¥„µ‘”µÁÉ¥Ù…¥‘…‘”œ¤É•ÑÕÉ¸€ñAÉ¥Ù…åA½±¥åA…”¼øì(€¥˜€¡¡•­¥¹M•ÍÍ¥½¸¤É•ÑÕÉ¸€ñÁÁ1½…‘¥¹œ¼øì(€¥˜€¡¥ÍA±…Ñ™½Éµ½µ…¥¸€˜˜€…Í•ÍÍ¥½¸€˜˜€…¹•ÜUI1M•…É¡A…É…µÌ¡İ¥¹‘½Ü¹±½…Ñ¥½¸¹Í•…É ¤¹¡…Ì …ÕÑ œ¤¤É•ÑÕÉ¸€ñA±…Ñ™½Éµ!½µ”¼øì(€¥˜€ ¡¥ÍA±…Ñ™½Éµ½µ…¥¸ñğ¥Í1½…±•Ù•±½Áµ•¹Ñ!½ÍĞ¤€˜˜Í•ÍÍ¥½¸€˜˜Á…Ñ¡¹…µ”€ôôô€œ¼œ€˜˜€ …¥Í1½…±•Ù•±½Áµ•¹Ñ!½ÍĞñğ€…Í•ÍÍ¥½¹MÑ½É…”¹•Ñ%Ñ•´ Ùå‰•}…Ñ¥Ù•}½µµÕ¹¥Ñäœ¤¤¤É•ÑÕÉ¸€ñ½µµÕ¹¥ÑåA¥­•ÉA…”¡…É…Ñ•ÈõíÍ•ÍÍ¥½¸¹¡…É…Ñ•Éô½¹1½½ÕĞõì ¤€ôøÙ½¥±½½ÕĞ ¥ô¼øì(€½¹ÍĞ©½¥¹I½ÕÑ”€ôÁ…Ñ¡¹…µ”¹µ…Ñ  ½yp½½µÕ¹¥‘…‘•Íp¼¡m„µèÀ´äµt¬¥p½Í½±¥¥Ñ…Èµ•¹ÑÉ…‘„¼¤ì(€¥˜€¡Í•ÍÍ¥½¸€˜˜©½¥¹I½ÕÑ”¤É•ÑÕÉ¸€ñ½µµÕ¹¥Ñå)½¥¹A…”Í±Õœõí©½¥¹I½ÕÑ•lÅuô¼øì(€¥˜€¡¥ÍA±…Ñ™½Éµ½µ…¥¸€˜˜Í•ÍÍ¥½¸¤É•ÑÕÉ¸€ñ½µµÕ¹¥ÑåA¥­•ÉA…”¡…É…Ñ•ÈõíÍ•ÍÍ¥½¸¹¡…É…Ñ•Éô½¹1½½ÕĞõì ¤€ôøÙ½¥±½½ÕĞ ¥ô¼øì(€¥˜€¡Í•ÍÍ¥½¸€˜˜lœ½½µÕ¹¥‘…‘•Ìœ°€œ½µ¥¹¡…ÌµÍ½±¥¥Ñ…½•Ìœ°€œ½…‘µ¥¹¥ÍÑÉ……¼µÙå‰”t¹¥¹±Õ‘•Ì¡Á…Ñ¡¹…µ”¤¤É•ÑÕÉ¸€ñ½µµÕ¹¥ÑåA¥­•ÉA…”¡…É…Ñ•ÈõíÍ•ÍÍ¥½¸¹¡…É…Ñ•Éô½¹1½½ÕĞõì ¤€ôøÙ½¥±½½ÕĞ ¥ô¼øì(€¥˜€¡Í•ÍÍ¥½¸€˜˜€¡Á…Ñ¡¹…µ”¹ÍÑ…ÉÑÍ]¥Ñ  œ½…ÉÉ•¥É„œ¤ñğÁ…Ñ¡¹…µ”¹ÍÑ…ÉÑÍ]¥Ñ  œ½•µÁÉ•Í…Ìœ¤¤¤É•ÑÕÉ¸€ñ½µµÕ¹¥Ñå!½µ•I•‘¥É•Ğ¼øì(€¥˜€¡Í•ÍÍ¥½¸¤É•ÑÕÉ¸€ñM½¥…±ÁÀ¡…É…Ñ•ÈõíÍ•ÍÍ¥½¸¹¡…É…Ñ•Éô½¹¡…É…Ñ•ÉUÁ‘…Ñ•õì¡¡…É…Ñ•È¤€ôøÍ•ÑM•ÍÍ¥½¸¡ì€¸¸¹Í•ÍÍ¥½¸°¡…É…Ñ•Èô¥ô½¹1½½ÕĞõì ¤€ôøÙ½¥±½½ÕĞ ¥ô¼øì((€É•ÑÕÉ¸€ñµ…¥¸±…ÍÍ9…µ”õí±½¥¸µÁ…”…ÕÑ µÍÁ±¥Ğ€‘íÉ•¥ÍÑ•É5½‘”€ü€¥ÌµÉ•¥ÍÑ•Èœ€è€œõôø(€€€€ñÍ•Ñ¥½¸É•˜õí…ÕÑ¡A…¹•±I•™ô±…ÍÍ9…µ”ô‰…ÕÑ µÁ…¹•°ˆ…É¥„µ±…‰•±±•‘‰äô‰±½¥¸µÑ¥Ñ±”ˆø(€€€€€€ñ‘¥Ø±…ÍÍ9…µ”ô‰…ÕÑ µÁ…¹•°µ¥¹¹•Èˆø(€€€€€€€€ñ‘¥Ø±…ÍÍ9…µ”ô‰…ÕÑ µ‰É…¹ˆøñ1½¼¼øğ½‘¥Øø(€€€€€€€€ñ‘¥Ø±…ÍÍ9…µ”ô‰±½¥¸µ…É…ÕÑ µ…Éˆø(€€€€€€€€€€ñ‘¥Ø±…ÍÍ9…µ”ô‰…Éµ¡•…‘¥¹œˆø(€€€€€€€€€€€€ñ Ä¥ô‰±½¥¸µÑ¥Ñ±”ˆùíÉ•¥ÍÑ•É5½‘”€ü€É¥”ÍÕ„½¹Ñ„œ€è€¹ÑÉ”¹¼Í•ÔÕ¹¥Ù•ÉÍ¼ôğ½ Äø(€€€€€€€€€€€€ñÀ±…ÍÍ9…µ”ô‰…ÉµÍÕ‰Ñ¥Ñ±”ˆùíÉ•¥ÍÑ•É5½‘”€ü€¹ÑÉ”¹¼Ye	”“¨¥»µ¥¼ƒ€ÍÕ„¡¥ÍÓÍÉ¥„¸œ€è€•ÍÍ”ÍÕ„½¹Ñ„”½¹Ñ¥¹Õ”ÍÕ„¡¥ÍÓÍÉ¥„¹¼Ye	¸ôğ½Àø(€€€€€€€€€€ğ½‘¥Øø(€€€€€€€€€€ñ™½É´½¹MÕ‰µ¥Ğõì¡•Ù•¹Ğ¤€ôøÙ½¥¡…¹‘±•MÕ‰µ¥Ğ¡•Ù•¹Ğ¥ôø(€€€€€€€€€€€íÉ•¥ÍÑ•É5½‘”€˜˜€ğøñ±…‰•°¡Ñµ±½Èô‰¹…µ”ˆù9½µ”ğ½±…‰•°øñ‘¥Ø±…ÍÍ9…µ”ô‰¥¹ÁÕĞµİÉ…Àˆøñ5…Ñ•É¥…±%½¸¹…µ”ô‰Á•ÉÍ½¸ˆ¼øñ¥¹ÁÕĞ¥ô‰¹…µ”ˆ¹…µ”ô‰¹…µ”ˆÑåÁ”ô‰Ñ•áĞˆÁ±…•¡½±‘•Èô‰M•Ô¹½µ”ˆ…ÕÑ½½µÁ±•Ñ”ô‰¹…µ”ˆÉ•ÅÕ¥É•µ¥¹1•¹Ñ õìÉôµ…á1•¹Ñ õìØÁô¼øğ½‘¥Øøğ¼ùô(€€€€€€€€€€€€ñ±…‰•°±…ÍÍ9…µ”õíÉ•¥ÍÑ•É5½‘”€ü€œœ€è€…ÕÑ µÙ¥ÍÕ…±±äµ¡¥‘‘•¸ô¡Ñµ±½Èô‰•µ…¥°ˆùµµ…¥°ğ½±…‰•°ø(€€€€€€€€€€€€ñ‘¥Ø±…ÍÍ9…µ”ô‰¥¹ÁÕĞµİÉ…Àˆøñ5…Ñ•É¥…±%½¸¹…µ”ô‰µ…¥°ˆ¼øñ¥¹ÁÕĞ¥ô‰•µ…¥°ˆ¹…µ”ô‰•µ…¥°ˆÑåÁ”ô‰•µ…¥°ˆÁ±…•¡½±‘•ÈõíÉ•¥ÍÑ•É5½‘”€ü€Í•Õ•µ…¥°¹½´œ€è€µµ…¥°ô…ÕÑ½½µÁ±•Ñ”ô‰•µ…¥°ˆÉ•ÅÕ¥É•¼øğ½‘¥Øø(€€€€€€€€€€€€ñ‘¥Ø±…ÍÍ9…µ”ô‰Á…ÍÍİ½Éµ±…‰•°ˆøñ±…‰•°±…ÍÍ9…µ”õíÉ•¥ÍÑ•É5½‘”€ü€œœ€è€…ÕÑ µÙ¥ÍÕ…±±äµ¡¥‘‘•¸ô¡Ñµ±½Èô‰Á…ÍÍİ½ÉˆùM•¹¡„ğ½±…‰•°øğ½‘¥Øø(€€€€€€€€€€€€ñ‘¥Ø±…ÍÍ9…µ”ô‰¥¹ÁÕĞµİÉ…Àˆøñ5…Ñ•É¥…±%½¸¹…µ”ô‰±½¬ˆ¼øñ¥¹ÁÕĞ¥ô‰Á…ÍÍİ½Éˆ¹…µ”ô‰Á…ÍÍİ½ÉˆÑåÁ”õíÍ¡½İA…ÍÍİ½É€ü€Ñ•áĞœ€è€Á…ÍÍİ½ÉôÁ±…•¡½±‘•ÈõíÉ•¥ÍÑ•É5½‘”€ü€É¥”Õµ„Í•¹¡„œ€è€M•¹¡„ô…ÕÑ½½µÁ±•Ñ”õíÉ•¥ÍÑ•É5½‘”€ü€¹•ÜµÁ…ÍÍİ½Éœ€è€ÕÉÉ•¹ĞµÁ…ÍÍİ½ÉôÉ•ÅÕ¥É•µ¥¹1•¹Ñ õíÉ•¥ÍÑ•É5½‘”€ü€à€èÕ¹‘•™¥¹•‘ô¼øñ‰ÕÑÑ½¸±…ÍÍ9…µ”ô‰Ù¥Í¥‰¥±¥ÑäµÑ½±”ˆÑåÁ”ô‰‰ÕÑÑ½¸ˆ½¹±¥¬õì ¤€ôøÍ•ÑM¡½İA…ÍÍİ½É ¡Ù…±Õ”¤€ôø€…Ù…±Õ”¥ô…É¥„µ±…‰•°õíÍ¡½İA…ÍÍİ½É€ü€=Õ±Ñ…ÈÍ•¹¡„œ€è€5½ÍÑÉ…ÈÍ•¹¡„ôøñ5…Ñ•É¥…±%½¸¹…µ”õíÍ¡½İA…ÍÍİ½É€ü€Ù¥Í¥‰¥±¥Ñå}½™˜œ€è€Ù¥Í¥‰¥±¥Ñäô¼øğ½‰ÕÑÑ½¸øğ½‘¥Øø(€€€€€€€€€€€íÉ•¥ÍÑ•É5½‘”€˜˜€ñÀ±…ÍÍ9…µ”ô‰…ÕÑ µ¡¥¹ĞÁ…ÍÍİ½Éµ¡¥¹ĞˆùUÍ”Á•±¼µ•¹½Ì€à…É…Ñ•É•Ì¸ğ½Àùô(€€€€€€€€€€€íÉ•¥ÍÑ•É5½‘”€˜˜€ğøñ±…‰•°¡Ñµ±½Èô‰½¹™¥ÉµA…ÍÍİ½Éˆù½¹™¥Éµ…ÈÍ•¹¡„ğ½±…‰•°øñ‘¥Ø±…ÍÍ9…µ”ô‰¥¹ÁÕĞµİÉ…Àˆøñ5…Ñ•É¥…±%½¸¹…µ”ô‰±½¬ˆ¼øñ¥¹ÁÕĞ¥ô‰½¹™¥ÉµA…ÍÍİ½Éˆ¹…µ”ô‰½¹™¥ÉµA…ÍÍİ½ÉˆÑåÁ”õíÍ¡½İ½¹™¥ÉµA…ÍÍİ½É€ü€Ñ•áĞœ€è€Á…ÍÍİ½ÉôÁ±…•¡½±‘•Èô‰I•Á¥Ñ„ÍÕ„Í•¹¡„ˆ…ÕÑ½½µÁ±•Ñ”ô‰¹•ÜµÁ…ÍÍİ½ÉˆÉ•ÅÕ¥É•¼øñ‰ÕÑÑ½¸±…ÍÍ9…µ”ô‰Ù¥Í¥‰¥±¥ÑäµÑ½±”ˆÑåÁ”ô‰‰ÕÑÑ½¸ˆ½¹±¥¬õì ¤€ôøÍ•ÑM¡½İ½¹™¥ÉµA…ÍÍİ½É ¡Ù…±Õ”¤€ôø€…Ù…±Õ”¥ô…É¥„µ±…‰•°õíÍ¡½İ½¹™¥ÉµA…ÍÍİ½É€ü€=Õ±Ñ…È½¹™¥Éµ‡Ÿ¼œ€è€5½ÍÑÉ…È½¹™¥Éµ‡Ÿ¼ôøñ5…Ñ•É¥…±%½¸¹…µ”õíÍ¡½İ½¹™¥ÉµA…ÍÍİ½É€ü€Ù¥Í¥‰¥±¥Ñå}½™˜œ€è€Ù¥Í¥‰¥±¥Ñäô¼øğ½‰ÕÑÑ½¸øğ½‘¥Øøñ±…‰•°±…ÍÍ9…µ”ô‰Ñ•ÉµÌµÉ½Üˆøñ¥¹ÁÕĞÑåÁ”ô‰¡•­‰½àˆ¹…µ”ô‰Ñ•ÉµÌˆÉ•ÅÕ¥É•¼øñÍÁ…¸ù1¤”½¹½É‘¼½´½Ì€ñ„¡É•˜ôˆ½Ñ•Éµ½Ìµ‘”µÕÍ¼ˆùQ•Éµ½Ì‘”UÍ¼ğ½„ø”„€ñ„¡É•˜ôˆ½Á½±¥Ñ¥„µ‘”µÁÉ¥Ù…¥‘…‘”ˆùA½³µÑ¥„‘”AÉ¥Ù…¥‘…‘”ğ½„ø‘¼Ye	¸ğ½ÍÁ…¸øğ½±…‰•°øğ¼ùô(€€€€€€€€€€€íµ•ÍÍ…”€˜˜€ñÀ±…ÍÍ9…µ”ô‰™½É´µµ•ÍÍ…”ˆÉ½±”ô‰…±•ÉĞˆùí‰½½ÑÉÉ½Èñğµ•ÍÍ…•ôğ½Àùõí‰½½ÑÉÉ½È€˜˜€…µ•ÍÍ…”€˜˜€ñÀ±…ÍÍ9…µ”ô‰™½É´µµ•ÍÍ…”ˆÉ½±”ô‰…±•ÉĞˆùí‰½½ÑÉÉ½Éôğ½Àùô(€€€€€€€€€€€€ñ‰ÕÑÑ½¸±…ÍÍ9…µ”ô‰ÍÕ‰µ¥Ğµ‰ÕÑÑ½¸ˆÑåÁ”ô‰ÍÕ‰µ¥Ğˆ‘¥Í…‰±•õíÍÕ‰µ¥ÑÑ¥¹ôùíÍÕ‰µ¥ÑÑ¥¹œ€ü€Õ…É‘—Š˜œ€èÉ•¥ÍÑ•É5½‘”€ü€É¥…Èµ¥¹¡„½¹Ñ„œ€è€¹ÑÉ…È¹¼Ye	ô€ñ5…Ñ•É¥…±%½¸¹…µ”ô‰…ÉÉ½İ}™½Éİ…Éˆ¼øğ½‰ÕÑÑ½¸ø(€€€€€€€€€€ğ½™½É´ø(€€€€€€€€€€ñÀ±…ÍÍ9…µ”ô‰…ÕÑ µÍİ¥Ñ ˆùíÉ•¥ÍÑ•É5½‘”€ü€+„Ñ•´Õµ„½¹Ñ„üœ€è€¥¹‘„»¼Ñ•´Õµ„½¹Ñ„üô€ñ‰ÕÑÑ½¸ÑåÁ”ô‰‰ÕÑÑ½¸ˆ½¹±¥¬õì ¤€ôøìÍ•ÑI•¥ÍÑ•É5½‘” ¡Ù…±Õ”¤€ôø€…Ù…±Õ”¤ìÍ•Ñ5•ÍÍ…” œœ¤ìÍ•ÑM¡½İA…ÍÍİ½É¡™…±Í”¤ìÍ•ÑM¡½İ½¹™¥ÉµA…ÍÍİ½É¡™…±Í”¤ìõôùíÉ•¥ÍÑ•É5½‘”€ü€¹ÑÉ…È¹¼Ye	œ€è€É¥…È½¹Ñ„ôğ½‰ÕÑÑ½¸øğ½Àø(€€€€€€€€ğ½‘¥Øø(€€€€€€€€ñ™½½Ñ•È±…ÍÍ9…µ”ô‰…ÕÑ µ™½½Ñ•Èˆø(€€€€€€€€€€ñ‘¥Ø±…ÍÍ9…µ”ô‰…ÕÑ µ…ÁÁÌˆ…É¥„µ±…‰•°ô‰Á±¥…Ñ¥Ù½ÌYe	ˆø(€€€€€€€€€€€€ñ‘¥Ø±…ÍÍ9…µ”ô‰…ÕÑ µ…ÁÀ…ÕÑ µ…ÁÀµÍ½¥…°ˆøñÍÁ…¸øñ5…Ñ•É¥…±%½¸¹…µ”ô‰Á¡½Ñ½}…µ•É„ˆ¼øğ½ÍÁ…¸øñÍµ…±°ùM½¥…°ğ½Íµ…±°øğ½‘¥Øø(€€€€€€€€€€€€ñ‘¥Ø±…ÍÍ9…µ”ô‰…ÕÑ µ…ÁÀ…ÕÑ µ…ÁÀµÁÕ±Í”ˆøñÍÁ…¸øñ5…Ñ•É¥…±%½¸¹…µ”ô‰É…Á¡¥}•Äˆ¼øğ½ÍÁ…¸øñÍµ…±°ù¡¼ğ½Íµ…±°øğ½‘¥Øø(€€€€€€€€€€€€ñ‘¥Ø±…ÍÍ9…µ”ô‰…ÕÑ µ…ÁÀ…ÕÑ µ…ÁÀµµ…Ñ ˆøñÍÁ…¸øñ5…Ñ•É¥…±%½¸¹…µ”ô‰™…Ù½É¥Ñ”ˆ¼øğ½ÍÁ…¸øñÍµ…±°ù5…Ñ ğ½Íµ…±°øğ½‘¥Øø(€€€€€€€€€€€€ñ‘¥Ø±…ÍÍ9…µ”ô‰…ÕÑ µ…ÁÀ…ÕÑ µ…ÁÀµµ•ÍÍ…•ÌˆøñÍÁ…¸øñ5…Ñ•É¥…±%½¸¹…µ”ô‰¡…Ñ}‰Õ‰‰±”ˆ¼øğ½ÍÁ…¸øñÍµ…±°ù5•¹Í…•¹Ìğ½Íµ…±°øğ½‘¥Øø(€€€€€€€€€€€€ñ‘¥Ø±…ÍÍ9…µ”ô‰…ÕÑ µ…ÁÀ…ÕÑ µ…ÁÀµ‰…¹¬ˆøñÍÁ…¸øñ5…Ñ•É¥…±%½¸¹…µ”ô‰É•‘¥Ñ}…Éˆ¼øğ½ÍÁ…¸øñÍµ…±°ù	…¹¼ğ½Íµ…±°øğ½‘¥Øø(€€€€€€€€€€ğ½‘¥Øø(€€€€€€€€€€ñÀ±…ÍÍ9…µ”ô‰…ÕÑ µÑ…±¥¹”ˆù=9cUL°5=59Q=L9=YL!%MSMI%L4U4OL1UH¸ğ½Àø(€€€€€€€€ğ½™½½Ñ•Èø(€€€€€€ğ½‘¥Øø(€€€€ğ½Í•Ñ¥½¸ø(€€€€ñ…Í¥‘”±…ÍÍ9…µ”ô‰…ÕÑ µÙ¥ÍÕ…°ˆ…É¥„µ±…‰•°ô‰Ye	è½¹•ãÕ•ÌÅÕ”Ù¥É…´¡¥ÍÓÍÉ¥…Ìˆ€¼ø(€€ğ½µ…¥¸øì)ô(
+import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { SocialApp, type SocialCharacter } from './SocialApp';
+import './CommunityPickerPage.css';
+import { notifySnack } from './SnackMessage';
+import { MaterialIcon } from './MaterialIcon';
+import { LEGAL_PRIVACY_VERSION, LEGAL_TERMS_VERSION } from '@vybe/shared';
+import { PrivacyPolicyPage, TermsOfUsePage } from './LegalPages';
+import { VybeLogo } from './VybeLogo';
+import { CommunityJoinPage } from './CommunityJoinPage';
+import { activateLocalCommunity, communityHomeHref } from './communityNavigation';
+
+type AuthPayload = { account: { id: string; email: string }; character: SocialCharacter; globalAccount?: boolean };
+
+function Logo() {
+  return <a className="brand" href="/" aria-label="VYBE"><VybeLogo className="brand-reference-image"/></a>;
+}
+
+function AppLoading() {
+  const section = window.location.pathname.split('/').filter(Boolean)[0] ?? '';
+  const appNames: Record<string, string> = { eventos: 'Eventos', banco: 'Banco', match: 'Match', mensagens: 'Mensagens', academico: 'AcadÃªmico', noticias: 'NotÃ­cias', empresas: 'Empresas', echo: 'Echo', pulso: 'Echo' };
+  const appName = appNames[section];
+  return <main className="vybe-loading-screen" role="status" aria-live="polite"><div className="vybe-loading-card"><span className="vybe-loading-mark"><VybeLogo variant="symbol" label="VYBE"/></span><span className="vybe-loading-spinner" aria-hidden="true"/><span className="vybe-loading-copy"><strong>{appName ? `Abrindo ${appName}` : 'Preparando seu universo'}</strong><small>Estamos preparando seu espaÃ§o no VYBE.</small></span></div></main>;
+}
+
+function CommunityHomeRedirect() {
+  useEffect(() => { window.location.replace('/'); }, []);
+  return <AppLoading/>;
+}
+
+function PlatformHome() {
+  return <main className="platform-home"><header><Logo/><span>A plataforma para comunidades de RPG</span><nav><a href="/?auth=login">Entrar</a><a href="/?auth=register">Criar conta</a></nav></header><section><p>UM UNIVERSO, MUITAS HISTÃ“RIAS</p><h1>Comunidades de RPG<br/>com vida prÃ³pria.</h1><span>Crie sua conta VYBE e escolha em quais comunidades deseja participar.</span><a href="/?auth=register">Criar minha conta VYBE <b><MaterialIcon name="arrow_forward"/></b></a></section><footer>VYBE Â· Plataforma principal</footer></main>;
+}
+
+type CommunitySummary = { id: string; name: string; slug: string; subdomain: string; description: string; coverUrl: string; logoUrl: string; memberCount: number; requiresApproval?: boolean; joinStatus?: 'MEMBER' | 'NONE' | 'PENDING' | 'NEEDS_INFORMATION' | 'REJECTED' };
+type CommunityRequestSummary = { id: string; rpgName: string; slug: string; description: string; status: 'pending' | 'approved' | 'rejected'; createdAt: string; updatedAt?: string; photoUrl?: string };
+type MyJoinRequest = { id: string; communityId: string; communitySlug: string; characterName: string; requestedUsername: string; status: 'PENDING' | 'NEEDS_INFORMATION' | 'APPROVED' | 'REJECTED'; adminMessage: string; rejectionReason: string; createdAt: string; updatedAt: string };
+type JoinNotice = { id: string; status: 'NEEDS_INFORMATION' | 'APPROVED' | 'REJECTED'; message: string; createdAt: string; communityName: string; communitySlug: string };
+type AdminCommunityRequest = CommunityRequestSummary & { applicant: { displayName: string; username: string } | null; photoUrl: string };
+type ManagedCommunity = Omit<CommunitySummary, 'coverUrl'> & { coverUrl: string; status: 'active' | 'archived' | 'suspended' };
+
+async function readFileAsDataUrl(file: File) {
+  return await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => typeof reader.result === 'string' ? resolve(reader.result) : reject(new Error('NÃ£o foi possÃ­vel ler a imagem.'));
+    reader.onerror = () => reject(new Error('NÃ£o foi possÃ­vel ler a imagem.'));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
+  const response = await fetch(path, { credentials: 'same-origin', ...init });
+  const body = await response.json().catch(() => null) as (T & { error?: string; message?: string }) | null;
+  if (!response.ok) throw new Error(body?.error ?? body?.message ?? 'NÃ£o foi possÃ­vel concluir a solicitaÃ§Ã£o.');
+  return body as T;
+}
+
+function CommunityPickerPage({ character, onLogout }: { character: SocialCharacter; onLogout: () => void }) {
+  const [communities, setCommunities] = useState<CommunitySummary[]>([]);
+  const [currentTenantSlug, setCurrentTenantSlug] = useState('community');
+  const [requests, setRequests] = useState<CommunityRequestSummary[]>([]);
+  const [joinRequests, setJoinRequests] = useState<MyJoinRequest[]>([]);
+  const [joinNotices, setJoinNotices] = useState<JoinNotice[]>([]);
+  const [reviewQueue, setReviewQueue] = useState<AdminCommunityRequest[]>([]);
+  const [managedCommunities, setManagedCommunities] = useState<ManagedCommunity[]>([]);
+  const [canReview, setCanReview] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [query, setQuery] = useState('');
+  const [error, setError] = useState('');
+  const [showRequestForm, setShowRequestForm] = useState(false);
+  const [photoPreview, setPhotoPreview] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [requestMessage, setRequestMessage] = useState('');
+  const [reviewingId, setReviewingId] = useState('');
+  const isRequestsPage = window.location.pathname === '/minhas-solicitacoes';
+  const isAdminPage = window.location.pathname === '/administracao-vybe';
+  const isPlatformHost = ['vybe.com.br', 'www.vybe.com.br'].includes(window.location.hostname.toLowerCase());
+  const isLocalHost = ['localhost', '127.0.0.1'].includes(window.location.hostname.toLowerCase());
+
+  useEffect(() => () => { if (photoPreview) URL.revokeObjectURL(photoPreview); }, [photoPreview]);
+
+  async function loadPage() {
+    setLoading(true);
+    try {
+      const [directory, ownRequests, ownJoinRequests, notices] = await Promise.all([
+        fetchJson<{ currentTenantSlug: string; communities: CommunitySummary[] }>('/api/communities'),
+        fetchJson<CommunityRequestSummary[]>('/api/community-requests'),
+        fetchJson<MyJoinRequest[]>('/api/my/community-join-requests'),
+        isPlatformHost ? fetchJson<JoinNotice[]>('/api/notifications') : Promise.resolve([]),
+      ]);
+      setCommunities(directory.communities);
+      setCurrentTenantSlug(directory.currentTenantSlug);
+      setRequests(ownRequests);
+      setJoinRequests(ownJoinRequests);
+      setJoinNotices(notices);
+      setError('');
+    } catch (reason) {
+      const message = reason instanceof Error ? reason.message : 'NÃ£o foi possÃ­vel carregar as comunidades.';
+      setError(message);
+      notifySnack(message);
+    } finally { setLoading(false); }
+    try {
+      const queue = await fetchJson<AdminCommunityRequest[]>('/api/platform/community-requests');
+      const managed = await fetchJson<ManagedCommunity[]>('/api/platform/communities');
+      setReviewQueue(queue);
+      setManagedCommunities(managed);
+      setCanReview(true);
+    } catch (reason) {
+      setCanReview(false);
+      setReviewQueue([]);
+      setManagedCommunities([]);
+    }
+  }
+
+  useEffect(() => {
+    void loadPage();
+  }, []);
+
+  async function submitCommunityRequest(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const values = new FormData(form);
+    const photo = values.get('photo');
+    if (!(photo instanceof File) || !photo.size) { notifySnack('Escolha uma foto de capa para o RPG.'); return; }
+    if (photo.size > 3 * 1024 * 1024) { notifySnack('A foto deve ter no mÃ¡ximo 3 MB.'); return; }
+    setSubmitting(true);
+    setRequestMessage('');
+    try {
+      await fetchJson<CommunityRequestSummary>('/api/community-requests', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rpgName: values.get('rpgName'), description: values.get('description'), photo: await readFileAsDataUrl(photo) }),
+      });
+      setShowRequestForm(false);
+      setPhotoPreview('');
+      setRequestMessage('SolicitaÃ§Ã£o enviada. A comunidade aparecerÃ¡ no diretÃ³rio depois da aprovaÃ§Ã£o.');
+      form.reset();
+      await loadPage();
+    } catch (reason) {
+      const message = reason instanceof Error ? reason.message : 'NÃ£o foi possÃ­vel enviar a solicitaÃ§Ã£o.';
+      notifySnack(message);
+    } finally { setSubmitting(false); }
+  }
+
+  async function decideRequest(id: string, decision: 'approve' | 'reject') {
+    setReviewingId(id);
+    try {
+      await fetchJson(`/api/platform/community-requests/${id}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ decision }),
+      });
+      setRequestMessage(decision === 'approve' ? 'Comunidade aprovada e publicada no diretÃ³rio.' : 'SolicitaÃ§Ã£o recusada.');
+      await loadPage();
+    } catch (reason) {
+      notifySnack(reason instanceof Error ? reason.message : 'NÃ£o foi possÃ­vel revisar a solicitaÃ§Ã£o.');
+    } finally { setReviewingId(''); }
+  }
+
+  async function updateCommunityStatus(community: ManagedCommunity, status: 'active' | 'archived' | 'suspended') {
+    try {
+      await fetchJson(`/api/platform/communities/${community.id}`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }),
+      });
+      setRequestMessage(status === 'archived' ? `${community.name} foi arquivada.` : status === 'suspended' ? `${community.name} foi suspensa.` : `${community.name} foi reativada.`);
+      await loadPage();
+    } catch (reason) {
+      notifySnack(reason instanceof Error ? reason.message : 'NÃ£o foi possÃ­vel atualizar a comunidade.');
+    }
+  }
+
+  async function deleteCommunity(community: ManagedCommunity) {
+    if (!window.confirm(`Excluir ${community.name}? Ela deixarÃ¡ de aparecer e nÃ£o poderÃ¡ ser reativada por esta tela.`)) return;
+    try {
+      await fetchJson(`/api/platform/communities/${community.id}`, { method: 'DELETE' });
+      setRequestMessage(`${community.name} foi excluÃ­da do diretÃ³rio.`);
+      await loadPage();
+    } catch (reason) {
+      notifySnack(reason instanceof Error ? reason.message : 'NÃ£o foi possÃ­vel excluir a comunidade.');
+    }
+  }
+
+  const normalizedQuery = query.trim().toLowerCase();
+  const visibleCommunities = communities.filter((item) => `${item.name} ${item.description}`.toLowerCase().includes(normalizedQuery));
+  const requestStatus = { pending: 'Em anÃ¡lise', approved: 'Aprovada', rejected: 'Recusada' };
+  return <main className="community-picker">
+    <header className="picker-header"><Logo/><div className="picker-account">{character.avatarUrl ? <img src={character.avatarUrl} alt=""/> : <span>{character.displayName.slice(0, 1).toUpperCase()}</span>}<strong>{character.displayName}</strong><small>@{character.username}</small>{canReview && <a className="picker-admin-link" href="/administracao-vybe">AdministraÃ§Ã£o VYBE</a>}<button type="button" onClick={onLogout}><MaterialIcon name="logout"/>Sair</button></div></header>
+    <section className={`picker-content ${isRequestsPage || isAdminPage ? 'is-subpage' : ''}`}>
+      <p className="picker-eyebrow">{isRequestsPage ? 'ACOMPANHAMENTO' : isAdminPage ? 'ADMINISTRAÃ‡ÃƒO VYBE' : 'SEUS UNIVERSOS'}</p>
+      <h1>{isRequestsPage ? 'Minhas solicitaÃ§Ãµes' : isAdminPage ? 'AdministraÃ§Ã£o VYBE' : 'Escolha seu universo'}</h1>
+      <p className="picker-description">{isRequestsPage ? 'Acompanhe as comunidades que vocÃª enviou para anÃ¡lise.' : isAdminPage ? 'Gerencie as solicitaÃ§Ãµes e comunidades da plataforma.' : 'Entre em uma comunidade e continue sua histÃ³ria.'}</p>
+      {!isRequestsPage && !isAdminPage && <div className="picker-controls"><label className="picker-search"><MaterialIcon name="search"/><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar comunidades..."/></label><button className="picker-create-button" type="button" onClick={() => { setShowRequestForm(true); setRequestMessage(''); }}><MaterialIcon name="add"/>Criar nova comunidade</button><a className="picker-requests-button" href="/minhas-solicitacoes">Minhas solicitaÃ§Ãµes{requests.length > 0 && <span>{requests.length}</span>}</a></div>}
+      {error && <p className="picker-error" role="alert">{error}</p>}
+      {requestMessage && <p className="picker-success" role="status">{requestMessage}</p>}
+      {!isRequestsPage && !isAdminPage && joinNotices.map((notice) => <p className="picker-success" role="status" key={notice.id}><strong>{notice.status === 'APPROVED' ? 'Entrada aprovada' : notice.status === 'REJECTED' ? 'SolicitaÃ§Ã£o recusada' : 'Ajustes solicitados'}</strong> Â· {notice.communityName}{notice.message ? ` â€” ${notice.message}` : ''} <a href={`/comunidades/${notice.communitySlug}/solicitar-entrada`}>Ver solicitaÃ§Ã£o</a></p>)}
+      {!isRequestsPage && !isAdminPage && <div className="picker-grid">{visibleCommunities.map((item) => { const isCurrent = item.slug === currentTenantSlug; const isMember = item.joinStatus === 'MEMBER'; const localEntry = isLocalHost && isCurrent && isMember; const destination = localEntry ? communityHomeHref(item.subdomain) : isCurrent && isMember && !isLocalHost ? '/' : isMember ? communityHomeHref(item.subdomain) : `/comunidades/${item.slug}/solicitar-entrada`; const action = isMember ? 'Entrar' : item.joinStatus === 'PENDING' ? 'Acompanhar solicitaÃ§Ã£o' : item.joinStatus === 'NEEDS_INFORMATION' ? 'Atualizar solicitaÃ§Ã£o' : item.joinStatus === 'REJECTED' ? 'Ver resposta' : item.requiresApproval ? 'Solicitar entrada' : 'Entrar na comunidade'; return <a className="picker-community" href={destination} onClick={() => { if (localEntry) activateLocalCommunity(item.subdomain); }} aria-label={`${action} em ${item.name}`} key={item.id}><div className="picker-cover" style={item.coverUrl ? { backgroundImage: `url("${item.coverUrl}")` } : undefined}/>{item.logoUrl ? <img className="picker-emblem-image" src={item.logoUrl} alt=""/> : <span className="picker-emblem">{item.name.slice(0, 1).toUpperCase()}</span>}<div className="picker-card-body"><h2>{item.name}</h2><p>{item.description}</p><div className="picker-members"><span className="picker-member-avatars"><i>Y</i><i>L</i><i>C</i></span><small>{item.memberCount.toLocaleString('pt-BR')} membros Â· {action}</small><b><MaterialIcon name="arrow_forward"/></b></div></div></a>; })}{loading && <p className="picker-empty">Carregando comunidadesâ€¦</p>}{!loading && !error && !visibleCommunities.length && <p className="picker-empty">Nenhuma comunidade encontrada.</p>}</div>}
+      {isRequestsPage && <section className="picker-own-requests is-dedicated"><a className="picker-page-back" href="/comunidades">â† Voltar para comunidades</a><h2>SolicitaÃ§Ãµes para criar comunidade</h2>{requests.length ? requests.map((item) => <article id={`solicitacao-${item.id}`} key={item.id}>{item.photoUrl ? <img className="picker-request-cover" src={item.photoUrl} alt={`Capa de ${item.rpgName}`}/> : <div className="picker-request-emblem">{item.rpgName.slice(0, 1).toUpperCase()}</div>}<div className="picker-request-info"><strong>{item.rpgName}</strong><small>{item.slug}.vybe.com.br Â· Enviada em {new Date(item.createdAt).toLocaleDateString('pt-BR')}</small><p>{item.description}</p><span>Ãšltima atualizaÃ§Ã£o: {new Date(item.updatedAt ?? item.createdAt).toLocaleDateString('pt-BR')}</span></div><div className="picker-request-action"><b className={`request-status is-${item.status}`}>{requestStatus[item.status]}</b>{item.status === 'approved' ? <a href={communityHomeHref(item.slug)} onClick={() => activateLocalCommunity(item.slug)}>Entrar na comunidade</a> : item.status === 'rejected' ? <button type="button" disabled title="O motivo nÃ£o estÃ¡ disponÃ­vel nesta versÃ£o.">Ver motivo</button> : <button type="button" onClick={() => void loadPage()}>Acompanhar</button>}</div></article>) : <p className="picker-empty">VocÃª ainda nÃ£o enviou solicitaÃ§Ãµes para criar comunidades.</p>}<h2>SolicitaÃ§Ãµes de entrada</h2>{joinRequests.length ? joinRequests.map((item) => <article id={`entrada-${item.id}`} key={item.id}><div className="picker-request-emblem">{item.characterName.slice(0, 1).toUpperCase()}</div><div className="picker-request-info"><strong>{item.characterName} <small>@{item.requestedUsername}</small></strong><small>{item.communitySlug}.vybe.com.br Â· Enviada em {new Date(item.createdAt).toLocaleDateString('pt-BR')}</small><span>Ãšltima atualizaÃ§Ã£o: {new Date(item.updatedAt).toLocaleDateString('pt-BR')}</span>{item.status === 'NEEDS_INFORMATION' && <p>{item.adminMessage}</p>}{item.status === 'REJECTED' && <p>{item.rejectionReason}</p>}</div><div className="picker-request-action"><b className={`request-status is-${item.status.toLowerCase()}`}>{item.status === 'PENDING' ? 'Aguardando anÃ¡lise' : item.status === 'NEEDS_INFORMATION' ? 'AlteraÃ§Ãµes solicitadas' : item.status === 'APPROVED' ? 'Aprovada' : 'Recusada'}</b>{item.status === 'APPROVED' ? <a href={communityHomeHref(item.communitySlug)} onClick={() => activateLocalCommunity(item.communitySlug)}>Entrar na comunidade</a> : <a href={`/comunidades/${item.communitySlug}/solicitar-entrada`}>{item.status === 'NEEDS_INFORMATION' ? 'Atualizar ficha' : 'Acompanhar'}</a>}</div></article>) : <p className="picker-empty">VocÃª ainda nÃ£o solicitou entrada em comunidades.</p>}</section>}
+      {isAdminPage && !canReview && <div className="picker-empty picker-restricted">Esta Ã¡rea estÃ¡ disponÃ­vel apenas para a administraÃ§Ã£o VYBE.</div>}
+      {isAdminPage && canReview && <><section className="picker-review-queue"><header><div><p className="picker-eyebrow">ADMINISTRAÃ‡ÃƒO VYBE</p><h2>SolicitaÃ§Ãµes para aprovaÃ§Ã£o</h2></div><span>{reviewQueue.length}</span></header>{reviewQueue.length ? <div className="picker-review-grid">{reviewQueue.map((item) => <article className="picker-review-card" key={item.id}><img src={item.photoUrl} alt={`Capa proposta para ${item.rpgName}`}/><div><h3>{item.rpgName}</h3><small>{item.slug}.vybe.com.br Â· por @{item.applicant?.username ?? 'personagem'}</small><p>{item.description}</p><footer><button type="button" disabled={reviewingId === item.id} onClick={() => void decideRequest(item.id, 'reject')}>Recusar</button><button type="button" disabled={reviewingId === item.id} onClick={() => void decideRequest(item.id, 'approve')}>{reviewingId === item.id ? 'Aguardeâ€¦' : 'Aprovar'}</button></footer></div></article>)}</div> : <p className="picker-empty">Nenhuma solicitaÃ§Ã£o aguardando aprovaÃ§Ã£o.</p>}</section><section className="picker-community-management"><header><div><p className="picker-eyebrow">ADMINISTRAÃ‡ÃƒO VYBE</p><h2>Gerenciar comunidades</h2></div><span>{managedCommunities.length}</span></header>{managedCommunities.length ? <div className="picker-managed-list">{managedCommunities.map((item) => <article key={item.id}><span className="picker-managed-emblem">{item.name.slice(0, 1).toUpperCase()}</span><div className="picker-managed-info"><strong>{item.name}</strong><small>{item.subdomain}.vybe.com.br Â· {item.memberCount.toLocaleString('pt-BR')} membros</small></div><b className={`request-status is-${item.status === 'active' ? 'approved' : 'rejected'}`}>{item.status === 'active' ? 'Ativa' : item.status === 'suspended' ? 'Suspensa' : 'Arquivada'}</b><div className="picker-managed-actions">{item.status === 'active' ? <><button type="button" onClick={() => void updateCommunityStatus(item, 'archived')}>Arquivar</button><button className="is-danger" type="button" onClick={() => void updateCommunityStatus(item, 'suspended')}>Suspender</button></> : <button type="button" onClick={() => void updateCommunityStatus(item, 'active')}>Reativar</button>}<button className="is-danger" type="button" onClick={() => void deleteCommunity(item)}>Excluir</button></div></article>)}</div> : <p className="picker-empty">Nenhuma comunidade para gerenciar.</p>}</section></>}
+      <footer className="picker-footer"><span>âœ³</span><p>MAIS QUE UMA REDE SOCIAL.<br/>UM UNIVERSO PARA CHAMAR DE SEU.</p></footer>
+    </section>
+    {showRequestForm && <div className="picker-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget && !submitting) setShowRequestForm(false); }}><form className="picker-request-modal" onSubmit={(event) => void submitCommunityRequest(event)}><button className="picker-modal-close" type="button" aria-label="Fechar" disabled={submitting} onClick={() => setShowRequestForm(false)}><MaterialIcon name="close"/></button><p className="picker-eyebrow">NOVO UNIVERSO</p><h2>Solicitar comunidade</h2><p className="picker-modal-intro">Envie os dados do seu RPG. A equipe VYBE revisarÃ¡ a solicitaÃ§Ã£o antes de publicar a comunidade.</p><label>Nome do RPG<input name="rpgName" required minLength={2} maxLength={80} placeholder="Ex.: CrÃ´nicas de Aurora"/></label><label>Sobre o RPG<textarea name="description" required minLength={10} maxLength={500} placeholder="Conte um pouco sobre o universo, o tema e a proposta da comunidade."/></label><label className="picker-photo-label">Foto de capa<span>PNG, JPG ou WebP Â· atÃ© 3 MB</span><input name="photo" type="file" accept="image/png,image/jpeg,image/webp" required onChange={(event) => { const file = event.currentTarget.files?.[0]; if (!file) { setPhotoPreview(''); return; } if (file.size > 3 * 1024 * 1024) { event.currentTarget.value = ''; setPhotoPreview(''); notifySnack('A foto deve ter no mÃ¡ximo 3 MB.'); return; } setPhotoPreview(URL.createObjectURL(file)); }}/></label>{photoPreview && <img className="picker-photo-preview" src={photoPreview} alt="PrÃ©via da foto de capa"/>}<div className="picker-form-actions"><button type="button" disabled={submitting} onClick={() => setShowRequestForm(false)}>Cancelar</button><button type="submit" disabled={submitting}>{submitting ? 'Enviandoâ€¦' : 'Enviar para aprovaÃ§Ã£o'}</button></div></form></div>}
+  </main>;
+}
+
+export function App() {
+  const hostname = window.location.hostname.toLowerCase();
+  const isLocalDevelopmentHost = ['localhost', '127.0.0.1'].includes(hostname);
+  const isPlatformDomain = ['vybe.com.br', 'www.vybe.com.br'].includes(hostname);
+  const [session, setSession] = useState<AuthPayload | null>(null);
+  const [checkingSession, setCheckingSession] = useState(true);
+  const [bootError, setBootError] = useState('');
+  const [registerMode, setRegisterMode] = useState(() => new URLSearchParams(window.location.search).get('auth') === 'register');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [message, setMessage] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const authPanelRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    authPanelRef.current?.scrollTo({ top: 0 });
+  }, [registerMode]);
+
+  useEffect(() => {
+    fetch('/api/auth/me', { credentials: 'same-origin' })
+      .then(async (response) => {
+        if (response.ok) setSession(await response.json() as AuthPayload);
+        else if (response.status !== 401) {
+          const errorMessage = await response.json().then((body: { error?: string; message?: string }) => body.error ?? body.message ?? 'Comunidade indisponÃ­vel.').catch(() => 'Comunidade indisponÃ­vel.');
+          setBootError(errorMessage);
+          notifySnack(errorMessage);
+        }
+      })
+      .catch(() => {
+        const errorMessage = 'NÃ£o foi possÃ­vel conectar ao servidor. Verifique se a API e o banco estÃ£o disponÃ­veis.';
+        setBootError(errorMessage);
+        notifySnack(errorMessage);
+      })
+      .finally(() => setCheckingSession(false));
+  }, [isPlatformDomain]);
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSubmitting(true);
+    setMessage('');
+    const values = new FormData(event.currentTarget);
+    const password = String(values.get('password') ?? '');
+    if (registerMode && password !== String(values.get('confirmPassword') ?? '')) {
+      setMessage('As senhas nÃ£o coincidem. Confira os campos e tente novamente.');
+      setSubmitting(false);
+      return;
+    }
+    const payload = registerMode
+      ? { email: values.get('email'), password, displayName: values.get('name'), termsAccepted: values.get('terms') === 'on', termsVersion: LEGAL_TERMS_VERSION, privacyVersion: LEGAL_PRIVACY_VERSION }
+      : { email: values.get('email'), password };
+    try {
+      const response = await fetch(registerMode ? '/api/auth/register' : '/api/auth/login', {
+        method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
+      });
+      const body = await response.json().catch(() => null) as AuthPayload | { error?: string; message?: string; pending?: boolean } | null;
+      if (!response.ok) throw new Error(body && ('error' in body || 'message' in body) ? body.error ?? body.message : 'NÃ£o foi possÃ­vel acessar sua conta.');
+      if (body && 'pending' in body && body.pending) {
+        const pendingMessage = body.message ?? 'Seu pedido de entrada estÃ¡ aguardando aprovaÃ§Ã£o da equipe.';
+        setMessage(pendingMessage);
+        notifySnack(pendingMessage);
+        return;
+      }
+      setSession(body as AuthPayload);
+      window.location.assign('/comunidades');
+    } catch (error) {
+      const errorMessage = error instanceof TypeError
+        ? 'NÃ£o foi possÃ­vel conectar ao servidor. Verifique sua conexÃ£o e tente novamente.'
+        : error instanceof Error ? error.message : 'NÃ£o foi possÃ­vel acessar sua conta.';
+      setMessage(errorMessage);
+      notifySnack(errorMessage);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function logout() {
+    await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' }).catch(() => undefined);
+    sessionStorage.removeItem('vybe_active_community');
+    setSession(null);
+    window.location.assign('/');
+  }
+
+  const pathname = window.location.pathname;
+  if (pathname === '/termos-de-uso') return <TermsOfUsePage/>;
+  if (pathname === '/politica-de-privacidade') return <PrivacyPolicyPage/>;
+  if (checkingSession) return <AppLoading/>;
+  if (isPlatformDomain && !session && !new URLSearchParams(window.location.search).has('auth')) return <PlatformHome/>;
+  if ((isPlatformDomain || isLocalDevelopmentHost) && session && pathname === '/' && (!isLocalDevelopmentHost || !sessionStorage.getItem('vybe_active_community'))) return <CommunityPickerPage character={session.character} onLogout={() => void logout()}/>;
+  const joinRoute = pathname.match(/^\/comunidades\/([a-z0-9-]+)\/solicitar-entrada$/);
+  if (session && joinRoute) return <CommunityJoinPage slug={joinRoute[1]}/>;
+  if (isPlatformDomain && session) return <CommunityPickerPage character={session.character} onLogout={() => void logout()}/>;
+  if (session && ['/comunidades', '/minhas-solicitacoes', '/administracao-vybe'].includes(pathname)) return <CommunityPickerPage character={session.character} onLogout={() => void logout()}/>;
+  if (session && (pathname.startsWith('/carreira') || pathname.startsWith('/empresas'))) return <CommunityHomeRedirect/>;
+  if (session) return <SocialApp character={session.character} onCharacterUpdated={(character) => setSession({ ...session, character })} onLogout={() => void logout()}/>;
+
+  return <main className={`login-page auth-split ${registerMode ? 'is-register' : ''}`}>
+    <section ref={authPanelRef} className="auth-panel" aria-labelledby="login-title">
+      <div className="auth-panel-inner">
+        <div className="auth-brand"><Logo/></div>
+        <div className="login-card auth-card">
+          <div className="card-heading">
+            <h1 id="login-title">{registerMode ? 'Crie sua conta' : 'Entre no seu universo'}</h1>
+            <p className="card-subtitle">{registerMode ? 'Entre no VYBE e dÃª inÃ­cio Ã  sua histÃ³ria.' : 'Acesse sua conta e continue sua histÃ³ria no VYBE.'}</p>
+          </div>
+          <form onSubmit={(event) => void handleSubmit(event)}>
+            {registerMode && <><label htmlFor="name">Nome</label><div className="input-wrap"><MaterialIcon name="person"/><input id="name" name="name" type="text" placeholder="Seu nome" autoComplete="name" required minLength={2} maxLength={60}/></div></>}
+            <label className={registerMode ? '' : 'auth-visually-hidden'} htmlFor="email">E-mail</label>
+            <div className="input-wrap"><MaterialIcon name="mail"/><input id="email" name="email" type="email" placeholder={registerMode ? 'seu@email.com' : 'E-mail'} autoComplete="email" required/></div>
+            <div className="password-label"><label className={registerMode ? '' : 'auth-visually-hidden'} htmlFor="password">Senha</label></div>
+            <div className="input-wrap"><MaterialIcon name="lock"/><input id="password" name="password" type={showPassword ? 'text' : 'password'} placeholder={registerMode ? 'Crie uma senha' : 'Senha'} autoComplete={registerMode ? 'new-password' : 'current-password'} required minLength={registerMode ? 8 : undefined}/><button className="visibility-toggle" type="button" onClick={() => setShowPassword((value) => !value)} aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}><MaterialIcon name={showPassword ? 'visibility_off' : 'visibility'}/></button></div>
+            {registerMode && <p className="auth-hint password-hint">Use pelo menos 8 caracteres.</p>}
+            {registerMode && <><label htmlFor="confirmPassword">Confirmar senha</label><div className="input-wrap"><MaterialIcon name="lock"/><input id="confirmPassword" name="confirmPassword" type={showConfirmPassword ? 'text' : 'password'} placeholder="Repita sua senha" autoComplete="new-password" required/><button className="visibility-toggle" type="button" onClick={() => setShowConfirmPassword((value) => !value)} aria-label={showConfirmPassword ? 'Ocultar confirmaÃ§Ã£o' : 'Mostrar confirmaÃ§Ã£o'}><MaterialIcon name={showConfirmPassword ? 'visibility_off' : 'visibility'}/></button></div><label className="terms-row"><input type="checkbox" name="terms" required/><span>Li e concordo com os <a href="/termos-de-uso">Termos de Uso</a> e a <a href="/politica-de-privacidade">PolÃ­tica de Privacidade</a> do VYBE.</span></label></>}
+            {message && <p className="form-message" role="alert">{bootError || message}</p>}{bootError && !message && <p className="form-message" role="alert">{bootError}</p>}
+            <button className="submit-button" type="submit" disabled={submitting}>{submitting ? 'Aguardeâ€¦' : registerMode ? 'Criar minha conta' : 'Entrar no VYBE'} <MaterialIcon name="arrow_forward"/></button>
+          </form>
+          <p className="auth-switch">{registerMode ? 'JÃ¡ tem uma conta?' : 'Ainda nÃ£o tem uma conta?'} <button type="button" onClick={() => { setRegisterMode((value) => !value); setMessage(''); setShowPassword(false); setShowConfirmPassword(false); }}>{registerMode ? 'Entrar no VYBE' : 'Criar conta'}</button></p>
+        </div>
+        <footer className="auth-footer">
+          <div className="auth-apps" aria-label="Aplicativos VYBE">
+            <div className="auth-app auth-app-social"><span><MaterialIcon name="photo_camera"/></span><small>Social</small></div>
+            <div className="auth-app auth-app-pulse"><span><MaterialIcon name="graphic_eq"/></span><small>Echo</small></div>
+            <div className="auth-app auth-app-match"><span><MaterialIcon name="favorite"/></span><small>Match</small></div>
+            <div className="auth-app auth-app-messages"><span><MaterialIcon name="chat_bubble"/></span><small>Mensagens</small></div>
+            <div className="auth-app auth-app-bank"><span><MaterialIcon name="credit_card"/></span><small>Banco</small></div>
+          </div>
+          <p className="auth-tagline">CONEXÃ•ES, MOMENTOS E NOVAS HISTÃ“RIAS EM UM SÃ“ LUGAR.</p>
+        </footer>
+      </div>
+    </section>
+    <aside className="auth-visual" aria-label="VYBE: conexÃµes que viram histÃ³rias" />
+  </main>;
+}
