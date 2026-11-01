@@ -8,6 +8,7 @@ import { Account, Character, Notification } from '../models/Social.js';
 import { NewsArticle, NewsAudit, NewsCategory, NewsComment, NewsEdition, NewsEditionArticle, NewsRole, NewsView } from '../models/News.js';
 import { requireSession } from '../middleware/tenant.js';
 import { mayEditArticle, mayManageNews, mayReviewNews, maySubmitForReview, mayViewEditorial, mayWriteNews, type NewsRoleName } from './newsPolicy.js';
+import { isCommunityOwner as checkCommunityOwner, isPlatformAppCreator } from './communityAdminPolicy.js';
 
 export const newsRouter=Router();newsRouter.use(requireSession);
 const uploadRoot=resolve(dirname(fileURLToPath(import.meta.url)),'../../uploads');
@@ -21,7 +22,7 @@ async function requireWriter(req:Request,res:Response){const roles=await getRole
 async function requireReviewer(req:Request,res:Response){const roles=await getRoles(req);if(mayReviewNews(roles))return roles;fail(res,403,'A revisão de matérias exige permissão de editor.');return null}
 async function requireNewsAdmin(req:Request,res:Response){const roles=await getRoles(req);if(mayManageNews(roles))return roles;fail(res,403,'Apenas um News Admin pode gerenciar o jornal.');return null}
 async function generalAdmin(req:Request){const tenant=tenantOf(req);return Boolean(tenant.ownerAccountId?.equals(accountOf(req)._id)||tenant.admins.some((id)=>id.equals(accountOf(req)._id)))}
-async function isCommunityOwner(req:Request){return Boolean(tenantOf(req).ownerAccountId?.equals(accountOf(req)._id))}
+async function isCommunityOwner(req:Request){const user=accountOf(req);return checkCommunityOwner(tenantOf(req),user)||isPlatformAppCreator(user)}
 async function audit(req:Request,action:string,articleId?:mongoose.Types.ObjectId,editionId?:mongoose.Types.ObjectId,details:Record<string,unknown>={}){await NewsAudit.create({tenantId:tenantOf(req)._id,actorProfileId:profileOf(req)._id,action,articleId,editionId,details})}
 function safeImageUrl(value:unknown,slug:string){if(typeof value!=='string'||!value.trim())return '';const url=value.trim();if(url.length>500)return null;if(/^https:\/\//i.test(url))return url;if(new RegExp(`^/media/${slug}/[a-f0-9]{32}\\.(png|jpg|webp)$`).test(url))return url;return null}
 function cleanTags(value:unknown){if(!Array.isArray(value))return [];return [...new Set(value.filter((tag):tag is string=>typeof tag==='string').map((tag)=>tag.trim().replace(/^#/,'').slice(0,32)).filter(Boolean))].slice(0,12)}
