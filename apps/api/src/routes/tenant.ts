@@ -22,6 +22,7 @@ import { isCommunityOwner, isPlatformAppCreator } from './communityAdminPolicy.j
 import { CommunitySanction } from '../models/CommunitySanction.js';
 import { VybeSession } from '../models/VybeSession.js';
 import { VybeAccount } from '../models/VybeAccount.js';
+import { communityReportsRouter } from './communityReports.js';
 
 export const tenantRouter = Router();
 tenantRouter.use(requireTenant);
@@ -109,6 +110,7 @@ tenantRouter.post('/auth/register', async (request, response) => {
   if (termsAccepted !== true || termsVersion !== LEGAL_TERMS_VERSION || privacyVersion !== LEGAL_PRIVACY_VERSION) {
     sendError(response, 400, 'É necessário aceitar a versão atual dos Termos de Uso e da Política de Privacidade.'); return;
   }
+  if (bio !== undefined && (typeof bio !== 'string' || bio.length > 1000)) { sendError(response, 400, 'A bio pode ter até 1.000 caracteres.'); return; }
   if (tenant.settings?.characters?.requireBio && (typeof bio !== 'string' || bio.trim().length < 3)) { sendError(response, 400, 'Esta comunidade exige uma bio de pelo menos 3 caracteres.'); return; }
   if (typeof email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || typeof password !== 'string' || password.length < 8 || password.length > 128 || typeof displayName !== 'string' || displayName.trim().length < 2 || displayName.trim().length > 60) {
     sendError(response, 400, 'Informe nome, e-mail válido e senha com pelo menos 8 caracteres.'); return;
@@ -126,7 +128,7 @@ tenantRouter.post('/auth/register', async (request, response) => {
   try {
     const acceptedAt = new Date();
     account = await Account.create({ tenantId: tenant._id, email: normalizedEmail, passwordHash: hashPassword(password), status: 'active', termsAcceptedAt: acceptedAt, termsVersion: LEGAL_TERMS_VERSION, privacyAcceptedAt: acceptedAt, privacyVersion: LEGAL_PRIVACY_VERSION });
-    const character = await Character.create({ tenantId: tenant._id, accountId: account._id, username: characterUsername, displayName: displayName.trim(), bio: typeof bio === 'string' ? bio.trim().slice(0, 280) : '' });
+    const character = await Character.create({ tenantId: tenant._id, accountId: account._id, username: characterUsername, displayName: displayName.trim(), bio: typeof bio === 'string' ? bio.trim() : '' });
     await claimCommunityOwnership(tenant, account);
     tenant.memberCount += 1;
     await tenant.save();
@@ -192,15 +194,19 @@ tenantRouter.post('/auth/logout', async (request, response) => {
   response.status(204).end();
 });
 
+// Community creation requests belong to the global VYBE account and can be
+// submitted by users who are not members of this tenant. Editorial review
+// endpoints keep their own session and admin checks inside this router.
+tenantRouter.use(communityRequestsRouter);
 tenantRouter.use(requireSession);
 tenantRouter.get('/community/admin-access', (request, response) => {
   const community = sessionTenant(request);
   const user = request.vybeAccount!;
   response.json({ canManage: isCommunityOwner(community, user) || isPlatformAppCreator(user) });
 });
-tenantRouter.use(communityRequestsRouter);
 tenantRouter.use(communityJoinRequestsRouter);
 tenantRouter.use(communitySettingsRouter);
+tenantRouter.use('/community-reports', communityReportsRouter);
 tenantRouter.use('/bank', bankRouter);
 tenantRouter.use('/academic', academicRouter);
 tenantRouter.use('/news', newsRouter);
@@ -224,7 +230,7 @@ tenantRouter.patch('/me/character', async (request, response) => {
     updates.username = normalizedUsername;
   }
   if (bio !== undefined) {
-    if (typeof bio !== 'string' || bio.length > 280) { sendError(response, 400, 'A bio pode ter até 280 caracteres.'); return; }
+    if (typeof bio !== 'string' || bio.length > 1000) { sendError(response, 400, 'A bio pode ter até 1.000 caracteres.'); return; }
     if (sessionTenant(request).settings?.characters?.requireBio && bio.trim().length < 3) { sendError(response, 400, 'Esta comunidade exige uma bio de pelo menos 3 caracteres.'); return; }
     updates.bio = bio.trim();
   }

@@ -1,16 +1,34 @@
-import { randomBytes } from 'node:crypto';
+import { createHash, randomBytes } from 'node:crypto';
 import { copyFile, mkdir, rm, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { Router, type Request, type Response } from 'express';
+import { Router, type NextFunction, type Request, type Response } from 'express';
 import mongoose from 'mongoose';
 import { Community } from '../models/Community.js';
 import { CommunityAudit } from '../models/CommunityAudit.js';
 import { CommunityRequest } from '../models/CommunityRequest.js';
 import { CommunityJoinRequest } from '../models/CommunityJoinRequest.js';
 import { Account, Character } from '../models/Social.js';
+import { VybeAccount } from '../models/VybeAccount.js';
+import { VybeSession } from '../models/VybeSession.js';
+import { requireSession } from '../middleware/tenant.js';
 
 export const communityRequestsRouter = Router();
+
+async function requireCommunityRequester(request: Request, response: Response, next: NextFunction) {
+  const cookie = request.headers.cookie?.split(';').map((part) => part.trim()).find((part) => part.startsWith('vybe_account_session='));
+  const token = cookie ? decodeURIComponent(cookie.slice('vybe_account_session='.length)) : '';
+  if (!token) { requireSession(request, response, next); return; }
+  const tokenHash = createHash('sha256').update(token).digest('hex');
+  const session = await VybeSession.findOne({ tokenHash, expiresAt: { $gt: new Date() } });
+  if (!session) { response.status(401).json({ error: 'Sessão VYBE inválida ou expirada.' }); return; }
+  const account = await VybeAccount.findOne({ _id: session.accountId, status: 'active' });
+  if (!account) { response.status(401).json({ error: 'Conta VYBE indisponível.' }); return; }
+  request.vybeGlobalAccount = account;
+  next();
+}
+
+communityRequestsRouter.use('/platform', requireSession);
 
 const uploadsDirectory = resolve(dirname(fileURLToPath(import.meta.url)), '../../uploads');
 const reservedSlugs = new Set(['api', 'www', 'community', 'vybe', 'admin', 'app']);
@@ -47,7 +65,7 @@ function requestJson(row: InstanceType<typeof CommunityRequest>) {
   };
 }
 
-communityRequestsRouter.get('/communities', async (request, response) => {
+communityRequestsRouter.get('/communities', requireSession, async (request, response) => {
   const communities = await Community.find({ status: 'active', type: 'public' })
     .select('name slug subdomain description coverUrl logoUrl category memberCount createdAt settings')
     .sort({ createdAt: 1 }).limit(100).lean();
@@ -80,11 +98,11 @@ communityRequestsRouter.get('/communities/:slug/cover', async (request, response
   });
 });
 
-communityRequestsRouter.get('/community-requests', async (request, response) => {
-  const rows = await CommunityRequest.find({
-    sourceTenantId: request.vybeTenant!._id,
-    accountId: request.vybeAccount!._id,
-  }).sort({ createdAt: -1 }).limit(20).lean();
+communityRequestsRouter.get('/community-requests', requireCommunityRequester, async (request, response) => {
+  const filter = request.vybeGlobalAccount
+    ? { globalAccountId: request.vybeGlobalAccount._id }
+    : { sourceTenantId: request.vybeTenant!._id, accountId: request.vybeAccount!._id };
+  const rows = await CommunityRequest.find(filter).sort({ createdAt: -1 }).limit(20).lean();
   response.json(rows.map((row) => ({
     id: String(row._id), rpgName: row.rpgName, slug: row.slug,
     description: row.description, status: row.status, createdAt: row.createdAt, updatedAt: row.updatedAt,
@@ -92,20 +110,19 @@ communityRequestsRouter.get('/community-requests', async (request, response) => 
   })));
 });
 
-communityRequestsRouter.get('/community-requests/:requestId/photo', async (request, response) => {
+communityRequestsRouter.get('/community-requests/:requestId/photo', requireCommunityRequester, async (request, response) => {
   if (!mongoose.isValidObjectId(request.params.requestId)) { response.status(404).end(); return; }
-  const row = await CommunityRequest.findOne({
-    _id: request.params.requestId,
-    sourceTenantId: request.vybeTenant!._id,
-    accountId: request.vybeAccount!._id,
-  });
+  const ownerFilter = request.vybeGlobalAccount
+    ? { globalAccountId: request.vybeGlobalAccount._id }
+    : { sourceTenantId: request.vybeTenant!._id, accountId: request.vybeAccount!._id };
+  const row = await CommunityRequest.findOne({ _id: request.params.requestId, ...ownerFilter });
   if (!row || !/^[a-z0-9-]+$/.test(row.sourceTenantSlug) || !/^[a-f0-9]{32}\.(png|jpg|webp)$/.test(row.photoFilename)) { response.status(404).end(); return; }
   response.sendFile(row.photoFilename, { root: resolve(uploadsDirectory, row.sourceTenantSlug) }, (error) => {
     if (error && !response.headersSent) response.status(404).end();
   });
 });
 
-communityRequestsRouter.post('/community-requests', async (request, response) => {
+communityRequestsRouter.post('/community-requests', requireCommunityRequester, async (request, response) => {
   const rpgName = typeof request.body?.rpgName === 'string' ? request.body.rpgName.trim() : '';
   const description = typeof request.body?.description === 'string' ? request.body.description.trim() : '';
   const photo = typeof request.body?.photo === 'string' ? request.body.photo : '';
@@ -140,13 +157,20 @@ communityRequestsRouter.post('/community-requests', async (request, response) =>
   }
 
   const tenant = request.vybeTenant!;
+  const account = request.vybeAccount;
+  const character = request.vybeCharacter;
+  const globalAccount = request.vybeGlobalAccount;
   const filename = `${randomBytes(16).toString('hex')}.${extension}`;
   const tenantDirectory = resolve(uploadsDirectory, tenant.slug);
   await mkdir(tenantDirectory, { recursive: true });
   await writeFile(resolve(tenantDirectory, filename), imageBytes, { flag: 'wx', mode: 0o600 });
   const row = await CommunityRequest.create({
     sourceTenantId: tenant._id, sourceTenantSlug: tenant.slug,
-    accountId: request.vybeAccount!._id, characterId: request.vybeCharacter!._id,
+    ...(account ? { accountId: account._id } : {}), ...(character ? { characterId: character._id } : {}),
+    ...(globalAccount ? { globalAccountId: globalAccount._id } : {}),
+    applicantEmail: globalAccount?.email ?? account!.email,
+    applicantName: globalAccount?.displayName ?? character!.displayName,
+    applicantUsername: globalAccount?.username ?? character!.username,
     rpgName, slug, description, photoFilename: filename, photoExtension: extension, status: 'pending',
   });
   response.status(201).json(requestJson(row));
@@ -155,15 +179,23 @@ communityRequestsRouter.post('/community-requests', async (request, response) =>
 communityRequestsRouter.get('/platform/community-requests', async (request, response) => {
   if (!isPlatformAdmin(request)) { denyReview(response); return; }
   const rows = await CommunityRequest.find({ status: 'pending' }).sort({ createdAt: 1 }).limit(100).lean();
-  const characterIds = rows.map((row) => row.characterId);
+  const characterIds = rows.flatMap((row) => row.characterId ? [row.characterId] : []);
+  const globalAccountIds = rows.flatMap((row) => row.globalAccountId ? [row.globalAccountId] : []);
   const tenantIds = [...new Set(rows.map((row) => row.sourceTenantId.toString()))].map((id) => new mongoose.Types.ObjectId(id));
-  const characters = await Character.find({ _id: { $in: characterIds }, tenantId: { $in: tenantIds } }).select('displayName username tenantId').lean();
+  const [characters, globalAccounts] = await Promise.all([
+    Character.find({ _id: { $in: characterIds }, tenantId: { $in: tenantIds } }).select('displayName username tenantId').lean(),
+    VybeAccount.find({ _id: { $in: globalAccountIds } }).select('displayName username').lean(),
+  ]);
   const characterMap = new Map(characters.map((character) => [`${character.tenantId}:${character._id}`, character]));
+  const globalAccountMap = new Map(globalAccounts.map((account) => [String(account._id), account]));
   response.json(rows.map((row) => {
-    const character = characterMap.get(`${row.sourceTenantId}:${row.characterId}`);
+    const character = row.characterId ? characterMap.get(`${row.sourceTenantId}:${row.characterId}`) : undefined;
+    const globalAccount = row.globalAccountId ? globalAccountMap.get(String(row.globalAccountId)) : undefined;
     return {
       ...requestJson(row), sourceTenantSlug: row.sourceTenantSlug,
-      applicant: character ? { displayName: character.displayName, username: character.username } : null,
+      applicant: character ? { displayName: character.displayName, username: character.username }
+        : globalAccount ? { displayName: globalAccount.displayName, username: globalAccount.username }
+          : { displayName: row.applicantName, username: row.applicantUsername },
       photoUrl: `/api/platform/community-requests/${String(row._id)}/photo`,
     };
   }));
@@ -242,7 +274,9 @@ communityRequestsRouter.patch('/platform/community-requests/:requestId', async (
   const destinationDirectory = resolve(uploadsDirectory, row.slug);
   const sourcePhoto = resolve(uploadsDirectory, row.sourceTenantSlug, row.photoFilename);
   const destinationPhoto = resolve(destinationDirectory, row.photoFilename);
-  const applicantAccount = await Account.findOne({ _id: row.accountId, tenantId: row.sourceTenantId }).select('email').lean();
+  const applicantAccount = row.accountId
+    ? await Account.findOne({ _id: row.accountId, tenantId: row.sourceTenantId }).select('email').lean()
+    : null;
   let createdCommunityId: mongoose.Types.ObjectId | undefined;
   try {
     await mkdir(destinationDirectory, { recursive: true });
@@ -250,9 +284,8 @@ communityRequestsRouter.patch('/platform/community-requests/:requestId', async (
     const community = await Community.create({
       name: row.rpgName, slug: row.slug, subdomain: row.slug, description: row.description,
       coverUrl: `/media/${row.slug}/${row.photoFilename}`,
-      type: 'public', entry: 'open', status: 'active', memberCount: 0, admins: [], ownerEmail: applicantAccount?.email ?? '',
+      type: 'public', entry: 'open', status: 'active', category: '', memberCount: 0, admins: [], moderators: [], rules: [], ownerEmail: applicantAccount?.email ?? row.applicantEmail,
       brand: { primary: '#16815D', dark: '#0D6248', medium: '#35A67A', soft: '#F2FAF6', lilac: '#DDF3EA', white: '#FFFFFF', graphite: '#1F2422' },
-      rules: ['Respeite os personagens e as histórias da comunidade.', 'Mantenha as conversas dentro do tema do RPG.', 'Siga as orientações da equipe de moderação.'],
     });
     createdCommunityId = community._id;
     row.status = 'approved';

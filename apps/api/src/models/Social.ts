@@ -64,7 +64,7 @@ const characterSchema = new mongoose.Schema<CharacterFields>({
   username: { type: String, required: true, lowercase: true, trim: true, match: /^[a-z0-9._]{3,24}$/ },
   displayName: { type: String, required: true, trim: true, maxlength: 60 },
   communityFunction: { type: String, default: '', trim: true, maxlength: 80 },
-  bio: { type: String, default: '', maxlength: 280 },
+  bio: { type: String, default: '', maxlength: 1000 },
   age: { type: Number, min: 13, max: 100, default: undefined },
   photoplayerName: { type: String, default: '', trim: true, maxlength: 100 },
   normalizedPhotoplayerName: { type: String, default: undefined, lowercase: true, trim: true, maxlength: 120 },
@@ -151,6 +151,8 @@ export interface PostReportFields {
   reporterId: mongoose.Types.ObjectId;
   reason: string;
   status: 'open' | 'resolved';
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 const postReportSchema = new mongoose.Schema<PostReportFields>({
   tenantId: { type: mongoose.Schema.Types.ObjectId, required: true, index: true },

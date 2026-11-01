@@ -1,11 +1,12 @@
 import { createHash, randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, rm, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Router, type Request, type Response, type NextFunction } from 'express';
 import mongoose from 'mongoose';
 import { LEGAL_PRIVACY_VERSION, LEGAL_TERMS_VERSION } from '@vybe/shared';
 import { Community } from '../models/Community.js';
+import { CommunityRequest } from '../models/CommunityRequest.js';
 import { CommunityJoinRequest } from '../models/CommunityJoinRequest.js';
 import { Account, Character } from '../models/Social.js';
 import { VybeAccount } from '../models/VybeAccount.js';
@@ -131,7 +132,73 @@ platformRouter.get('/communities', requireGlobal, async (request, response) => {
   response.json({ currentTenantSlug: request.vybeTenant?.slug ?? '', communities: communities.map((item) => ({ id: String(item._id), name: item.name, slug: item.slug, subdomain: item.subdomain, description: item.description, coverUrl: item.coverUrl ? `/api/communities/${item.slug}/cover` : '', logoUrl: item.logoUrl, category: item.category, memberCount: item.memberCount, requiresApproval: requiresJoinApproval(item), joinStatus: memberships.some((member) => String(member.tenantId) === String(item._id)) ? 'MEMBER' : requests.find((joinRequest) => String(joinRequest.communityId) === String(item._id))?.status ?? 'NONE' })) });
 });
 
-platformRouter.get('/community-requests', requireGlobal, (_request, response) => response.json([]));
+platformRouter.get('/community-requests', requireGlobal, async (request, response) => {
+  const account = globalAccount(request);
+  const rows = await CommunityRequest.find({ $or: [
+    { globalAccountId: account._id },
+    { applicantEmail: account.email },
+  ] }).sort({ createdAt: -1 }).limit(20).lean();
+  response.json(rows.map((row) => ({
+    id: String(row._id), rpgName: row.rpgName, slug: row.slug,
+    description: row.description, status: row.status, createdAt: row.createdAt, updatedAt: row.updatedAt,
+    photoUrl: `/api/community-requests/${String(row._id)}/photo`,
+  })));
+});
+
+platformRouter.get('/community-requests/:requestId/photo', requireGlobal, async (request, response) => {
+  if (!mongoose.isValidObjectId(request.params.requestId)) { response.status(404).end(); return; }
+  const account = globalAccount(request);
+  const row = await CommunityRequest.findOne({ _id: request.params.requestId, $or: [
+    { globalAccountId: account._id },
+    { applicantEmail: account.email },
+  ] });
+  if (!row || !/^[a-z0-9-]+$/.test(row.sourceTenantSlug) || !/^[a-f0-9]{32}\.(png|jpg|webp)$/.test(row.photoFilename)) { response.status(404).end(); return; }
+  response.sendFile(row.photoFilename, { root: resolve(uploadsDirectory, row.sourceTenantSlug) }, (error) => {
+    if (error && !response.headersSent) response.status(404).end();
+  });
+});
+
+platformRouter.post('/community-requests', requireGlobal, async (request, response) => {
+  const account = globalAccount(request);
+  const rpgName = typeof request.body?.rpgName === 'string' ? request.body.rpgName.trim() : '';
+  const description = typeof request.body?.description === 'string' ? request.body.description.trim() : '';
+  const photo = typeof request.body?.photo === 'string' ? request.body.photo : '';
+  if (rpgName.length < 2 || rpgName.length > 80) { fail(response, 400, 'O nome da comunidade deve ter entre 2 e 80 caracteres.'); return; }
+  if (description.length < 10 || description.length > 500) { fail(response, 400, 'Conte um pouco sobre a comunidade (de 10 a 500 caracteres).'); return; }
+  const imageMatch = photo.match(/^data:image\/(png|jpeg|webp);base64,([A-Za-z0-9+/=]+)$/);
+  if (!imageMatch) { fail(response, 400, 'Escolha uma imagem PNG, JPG ou WebP para a capa.'); return; }
+  const imageBytes = Buffer.from(imageMatch[2], 'base64');
+  if (imageBytes.byteLength < 16 || imageBytes.byteLength > 3 * 1024 * 1024) { fail(response, 400, 'A imagem deve ter no máximo 3 MB.'); return; }
+  const extension = imageMatch[1] === 'jpeg' ? 'jpg' : imageMatch[1];
+  const signatureMatches = extension === 'png'
+    ? imageBytes.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))
+    : extension === 'jpg' ? imageBytes[0] === 0xff && imageBytes[1] === 0xd8 && imageBytes[2] === 0xff
+      : imageBytes.subarray(0, 4).toString() === 'RIFF' && imageBytes.subarray(8, 12).toString() === 'WEBP';
+  if (!signatureMatches) { fail(response, 400, 'O arquivo escolhido não corresponde a uma imagem válida.'); return; }
+  const slug = rpgName.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40).replace(/-+$/g, '');
+  if (slug.length < 3 || new Set(['api', 'www', 'community', 'vybe', 'admin', 'app']).has(slug)) { fail(response, 400, 'Este nome não pode ser usado como endereço de comunidade.'); return; }
+  if (await Community.exists({ $or: [{ slug }, { subdomain: slug }] })) { fail(response, 409, 'Já existe uma comunidade com o endereço gerado para esse nome.'); return; }
+  if (await CommunityRequest.exists({ slug, status: 'pending' })) { fail(response, 409, 'Já existe uma solicitação aguardando aprovação para este nome.'); return; }
+  const sourceTenant = request.vybeTenant ?? await Community.findOne({ slug: process.env.VYBE_PLATFORM_TENANT_SLUG ?? 'community', status: 'active' });
+  if (!sourceTenant) { fail(response, 503, 'Não foi possível registrar a solicitação agora. Tente novamente.'); return; }
+  const filename = `${randomBytes(16).toString('hex')}.${extension}`;
+  const sourceDirectory = resolve(uploadsDirectory, sourceTenant.slug);
+  await mkdir(sourceDirectory, { recursive: true });
+  await writeFile(resolve(sourceDirectory, filename), imageBytes, { flag: 'wx', mode: 0o600 });
+  try {
+    const row = await CommunityRequest.create({
+      sourceTenantId: sourceTenant._id, sourceTenantSlug: sourceTenant.slug,
+      globalAccountId: account._id, applicantEmail: account.email,
+      applicantName: account.displayName, applicantUsername: account.username,
+      rpgName, slug, description, photoFilename: filename, photoExtension: extension, status: 'pending',
+    });
+    response.status(201).json({ id: String(row._id), rpgName: row.rpgName, slug: row.slug, description: row.description, status: row.status, createdAt: row.createdAt });
+  } catch (error) {
+    await rm(resolve(sourceDirectory, filename), { force: true });
+    if (error && typeof error === 'object' && 'code' in error && error.code === 11000) { fail(response, 409, 'Já existe uma solicitação aguardando aprovação para este nome.'); return; }
+    throw error;
+  }
+});
 
 platformRouter.get('/communities/:slug/cover', async (request, response) => {
   const community: any = await Community.findOne({ slug: request.params.slug, status: 'active', type: 'public' }).select('slug coverUrl').lean();

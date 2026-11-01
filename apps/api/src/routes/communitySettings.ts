@@ -8,10 +8,12 @@ import { Community, type CommunityDocument } from '../models/Community.js';
 import { CommunityAudit } from '../models/CommunityAudit.js';
 import { CommunityJoinRequest } from '../models/CommunityJoinRequest.js';
 import { VybeAccount } from '../models/VybeAccount.js';
-import { Account, Character, CommunityEvent } from '../models/Social.js';
+import { Account, Character, CommunityEvent, Post, PostReport } from '../models/Social.js';
+import { CommunityChannel, CommunityMessage, CommunityMessageReport } from '../models/Chat.js';
 import { AcademicRole } from '../models/Academic.js';
 import { NewsRole } from '../models/News.js';
 import { CommunitySanction } from '../models/CommunitySanction.js';
+import { CommunityContentReport } from '../models/CommunityContentReport.js';
 import { isCommunityOwner, isPlatformAppCreator, sanctionEndDate } from './communityAdminPolicy.js';
 
 export const communitySettingsRouter = Router();
@@ -80,14 +82,54 @@ communitySettingsRouter.get('/settings/community', async (request, response) => 
       Account.updateMany({ _id: { $in: expiredSanctions.map((item) => item.accountId) }, tenantId: community._id, status: 'disabled' }, { $set: { status: 'active' } }),
     ]);
   }
-  const [activeMembers, activeAccounts, teachers, newsWriters, pendingEvents, pendingEventItems] = await Promise.all([
+  const [activeMembers, activeAccounts, teachers, newsWriters, pendingEvents, pendingEventItems, postReports, messageReports, contentReports] = await Promise.all([
     Account.countDocuments({ tenantId: community._id, status: 'active' }),
     Account.find({ tenantId: community._id, status: 'active' }).select('_id createdAt').sort({ createdAt: -1 }).limit(200).lean(),
     AcademicRole.countDocuments({ tenantId: community._id, role: 'TEACHER', status: 'active' }),
     NewsRole.countDocuments({ tenantId: community._id, role: 'NEWS_WRITER', status: 'active' }),
     CommunityEvent.countDocuments({ tenantId: community._id, status: 'pending_approval' }),
     CommunityEvent.find({ tenantId: community._id, status: 'pending_approval' }).sort({ createdAt: 1 }).limit(4).lean(),
+    PostReport.find({ tenantId: community._id, status: 'open' }).sort({ createdAt: -1 }).lean(),
+    CommunityMessageReport.find({ tenantId: community._id, status: 'open' }).sort({ createdAt: -1 }).lean(),
+    CommunityContentReport.find({ tenantId: community._id, status: 'open' }).sort({ createdAt: -1 }).limit(100).lean(),
   ]);
+  const [reportedPosts, reportedMessages] = await Promise.all([
+    Post.find({ tenantId: community._id, _id: { $in: postReports.map((item) => item.postId) } }).select('characterId content imageUrl imageUrls createdAt').lean(),
+    CommunityMessage.find({ tenantId: community._id, _id: { $in: messageReports.map((item) => item.messageId) } }).select('channelId characterId content createdAt deletedAt').lean(),
+  ]);
+  const reportCharacterIds = [...new Set([
+    ...postReports.map((item) => item.reporterId.toString()), ...reportedPosts.map((item) => item.characterId.toString()),
+    ...messageReports.map((item) => item.reporterId.toString()), ...reportedMessages.map((item) => item.characterId.toString()),
+    ...contentReports.flatMap((item) => [item.reporterProfileId.toString(), ...(item.targetProfileId ? [item.targetProfileId.toString()] : [])]),
+  ])].map((id) => new mongoose.Types.ObjectId(id));
+  const [reportCharacters, reportChannels] = await Promise.all([
+    Character.find({ tenantId: community._id, _id: { $in: reportCharacterIds } }).select('displayName username avatarUrl').lean(),
+    CommunityChannel.find({ tenantId: community._id, _id: { $in: reportedMessages.map((item) => item.channelId) } }).select('name').lean(),
+  ]);
+  const reportCharacterMap = new Map(reportCharacters.map((item) => [item._id.toString(), item]));
+  const reportedPostMap = new Map(reportedPosts.map((item) => [item._id.toString(), item]));
+  const reportedMessageMap = new Map(reportedMessages.map((item) => [item._id.toString(), item]));
+  const reportChannelMap = new Map(reportChannels.map((item) => [item._id.toString(), item.name]));
+  const openReportItems = [
+    ...postReports.map((report) => {
+      const post = reportedPostMap.get(report.postId.toString());
+      const author = post ? reportCharacterMap.get(post.characterId.toString()) : undefined;
+      const reporter = reportCharacterMap.get(report.reporterId.toString());
+      const images = post ? [...new Set([post.imageUrl, ...(post.imageUrls ?? [])].filter(Boolean))] : [];
+      return { id: `post:${report._id}`, kind: 'post' as const, targetId: report.postId.toString(), reason: report.reason, createdAt: report.createdAt ?? new Date(0), reporterName: reporter?.displayName ?? 'Membro removido', reporterUsername: reporter?.username ?? '', authorName: author?.displayName ?? 'Autor indisponível', authorUsername: author?.username ?? '', content: post?.content ?? 'Publicação não disponível; ela pode ter sido removida.', images };
+    }),
+    ...messageReports.map((report) => {
+      const message = reportedMessageMap.get(report.messageId.toString());
+      const author = message ? reportCharacterMap.get(message.characterId.toString()) : undefined;
+      const reporter = reportCharacterMap.get(report.reporterId.toString());
+      return { id: `message:${report._id}`, kind: 'message' as const, targetId: report.messageId.toString(), reason: report.reason, createdAt: report.createdAt ?? new Date(0), reporterName: reporter?.displayName ?? 'Membro removido', reporterUsername: reporter?.username ?? '', authorName: author?.displayName ?? 'Autor indisponível', authorUsername: author?.username ?? '', content: message ? `${message.deletedAt ? '[Mensagem removida] ' : ''}${message.content} · #${reportChannelMap.get(message.channelId.toString()) ?? 'canal removido'}` : 'Mensagem não disponível; ela pode ter sido removida.', images: [] };
+    }),
+    ...contentReports.map((report) => {
+      const reporter = reportCharacterMap.get(report.reporterProfileId.toString());
+      const author = report.targetProfileId ? reportCharacterMap.get(report.targetProfileId.toString()) : undefined;
+      return { id: `content:${report._id}`, kind: 'content' as const, targetId: report.targetId.toString(), reason: report.reason, createdAt: report.createdAt ?? new Date(0), reporterName: reporter?.displayName ?? 'Membro removido', reporterUsername: reporter?.username ?? '', authorName: author?.displayName ?? report.targetType.replaceAll('_', ' '), authorUsername: author?.username ?? '', content: `${report.targetType.replaceAll('_', ' ')}\n${report.snapshot || 'Conteúdo não disponível.'}`, images: [] };
+    }),
+  ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   const activeCharacters = await Character.find({ tenantId: community._id, accountId: { $in: activeAccounts.map((item) => item._id) } }).select('accountId displayName username bio avatarUrl').lean();
   const activeSanctions = await CommunitySanction.find({ tenantId: community._id, status: 'active' }).sort({ createdAt: -1 }).lean();
   const sanctionedAccounts = await Account.find({ tenantId: community._id, _id: { $in: activeSanctions.map((item) => item.accountId) } }).select('email').lean();
@@ -102,7 +144,8 @@ communitySettingsRouter.get('/settings/community', async (request, response) => 
       status: community.status, brand: community.brand, rules: community.rules, memberCount: community.memberCount,
       entry: community.entry, type: community.type, settings: community.settings,
     },
-    metrics: { pendingMembers: pendingAccounts.length, teachers, newsWriters, pendingEvents, activeMembers, openReports: null },
+    metrics: { pendingMembers: pendingAccounts.length, teachers, newsWriters, pendingEvents, activeMembers, openReports: openReportItems.length },
+    reports: openReportItems,
     members: activeAccounts.map((item) => {
       const character = activeCharacters.find((person) => person.accountId.equals(item._id));
       return { accountId: item._id.toString(), joinedAt: item.createdAt, displayName: character?.displayName ?? 'Membro', username: character?.username ?? '', bio: character?.bio ?? '', avatarUrl: character?.avatarUrl ?? '' };
@@ -125,6 +168,22 @@ communitySettingsRouter.get('/settings/community', async (request, response) => 
     }),
     audit: logs.map((item) => ({ id: String(item._id), action: item.action, details: item.details, createdAt: item.createdAt, actorEmail: actorEmails.get(item.actorId.toString()) ?? 'Conta removida' })),
   });
+});
+
+communitySettingsRouter.post('/settings/community/reports/:kind/:reportId/resolve', async (request, response) => {
+  if (roleFor(request) !== 'owner') { deny(response); return; }
+  if (!['post', 'message', 'content'].includes(request.params.kind) || !mongoose.isValidObjectId(request.params.reportId)) { sendError(response, 400, 'Denúncia inválida.'); return; }
+  const community = tenant(request);
+  const report = request.params.kind === 'post'
+    ? await PostReport.findOne({ _id: request.params.reportId, tenantId: community._id, status: 'open' })
+    : request.params.kind === 'message'
+      ? await CommunityMessageReport.findOne({ _id: request.params.reportId, tenantId: community._id, status: 'open' })
+      : await CommunityContentReport.findOne({ _id: request.params.reportId, tenantId: community._id, status: 'open' });
+  if (!report) { sendError(response, 404, 'Denúncia aberta não encontrada nesta comunidade.'); return; }
+  report.status = 'resolved';
+  await report.save();
+  await audit(request, 'moderation.report.resolved', { kind: request.params.kind, reportId: report._id.toString() });
+  response.json({ saved: true, status: report.status });
 });
 
 communitySettingsRouter.post('/settings/community/members/:accountId', async (request, response) => {
@@ -245,9 +304,26 @@ communitySettingsRouter.post('/settings/community/team', async (request, respons
   const community = tenant(request);
   const { operation, email, staffRole, accountId: targetId } = request.body ?? {};
   if (operation === 'add') {
-    if (typeof email !== 'string' || !['admin', 'moderator'].includes(staffRole)) { sendError(response, 400, 'Informe e-mail e função válidos.'); return; }
-    const target = await Account.findOne({ tenantId: community._id, email: email.trim().toLowerCase(), status: 'active' });
-    if (!target) { sendError(response, 404, 'Não encontrei uma conta ativa com esse e-mail nesta comunidade.'); return; }
+    if ((!mongoose.isValidObjectId(targetId) && typeof email !== 'string') || !['owner', 'admin', 'moderator'].includes(staffRole)) { sendError(response, 400, 'Selecione um membro e uma função válidos.'); return; }
+    const target = await Account.findOne({ tenantId: community._id, ...(mongoose.isValidObjectId(targetId) ? { _id: targetId } : { email: (email as string).trim().toLowerCase() }), status: 'active' });
+    if (!target) { sendError(response, 404, 'Não encontrei um membro ativo com essa identificação nesta comunidade.'); return; }
+    if (staffRole === 'owner') {
+      if (request.body?.confirmation !== community.name) { sendError(response, 400, 'Digite o nome exato da comunidade para confirmar a transferência de Owner.'); return; }
+      const previousOwnerId = ownerId(community);
+      if (previousOwnerId?.equals(target._id)) { sendError(response, 400, 'Esta pessoa já é Owner da comunidade.'); return; }
+      if (previousOwnerId) {
+        community.admins = community.admins.filter((id) => !id.equals(previousOwnerId));
+        community.moderators = community.moderators.filter((id) => !id.equals(previousOwnerId));
+      }
+      community.moderators = community.moderators.filter((id) => !id.equals(target._id));
+      if (!community.admins.some((id) => id.equals(target._id))) community.admins.push(target._id);
+      community.ownerAccountId = target._id;
+      community.ownerEmail = target.email;
+      await community.save();
+      await audit(request, 'risk.ownership.transferred', { previousOwnerId: previousOwnerId?.toString(), newOwnerId: target._id.toString() });
+      response.json({ saved: true, role: 'owner' });
+      return;
+    }
     if (ownerId(community)?.equals(target._id) && staffRole !== 'admin') { sendError(response, 400, 'O Owner não pode ser rebaixado para Moderator.'); return; }
     if (staffRole === 'admin') {
       if (!community.admins.some((id) => id.equals(target._id))) community.admins.push(target._id);

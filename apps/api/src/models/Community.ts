@@ -43,7 +43,7 @@ const communitySchema = new mongoose.Schema<CommunityFields>({
   coverUrl: { type: String, default: '', maxlength: 300 },
   wallpaperUrl: { type: String, default: '', maxlength: 300 },
   logoUrl: { type: String, default: '', maxlength: 300 },
-  category: { type: String, default: 'RPG', trim: true, maxlength: 60 },
+  category: { type: String, default: '', trim: true, maxlength: 60 },
   memberCount: { type: Number, min: 0, default: 0 },
   type: { type: String, enum: ['public'], default: 'public', required: true },
   entry: { type: String, enum: ['open', 'approval'], default: 'open', required: true },

@@ -57,6 +57,8 @@ export interface MessageReportFields {
   reporterId: mongoose.Types.ObjectId;
   reason: string;
   status: 'open' | 'resolved';
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 const messageReportSchema = new mongoose.Schema<MessageReportFields>({
   tenantId: { type: mongoose.Schema.Types.ObjectId, required: true, index: true },

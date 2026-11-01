@@ -28,9 +28,10 @@ mediaRouter.get('/:tenantSlug/message-:filename', requireSession, async (request
   if (!profile && !canReadConversationFile) { response.status(404).end(); return; }
   response.sendFile(`message-${filename}`, { root: resolve(uploadsDirectory, tenant.slug) }, (error) => { if (error && !response.headersSent) response.status(404).end(); });
 });
-mediaRouter.get('/:tenantSlug/:filename', async (request, response) => {
+mediaRouter.get('/:tenantSlug/:filename', requireSession, async (request, response) => {
   const tenant = request.vybeTenant!;
-  const { tenantSlug, filename } = request.params;
+  const tenantSlug = String(request.params.tenantSlug);
+  const filename = String(request.params.filename);
   if (tenantSlug !== tenant.slug || !/^[a-f0-9]{32}\.(png|jpg|webp)$/.test(filename)) {
     response.status(404).end();
     return;

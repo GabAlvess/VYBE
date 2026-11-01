@@ -18,16 +18,6 @@ chatRouter.use((request, response, next) => {
   next();
 });
 
-const defaults: Array<{ name: string; category: string; description: string; kind: ChannelKind; posting: ChannelPosting }> = [
-  { name: 'geral', category: 'Geral', description: 'Conversa aberta da comunidade.', kind: 'text', posting: 'members' },
-  { name: 'apresentacoes', category: 'Geral', description: 'Conte um pouco sobre seu personagem.', kind: 'text', posting: 'members' },
-  { name: 'conversa-livre', category: 'Geral', description: 'Assuntos e encontros do dia a dia.', kind: 'text', posting: 'members' },
-  { name: 'praca-central', category: 'Roleplay', description: 'Um ponto de encontro no coração da cidade.', kind: 'roleplay', posting: 'members' },
-  { name: 'universidade', category: 'Roleplay', description: 'Cenas e histórias no campus.', kind: 'roleplay', posting: 'members' },
-  { name: 'avisos', category: 'Comunidade', description: 'Comunicados oficiais da comunidade.', kind: 'announcement', posting: 'staff' },
-  { name: 'ajuda', category: 'Comunidade', description: 'Dúvidas e apoio entre personagens.', kind: 'text', posting: 'members' },
-];
-
 function tenantId(request: Request) { return request.vybeTenant!._id; }
 function characterId(request: Request) { return request.vybeCharacter!._id; }
 function isStaff(request: Request) { const tenant = request.vybeTenant!; const account = request.vybeAccount!; return tenant.admins.some((id) => id.equals(account._id)) || tenant.moderators.some((id) => id.equals(account._id)); }
@@ -43,18 +33,10 @@ function characterJson(character: { _id: mongoose.Types.ObjectId; username: stri
 
 chatRouter.get('/conversations/channels', async (request, response) => {
   const tenant = tenantId(request);
-  await Promise.all(defaults.map((channel) => CommunityChannel.updateOne(
-    { tenantId: tenant, name: channel.name },
-    { $setOnInsert: { ...channel, tenantId: tenant, private: false, createdBy: null } },
-    { upsert: true },
-  )));
   const filter = tenantScope(tenant, isStaff(request) ? {} : { private: false });
   const channels = await CommunityChannel.find(filter).lean();
-  const categoryOrder = ['Geral', 'Roleplay', 'Comunidade'];
   channels.sort((left, right) => {
-    const leftCategory = categoryOrder.indexOf(left.category);
-    const rightCategory = categoryOrder.indexOf(right.category);
-    return (leftCategory < 0 ? categoryOrder.length : leftCategory) - (rightCategory < 0 ? categoryOrder.length : rightCategory) || left.category.localeCompare(right.category, 'pt-BR') || left.name.localeCompare(right.name);
+    return left.category.localeCompare(right.category, 'pt-BR') || left.name.localeCompare(right.name, 'pt-BR');
   });
   response.json(channels.map(channelJson));
 });

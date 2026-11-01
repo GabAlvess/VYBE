@@ -3,8 +3,12 @@ import mongoose, { type HydratedDocument } from 'mongoose';
 export interface CommunityRequestFields {
   sourceTenantId: mongoose.Types.ObjectId;
   sourceTenantSlug: string;
-  accountId: mongoose.Types.ObjectId;
-  characterId: mongoose.Types.ObjectId;
+  accountId?: mongoose.Types.ObjectId;
+  characterId?: mongoose.Types.ObjectId;
+  globalAccountId?: mongoose.Types.ObjectId;
+  applicantEmail: string;
+  applicantName: string;
+  applicantUsername: string;
   rpgName: string;
   slug: string;
   description: string;
@@ -22,8 +26,12 @@ export type CommunityRequestDocument = HydratedDocument<CommunityRequestFields>;
 const communityRequestSchema = new mongoose.Schema<CommunityRequestFields>({
   sourceTenantId: { type: mongoose.Schema.Types.ObjectId, required: true, index: true },
   sourceTenantSlug: { type: String, required: true, trim: true, lowercase: true },
-  accountId: { type: mongoose.Schema.Types.ObjectId, required: true, index: true },
-  characterId: { type: mongoose.Schema.Types.ObjectId, required: true },
+  accountId: { type: mongoose.Schema.Types.ObjectId, index: true },
+  characterId: { type: mongoose.Schema.Types.ObjectId },
+  globalAccountId: { type: mongoose.Schema.Types.ObjectId, index: true },
+  applicantEmail: { type: String, required: true, lowercase: true, trim: true, maxlength: 254, default: '' },
+  applicantName: { type: String, required: true, trim: true, maxlength: 60, default: 'Membro' },
+  applicantUsername: { type: String, required: true, trim: true, lowercase: true, maxlength: 24, default: '' },
   rpgName: { type: String, required: true, trim: true, minlength: 2, maxlength: 80 },
   slug: { type: String, required: true, trim: true, lowercase: true, maxlength: 40 },
   description: { type: String, required: true, trim: true, minlength: 10, maxlength: 500 },

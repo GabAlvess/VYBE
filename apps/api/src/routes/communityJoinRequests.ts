@@ -137,7 +137,7 @@ communityJoinRequestsRouter.post('/communities/:slug/join-requests', async (requ
   if (imageData) {
     try { image = await savePhotoplayerImage(imageData, community.slug); }
     catch (error) { fail(response, 400, error instanceof Error ? error.message : 'Não foi possível validar a foto.'); return; }
-  } else if (oldRequest?.status === 'NEEDS_INFORMATION' && !oldRequest.requestedChanges.includes('photoplayer')) {
+  } else if (oldRequest && oldRequest.normalizedPhotoplayerName === normalizedPhotoplayerName && (oldRequest.status === 'REJECTED' || (oldRequest.status === 'NEEDS_INFORMATION' && !oldRequest.requestedChanges.includes('photoplayer')))) {
     image = { filename: oldRequest.photoplayerImageFilename, extension: oldRequest.photoplayerImageExtension };
   } else { fail(response, 400, 'Envie a foto do photoplayer.'); return; }
   const record = {
