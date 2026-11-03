@@ -11,6 +11,7 @@ import { communityJoinRequestsRouter } from './communityJoinRequests.js';
 import { Account, Character, Session, type AccountDocument } from '../models/Social.js';
 import { clearGlobalSessionCookie, clearSessionCookie, hashSessionToken, requireSession, requireTenant, setSessionCookie } from '../middleware/tenant.js';
 import { socialRouter } from './social.js';
+import { verificationRouter } from './verification.js';
 import { chatRouter } from './chat.js';
 import { communitySettingsRouter } from './communitySettings.js';
 import { matchRouter } from './match.js';
@@ -23,6 +24,8 @@ import { CommunitySanction } from '../models/CommunitySanction.js';
 import { VybeSession } from '../models/VybeSession.js';
 import { VybeAccount } from '../models/VybeAccount.js';
 import { communityReportsRouter } from './communityReports.js';
+import { isVerificationActive } from '../services/verifiedSocialBenefits.js';
+import { resolveProfileCustomization, type CustomizationApp } from '../services/profileCustomization.js';
 
 export const tenantRouter = Router();
 tenantRouter.use(requireTenant);
@@ -44,8 +47,9 @@ async function claimCommunityOwnership(community: CommunityDocument, user: Accou
   await community.save();
 }
 
-function publicCharacter(character: { _id: mongoose.Types.ObjectId; username: string; displayName: string; communityFunction?: string; bio: string; age?: number; photoplayerName?: string; photoplayerImageUrl?: string; avatarUrl: string; coverUrl: string; followerCount: number; followingCount: number; postCount: number; verification?: { verifiedAt?: Date; removedAt?: Date } }) {
-  return { id: character._id.toString(), username: character.username, displayName: character.displayName, communityFunction: character.communityFunction ?? '', bio: character.bio, age: character.age, photoplayerName: character.photoplayerName ?? '', photoplayerImageUrl: character.photoplayerImageUrl ?? '', avatarUrl: character.avatarUrl, coverUrl: character.coverUrl, followerCount: character.followerCount, followingCount: character.followingCount, postCount: character.postCount, verified: Boolean(character.verification?.verifiedAt && !character.verification.removedAt) };
+function publicCharacter(character: { _id: mongoose.Types.ObjectId; username: string; displayName: string; communityFunction?: string; bio: string; age?: number; photoplayerName?: string; photoplayerImageUrl?: string; avatarUrl: string; coverUrl: string; followerCount: number; followingCount: number; postCount: number; verification?: { status?: string; verifiedAt?: Date; activatedAt?: Date; expiresAt?: Date | null; removedAt?: Date }; profileCustomization?: { nameColor?: string; nameFont?: string; avatarFrame?: string; profileTheme?: string }; profileCustomizations?: Partial<Record<CustomizationApp, { nameColor?: string; nameFont?: string; avatarFrame?: string; profileTheme?: string }>> }) {
+  const verified = isVerificationActive(character.verification);
+  return { id: character._id.toString(), username: character.username, displayName: character.displayName, communityFunction: character.communityFunction ?? '', bio: character.bio, age: character.age, photoplayerName: character.photoplayerName ?? '', photoplayerImageUrl: character.photoplayerImageUrl ?? '', avatarUrl: character.avatarUrl, coverUrl: character.coverUrl, followerCount: character.followerCount, followingCount: character.followingCount, postCount: character.postCount, verified, ...(verified ? { profileCustomization: resolveProfileCustomization(character.profileCustomizations, character.profileCustomization, 'SOCIAL') } : {}) };
 }
 
 async function issueSession(request: Request, response: Response, accountId: mongoose.Types.ObjectId, characterId: mongoose.Types.ObjectId) {
@@ -250,6 +254,7 @@ tenantRouter.patch('/me/character', async (request, response) => {
 });
 
 tenantRouter.use(socialRouter);
+tenantRouter.use(verificationRouter);
 tenantRouter.use('/match', matchRouter);
 tenantRouter.use('/messages-v2', messagesAppRouter);
 tenantRouter.use(chatRouter);

@@ -11,6 +11,8 @@ import { CommunityJoinRequest } from '../models/CommunityJoinRequest.js';
 import { Account, Character } from '../models/Social.js';
 import { VybeAccount } from '../models/VybeAccount.js';
 import { VybeSession } from '../models/VybeSession.js';
+import { ensureProvisioningCollections, provisionApprovedCommunity } from '../services/communityProvisioning.js';
+import { isConfiguredPlatformAdmin } from '../services/platformAdminPolicy.js';
 import { requireSession } from '../middleware/tenant.js';
 
 export const communityRequestsRouter = Router();
@@ -46,12 +48,7 @@ function isPlatformAdmin(request: Request) {
 
   // Platform administrators are configured on the server; display names and
   // character usernames are user editable and must never grant review access.
-  const configuredAdmins = (process.env.VYBE_PLATFORM_ADMIN_EMAILS ?? '')
-    .split(',')
-    .map((email) => email.trim().toLowerCase())
-    .filter(Boolean);
-  return tenant.admins.some((adminId) => adminId.equals(account._id))
-    || configuredAdmins.includes(account.email.toLowerCase());
+  return isConfiguredPlatformAdmin(account.email);
 }
 
 function denyReview(response: Response) {
@@ -274,30 +271,39 @@ communityRequestsRouter.patch('/platform/community-requests/:requestId', async (
   const destinationDirectory = resolve(uploadsDirectory, row.slug);
   const sourcePhoto = resolve(uploadsDirectory, row.sourceTenantSlug, row.photoFilename);
   const destinationPhoto = resolve(destinationDirectory, row.photoFilename);
-  const applicantAccount = row.accountId
-    ? await Account.findOne({ _id: row.accountId, tenantId: row.sourceTenantId }).select('email').lean()
-    : null;
-  let createdCommunityId: mongoose.Types.ObjectId | undefined;
+  let copiedPhoto = false;
   try {
+    await ensureProvisioningCollections();
     await mkdir(destinationDirectory, { recursive: true });
     await copyFile(sourcePhoto, destinationPhoto);
-    const community = await Community.create({
-      name: row.rpgName, slug: row.slug, subdomain: row.slug, description: row.description,
-      coverUrl: `/media/${row.slug}/${row.photoFilename}`,
-      type: 'public', entry: 'open', status: 'active', category: '', memberCount: 0, admins: [], moderators: [], rules: [], ownerEmail: applicantAccount?.email ?? row.applicantEmail,
-      brand: { primary: '#16815D', dark: '#0D6248', medium: '#35A67A', soft: '#F2FAF6', lilac: '#DDF3EA', white: '#FFFFFF', graphite: '#1F2422' },
-    });
-    createdCommunityId = community._id;
+    copiedPhoto = true;
+    const session = await mongoose.startSession();
+    let community: InstanceType<typeof Community> | undefined;
+    try {
+      await session.withTransaction(async () => {
+        const pendingRequest = await CommunityRequest.findOne({ _id: row._id, status: 'pending' }).session(session);
+        if (!pendingRequest) throw new Error('Solicitação não encontrada ou já revisada.');
+        community = await provisionApprovedCommunity(pendingRequest, request.vybeAccount!._id, session);
+        pendingRequest.status = 'approved';
+        pendingRequest.reviewedBy = request.vybeAccount!._id;
+        pendingRequest.reviewedAt = reviewedAt;
+        await pendingRequest.save({ session });
+      });
+    } finally {
+      await session.endSession();
+    }
+    if (!community) throw new Error('A aprovação não criou a comunidade.');
     row.status = 'approved';
     row.reviewedBy = request.vybeAccount!._id;
     row.reviewedAt = reviewedAt;
-    await row.save();
     response.json({ id: row._id.toString(), status: row.status, communityId: community._id.toString() });
   } catch (error) {
-    if (createdCommunityId) await Community.deleteOne({ _id: createdCommunityId }).catch(() => undefined);
-    await rm(destinationPhoto, { force: true }).catch(() => undefined);
+    if (copiedPhoto) await rm(destinationPhoto, { force: true }).catch(() => undefined);
     if (error && typeof error === 'object' && 'code' in error && error.code === 11000) {
       response.status(409).json({ error: 'O endereço de comunidade já está em uso.' }); return;
+    }
+    if (error instanceof Error && error.message === 'Solicitação não encontrada ou já revisada.') {
+      response.status(404).json({ error: error.message }); return;
     }
     throw error;
   }

@@ -27,8 +27,8 @@ function sendError(response: Response, status: number, error: string) { response
 function channelJson(channel: { _id: mongoose.Types.ObjectId; name: string; category: string; description: string; kind: ChannelKind; posting: ChannelPosting; private: boolean }) {
   return { id: channel._id.toString(), name: channel.name, category: channel.category, description: channel.description, kind: channel.kind, posting: channel.posting, private: channel.private };
 }
-function characterJson(character: { _id: mongoose.Types.ObjectId; username: string; displayName: string; avatarUrl: string; verification?: { verifiedAt?: Date; removedAt?: Date } }) {
-  return { id: character._id.toString(), username: character.username, displayName: character.displayName, avatarUrl: character.avatarUrl, verified: Boolean(character.verification?.verifiedAt && !character.verification.removedAt) };
+function characterJson(character: { _id: mongoose.Types.ObjectId; username: string; displayName: string; avatarUrl: string; verification?: { status?: string; verifiedAt?: Date; activatedAt?: Date; expiresAt?: Date | null; removedAt?: Date } }) {
+  return { id: character._id.toString(), username: character.username, displayName: character.displayName, avatarUrl: character.avatarUrl, verified: (character.verification?.status === 'ACTIVE' || (!character.verification?.status && Boolean(character.verification?.verifiedAt))) && (!character.verification?.expiresAt || character.verification.expiresAt > new Date()) && !character.verification?.removedAt };
 }
 
 chatRouter.get('/conversations/channels', async (request, response) => {

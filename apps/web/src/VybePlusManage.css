@@ -1,0 +1,62 @@
+.social-app.manage-vybe-plus{min-height:100vh;background:#f7f3eb;color:#243f3e}
+.social-app.manage-vybe-plus .social-workspace{margin-left:0;padding:0 clamp(18px,4vw,58px) 52px}
+.social-app.manage-vybe-plus .social-topbar{width:100%;min-height:76px;margin:0 auto 8px;padding:7px 0}
+.social-app.manage-vybe-plus .social-topbar>.brand{flex:0 0 auto}
+.social-app.manage-vybe-plus .social-page-layout{width:100%;max-width:none;display:block;margin:0}
+.social-app.manage-vybe-plus .social-route-column{width:100%}
+.social-app.manage-vybe-plus .vybe-plus-community-menu{margin:0}
+.social-app.manage-vybe-plus .vybe-plus-manage-header-link{padding:9px 14px;border:1px solid #e8dfd3;border-radius:999px;color:#2f706c;font-weight:700;text-decoration:none}
+.vybe-plus-manage-page{width:100%;padding:17px 0 56px;color:#234b4b}
+.vybe-plus-manage-breadcrumb{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 0 12px;color:#82908a;font-size:12px}
+.vybe-plus-manage-breadcrumb a{color:#397a72;font-weight:700;text-decoration:none}
+.vybe-plus-manage-breadcrumb span{color:#71807a}.vybe-plus-manage-breadcrumb b{margin:0 6px;color:#c2a877}
+.vybe-plus-manage-heading{margin:0 0 22px}.vybe-plus-manage-heading>span{color:#b29156}.vybe-plus-manage-heading h1{font-size:clamp(32px,4vw,44px)}
+.vybe-plus-manage-layout{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(280px,.85fr);align-items:start;gap:20px}
+.vybe-plus-manage-primary,.vybe-plus-manage-secondary{display:grid;min-width:0;gap:16px}
+.vybe-plus-manage-layout .vybe-plus-manage-status,.vybe-plus-manage-layout .vybe-plus-manage-customization,.vybe-plus-manage-layout .vybe-plus-manage-apps,.vybe-plus-manage-layout .vybe-plus-manage-preview,.vybe-plus-manage-layout .vybe-plus-manage-community,.vybe-plus-manage-layout .vybe-plus-manage-history,.vybe-plus-manage-layout .vybe-plus-manage-support{margin:0}
+.vybe-plus-manage-layout .vybe-plus-manage-status{grid-template-columns:auto minmax(0,1fr) minmax(190px,.75fr);padding:22px;background:linear-gradient(125deg,#fffdf8,#f6f2e7)}
+.vybe-plus-manage-layout .vybe-plus-manage-status h2{font-size:24px}
+.vybe-plus-manage-layout .vybe-plus-manage-customization,.vybe-plus-manage-layout .vybe-plus-manage-apps{padding:22px;border-color:#e8dfd3;border-radius:22px;background:#fffdf9;box-shadow:0 8px 24px #40301b08}
+.vybe-plus-manage-customization>header h2,.vybe-plus-manage-apps>header h2{font-size:23px}
+.vybe-plus-manage-apps>div{gap:12px}
+.vybe-plus-manage-apps article{grid-template-columns:auto minmax(0,1fr);min-height:172px;padding:17px;border-color:#eee5da;border-radius:18px;background:#fffdfa}
+.vybe-plus-manage-apps article>span{width:43px;height:43px;background:#e5f1eb;color:#317c72}
+.vybe-plus-manage-apps article:nth-child(2)>span{background:#efebf9;color:#7770ac}
+.vybe-plus-manage-apps article:nth-child(3)>span{background:#faeae4;color:#cb7868}
+.vybe-plus-manage-apps article>div{display:flex;min-width:0;flex-direction:column;align-items:flex-start}
+.vybe-plus-manage-apps article p{min-height:56px}
+.vybe-plus-manage-apps article strong{display:inline-flex;align-items:center;gap:5px;margin:0 0 10px;padding:4px 8px;border-radius:99px;background:#e7f3ec;color:#287863;font-size:10px;letter-spacing:.05em}
+.vybe-plus-manage-apps article strong i{font-style:normal}
+.vybe-plus-manage-apps article>div>a{display:inline-flex;align-items:center;gap:5px;color:#397a72;font-size:12px;font-weight:700;text-decoration:none}
+.vybe-plus-manage-preview,.vybe-plus-manage-history{display:grid;justify-items:center;gap:10px;padding:21px;border:1px solid #e8dfd3;border-radius:22px;background:#fffdf9;box-shadow:0 8px 24px #40301b08}
+.vybe-plus-manage-preview{background:linear-gradient(140deg,#fffdf9,#edf4ef)}
+.vybe-plus-manage-preview.theme-teal{background:linear-gradient(140deg,#fffdf9,#e6f3ef)}
+.vybe-plus-manage-preview.theme-coral{background:linear-gradient(140deg,#fffdf9,#faeae5)}
+.vybe-plus-manage-preview.theme-lilac{background:linear-gradient(140deg,#fffdf9,#f0edf9)}
+.vybe-plus-manage-preview.theme-gold{background:linear-gradient(140deg,#fffdf9,#f8f0df)}
+.vybe-plus-manage-preview>header{display:flex;width:100%;align-items:center;gap:7px;margin-bottom:5px;color:#9b865f;font-size:10px;font-weight:800;letter-spacing:.15em}
+.vybe-plus-manage-preview>header .material-symbol{font-size:17px}
+.vybe-plus-manage-preview-avatar{width:84px;height:84px;font-size:27px}
+.vybe-plus-manage-preview>.verified-name{color:#294c4b;font-size:21px;font-weight:750}
+.vybe-plus-manage-preview>small{color:#77827e;font-size:13px}
+.vybe-plus-manage-preview-caption{color:#9aa19d;font-size:11px}
+.vybe-plus-manage-layout .vybe-plus-manage-community{padding:16px;border-radius:18px;background:#fffdf9}
+.vybe-plus-manage-community>div{min-width:0}
+.vybe-plus-manage-community strong{overflow-wrap:anywhere}
+.vybe-plus-manage-community em{width:100%;margin:2px 0 0;font-size:11px}
+.vybe-plus-manage-history{justify-items:stretch;padding:18px}
+.vybe-plus-manage-history>header{display:flex;align-items:center;gap:8px;color:#a58a55}
+.vybe-plus-manage-history>header h2{margin:0;color:#294c4b;font-size:17px}
+.vybe-plus-manage-history ol{display:grid;gap:0;margin:0;padding:0;list-style:none}
+.vybe-plus-manage-history li{display:flex;gap:10px;padding:11px 0}
+.vybe-plus-manage-history li+li{border-top:1px solid #f0e8de}
+.vybe-plus-manage-history li>i{width:9px;height:9px;flex:none;margin:5px 0 0;border-radius:50%;background:#bba16a;box-shadow:0 0 0 4px #f6f0e3}
+.vybe-plus-manage-history li>span{display:grid;gap:4px}
+.vybe-plus-manage-history li strong{color:#39524d;font-size:12px}
+.vybe-plus-manage-history li small{color:#89928d;font-size:10px}
+.vybe-plus-manage-layout .vybe-plus-manage-support{align-items:flex-start;flex-direction:column;padding:18px}
+.vybe-plus-manage-layout .vybe-plus-manage-support>div{align-items:flex-start}
+.vybe-plus-manage-layout .vybe-plus-manage-support button{width:100%}
+.vybe-plus-manage-empty{display:grid;justify-items:center;gap:12px}.vybe-plus-manage-empty>strong{color:#294c4b;font-size:18px}.vybe-plus-manage-empty>p{margin:0}
+@media(max-width:900px){.vybe-plus-manage-layout{grid-template-columns:minmax(0,1fr) minmax(250px,.8fr)}.vybe-plus-manage-layout .vybe-plus-manage-status{grid-template-columns:auto minmax(0,1fr)}.vybe-plus-manage-layout .vybe-plus-manage-status dl{grid-column:1/-1}.vybe-plus-manage-apps>div{grid-template-columns:1fr}}
+@media(max-width:680px){.social-app.manage-vybe-plus{padding-bottom:0}.social-app.manage-vybe-plus .social-workspace{padding:0 15px 32px}.social-app.manage-vybe-plus .social-topbar{min-height:58px;gap:8px}.social-app.manage-vybe-plus .social-topbar>.brand{max-width:76px}.social-app.manage-vybe-plus .vybe-plus-community-menu{display:none}.vybe-plus-manage-breadcrumb{align-items:flex-start;flex-direction:column;gap:7px}.vybe-plus-manage-layout{grid-template-columns:1fr}.vybe-plus-manage-primary{order:1}.vybe-plus-manage-secondary{order:0}.vybe-plus-manage-layout .vybe-plus-manage-status{grid-template-columns:auto 1fr;padding:17px}.vybe-plus-manage-layout .vybe-plus-manage-status dl{grid-column:1/-1;padding:13px 0 0;border-top:1px solid #eee5da;border-left:0}.vybe-plus-manage-layout .vybe-plus-manage-apps>div{grid-template-columns:1fr}.vybe-plus-manage-layout .vybe-plus-manage-apps article{min-height:unset}.vybe-plus-manage-layout .vybe-plus-manage-support{align-items:stretch}}

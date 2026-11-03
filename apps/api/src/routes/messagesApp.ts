@@ -77,7 +77,13 @@ async function attachmentFrom(value: unknown, slug: string) {
   await writeFile(resolve(uploads, filename), bytes, { flag: 'wx', mode: 0o600 });
   return { url: `/media/${slug}/${filename}`, name: item.name.trim().slice(0,180) || `arquivo.${extensionByMime[mimeType]}`, mimeType, size: bytes.length };
 }
-function messageJson(message: any, me: mongoose.Types.ObjectId) { return { id: message._id.toString(), senderProfileId: message.senderProfileId.toString(), content: message.deletedAt ? 'Mensagem removida.' : message.content, messageType: message.messageType, attachment: message.deletedAt ? null : message.attachment ?? null, replyToMessageId: message.replyToMessageId?.toString() ?? null, favorite: message.favoriteBy?.some((id: mongoose.Types.ObjectId) => id.equals(me)) ?? false, favoriteCount: message.favoriteBy?.length ?? 0, deleted: Boolean(message.deletedAt), readAt: message.readAt ?? null, createdAt: message.createdAt }; }
+function messageJson(message: any, me: mongoose.Types.ObjectId) {
+  const storedAttachment = message.deletedAt ? null : message.attachment;
+  const attachment = storedAttachment && typeof storedAttachment.url === 'string' && storedAttachment.url
+    ? { url: storedAttachment.url, name: storedAttachment.name ?? '', mimeType: storedAttachment.mimeType ?? '', size: storedAttachment.size ?? 0 }
+    : null;
+  return { id: message._id.toString(), senderProfileId: message.senderProfileId.toString(), own: message.senderProfileId.equals(me), content: message.deletedAt ? 'Mensagem removida.' : message.content, messageType: message.messageType, attachment, replyToMessageId: message.replyToMessageId?.toString() ?? null, favorite: message.favoriteBy?.some((id: mongoose.Types.ObjectId) => id.equals(me)) ?? false, favoriteCount: message.favoriteBy?.length ?? 0, deleted: Boolean(message.deletedAt), readAt: message.readAt ?? null, createdAt: message.createdAt };
+}
 async function summary(request: Request, conversation: any) {
   const me = selfId(request);
   const others = conversation.participants.filter((p: any) => !p.profileId.equals(me) && !p.leftAt);
@@ -234,7 +240,7 @@ messagesAppRouter.post('/conversations/:conversationId/messages', async (request
   conversation.lastMessageAt = message.createdAt; await conversation.save();
   const notifyIds = conversation.participants.filter((participant) => !participant.profileId.equals(me) && !participant.leftAt && !participant.mutedAt).map((participant) => participant.profileId);
   if (notifyIds.length) await Notification.insertMany(notifyIds.map((characterId) => ({ tenantId: tenantId(request), characterId, actorId: me, type: 'message' as const, targetId: message._id })));
-  emitToProfiles(tenantId(request).toString(), conversation.participants.filter((participant) => !participant.leftAt).map((participant) => participant.profileId), { type: 'message:new', conversationId: conversation._id.toString(), messageId: message._id.toString() });
+  emitToProfiles(tenantId(request).toString(), conversation.participants.filter((participant) => !participant.leftAt && !participant.profileId.equals(me)).map((participant) => participant.profileId), { type: 'message:new', conversationId: conversation._id.toString(), messageId: message._id.toString() });
   if (conversation.kind === 'direct' && recipients[0]) {
     emitToProfiles(tenantId(request).toString(), [me], { type: 'direct:message', otherProfileId: recipients[0].toString(), messageId: message._id.toString() });
     emitToProfiles(tenantId(request).toString(), [recipients[0]], { type: 'direct:message', otherProfileId: me.toString(), messageId: message._id.toString() });

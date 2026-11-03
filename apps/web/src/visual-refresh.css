@@ -1,0 +1,142 @@
+/* Shared VYBE visual language: warm canvas, calm teal, restrained surfaces. */
+:root {
+  color-scheme: light;
+  --vybe-teal: #246b6e;
+  --vybe-teal-deep: #17494b;
+  --vybe-cream: #f7f2e8;
+  --vybe-coral: #e8867b;
+  --vybe-lilac: #8d86c9;
+  --vybe-gold: #c5a46d;
+  --vybe-ink: #253536;
+  --vybe-warm-muted: #727978;
+  --vybe-line: #e8e2d8;
+}
+
+body { color: var(--vybe-ink); background: #fcfaf6; }
+button, input, select, textarea { font-family: inherit; }
+input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visible {
+  outline-color: var(--vybe-teal);
+}
+
+/* Account entry keeps its existing split layout and form behavior. */
+.login-page.auth-split { background: #fcfaf6; }
+.auth-panel { background: #fcfaf6; }
+.auth-panel::before {
+  background: radial-gradient(ellipse at 15% 10%, #f1d8d0 0 17%, transparent 18%),
+    radial-gradient(ellipse at 24% 18%, #f7ece1 0 35%, transparent 36%),
+    linear-gradient(145deg, #f7f2e8 0%, #fcfaf6 66%, transparent 67%);
+}
+.auth-panel::after { background: radial-gradient(ellipse at 78% 70%, #e4eeee 0, #f4f3ed 38%, transparent 70%); }
+.auth-brand .brand-symbol { color: var(--vybe-teal); }
+.auth-brand .brand-symbol path:last-child { fill: #69aaa4; }
+.auth-card .card-heading h1 { color: var(--vybe-ink); }
+.auth-card .card-subtitle, .auth-switch { color: var(--vybe-warm-muted); }
+.auth-card .input-wrap { border-color: var(--vybe-line); background: #fffefa; }
+.auth-card .input-wrap:focus-within { border-color: #8bb8b4; box-shadow: 0 0 0 3px #246b6e18; }
+.auth-card .password-label a, .auth-switch button, .auth-card .terms-row a { color: var(--vybe-teal); }
+.auth-card .submit-button { background: linear-gradient(115deg, var(--vybe-teal-deep), var(--vybe-teal)); box-shadow: 0 8px 20px #17494b20; }
+.auth-card .submit-button:hover { background: linear-gradient(115deg, #123e40, #1d5d60); }
+.google-auth-button { border-color: var(--vybe-line); background: #fffefa; }
+.auth-app-social > span { background: #e5f0ec; color: var(--vybe-teal); }
+.auth-app-pulse > span { background: #eeebf8; color: var(--vybe-lilac); }
+.auth-app-match > span { background: #fae9e4; color: #c96861; }
+.auth-app-messages > span { background: #e8f0f1; color: #668fa3; }
+.auth-app-bank > span { background: #f4eddf; color: #a4854c; }
+.auth-tagline { color: #8b928d; }
+.auth-visual { background-color: var(--vybe-teal-deep); }
+
+/* Community selection and application flows. */
+.community-picker, .communities-app, .community-join-page { background: radial-gradient(ellipse at 8% 22%, #f2e4d9 0, transparent 28%), radial-gradient(ellipse at 92% 88%, #e5eeee 0, transparent 32%), #fcfaf6; color: var(--vybe-ink); }
+.picker-content h1, .communities-heading h1 { color: var(--vybe-teal-deep) !important; }
+.picker-eyebrow { color: var(--vybe-teal); }
+.picker-description { color: #6d7775; }
+.picker-community, .community-card, .picker-own-requests, .picker-managed-list,
+.picker-request-modal, .picker-review-card, .join-preview-card {
+  border-color: var(--vybe-line) !important;
+  border-radius: 22px !important;
+  background-color: #fffefa !important;
+  box-shadow: 0 8px 24px #493a260a;
+}
+.picker-community { background: linear-gradient(180deg, #fffefa, #fbf6ed) !important; }
+.picker-community:hover { border-color: #b7d0cb !important; box-shadow: 0 14px 30px #493a2618; }
+.picker-card-body h2 { color: var(--vybe-teal-deep); }
+.picker-card-body > p { color: #6d7775; }
+.picker-emblem { background: linear-gradient(135deg, var(--vybe-teal-deep), #43898a); }
+.picker-members b { background: #e1eeeb; color: var(--vybe-teal-deep); }
+.picker-search, .community-search, .picker-controls input, .picker-controls select {
+  border-color: var(--vybe-line) !important;
+  background: #fffefa !important;
+}
+.picker-create-button, .create-community-button, .picker-community .primary-button {
+  background: var(--vybe-teal) !important;
+  color: #fff !important;
+}
+.picker-create-button { border-color: var(--vybe-teal) !important; border-radius: 999px !important; box-shadow: 0 8px 18px #17494b20; }
+.picker-requests-button, .picker-page-back, .community-card button {
+  border-color: var(--vybe-line) !important;
+  color: var(--vybe-teal-deep) !important;
+}
+.picker-requests-button { border-radius: 999px !important; background: #fffefa !important; }
+.picker-members .material-symbol, .picker-member-count .material-symbol { color: #c96861; }
+
+/* Consistent quiet surface treatment across the existing app shells. */
+.social-app, .academic-app, .bank-shell, .career-app, .vybe-events-app,
+.settings-app, .match-app, .vybe-messages-app, .news-app {
+  color: var(--vybe-ink);
+}
+.social-app { --color-primary: var(--vybe-teal); --color-primary-dark: var(--vybe-teal-deep); --color-primary-light: #dcebea; --color-primary-soft: #f0f6f4; --color-background: #fcfaf6; --color-border: var(--vybe-line); }
+.academic-app { --academic-green: var(--vybe-teal); --academic-deep: var(--vybe-teal-deep); --academic-soft: #e4efed; --academic-bg: #f7f2e8; --academic-line: var(--vybe-line); --academic-muted: var(--vybe-warm-muted); }
+.vybe-events-app { --ev-green: var(--vybe-teal); --ev-deep: var(--vybe-teal-deep); --ev-soft: #e4efed; --ev-line: var(--vybe-line); --ev-muted: var(--vybe-warm-muted); background: #f7f2e8; }
+.vybe-messages-app { --m-green: var(--vybe-teal); --m-deep: var(--vybe-teal-deep); --m-mint: #e4efed; --m-blue: #6fa6c9; --m-bg: #f7f2e8; --m-line: var(--vybe-line); --m-ink: var(--vybe-ink); --m-muted: var(--vybe-warm-muted); background-color: #f7f2e8; }
+.bank-shell { --bank-green: var(--vybe-teal); --bank-dark: var(--vybe-teal-deep); --bank-mint: #e4efed; --bank-cream: #fcfaf6; --bank-line: var(--vybe-line); --bank-muted: var(--vybe-warm-muted); background: #f7f2e8; }
+.career-app { --cg: var(--vybe-teal); --cd: var(--vybe-teal-deep); --cm: #43898a; --cl: #e4efed; --cf: #f7f2e8; --cw: #fffefa; --ct: var(--vybe-ink); --cs: var(--vybe-warm-muted); --cb: var(--vybe-line); background: #f7f2e8; }
+.news-app { --news-green: var(--vybe-teal); --news-deep: var(--vybe-teal-deep); --news-soft: #e4efed; --news-bg: #f7f2e8; --news-line: var(--vybe-line); --news-muted: var(--vybe-warm-muted); }
+.match-app { background: #f7f2e8; }
+.social-page-card, .social-panel, .side-widget, .academic-section, .career-card,
+.career-side-card, .news-card, .match-card, .messages-panel, .bank-panel,
+.events-sidebar, .events-main, .events-details, .settings-tabs, .settings-content {
+  border-color: var(--vybe-line) !important;
+  border-radius: 18px;
+  background-color: #fffefa;
+  box-shadow: 0 5px 18px #493a2608;
+}
+.social-app .post-card, .social-app .person-card, .social-app .tenant-card,
+.social-app .event-social-card, .social-app .trends-widget, .social-app .stories-panel,
+.social-app .home-event-widget, .social-app .home-mini-widget, .social-app .home-notifications-widget,
+.academic-app .academic-discipline-card, .academic-app .academic-notifications-panel,
+.bank-shell .bank-balance-card, .bank-shell .bank-community-card, .bank-shell .bank-detail-panel,
+.bank-shell .bank-limit-card, .bank-shell .bank-transactions-card, .bank-shell .bank-wallet-page-card,
+.career-app .career-job-card, .career-app .career-application-card,
+.vybe-events-app .events-time-card, .vybe-events-app .events-upcoming-card,
+.news-app .news-section, .news-app .news-review-card, .match-app .match-person-card {
+  border-color: var(--vybe-line) !important;
+  border-radius: 18px;
+  box-shadow: 0 5px 18px #493a2608;
+}
+.social-app .post-card, .social-app .person-card, .social-app .tenant-card,
+.social-app .event-social-card, .social-app .trends-widget, .social-app .stories-panel,
+.social-app .home-mini-widget, .social-app .home-notifications-widget,
+.academic-app .academic-discipline-card, .academic-app .academic-notifications-panel,
+.bank-shell .bank-balance-card, .bank-shell .bank-community-card, .bank-shell .bank-detail-panel,
+.bank-shell .bank-limit-card, .bank-shell .bank-transactions-card, .bank-shell .bank-wallet-page-card,
+.career-app .career-job-card, .career-app .career-application-card,
+.vybe-events-app .events-time-card, .vybe-events-app .events-upcoming-card,
+.news-app .news-section, .news-app .news-review-card {
+  background-color: #fffefa;
+}
+.social-app .primary-button, .academic-app .academic-primary, .bank-shell .bank-primary,
+.vybe-events-app .events-create-button, .news-app .news-primary, .match-app .match-primary {
+  background-color: var(--vybe-teal);
+  border-color: var(--vybe-teal);
+  color: #fff;
+}
+.social-page-title, .academic-topbar h1, .career-heading h1, .events-heading h1,
+.settings-page-heading h1, .settings-section-heading h2 { color: var(--vybe-ink); }
+.social-app button.primary-button, .social-app .primary-button, .academic-app button.primary,
+.vybe-events-app .events-primary, .career-app .career-primary {
+  background-color: var(--vybe-teal);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}

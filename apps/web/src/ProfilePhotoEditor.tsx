@@ -5,12 +5,13 @@ import './ProfilePhotoEditor.css';
 type Crop = { x: number; y: number; zoom: number };
 
 /** Shared square avatar editor: drag to frame, zoom, then save the chosen crop. */
-export function ProfilePhotoEditor({ value, onChange, onError, maxBytes = 5 * 1024 * 1024, label = 'Foto de perfil' }: {
+export function ProfilePhotoEditor({ value, onChange, onError, maxBytes = 5 * 1024 * 1024, label = 'Foto de perfil', allowGif = true }: {
   value?: string;
   onChange: (croppedPhoto: string) => void;
   onError?: (message: string) => void;
   maxBytes?: number;
   label?: string;
+  allowGif?: boolean;
 }) {
   const [source, setSource] = useState('');
   const [ratio, setRatio] = useState(1);
@@ -25,8 +26,9 @@ export function ProfilePhotoEditor({ value, onChange, onError, maxBytes = 5 * 10
   function report(message: string) { setError(message); onError?.(message); }
   function choose(file?: File) {
     if (!file) return;
-    if (!['image/png', 'image/jpeg', 'image/webp', 'image/gif'].includes(file.type) || file.size > maxBytes) {
-      report(`Escolha uma imagem PNG, JPEG, WebP ou GIF de até ${Math.floor(maxBytes / 1024 / 1024)} MB.`);
+    const allowedTypes = allowGif ? ['image/png', 'image/jpeg', 'image/webp', 'image/gif'] : ['image/png', 'image/jpeg', 'image/webp'];
+    if (!allowedTypes.includes(file.type) || file.size > maxBytes) {
+      report(`Escolha uma imagem ${allowGif ? 'PNG, JPEG, WebP ou GIF' : 'JPG, PNG ou WEBP'} de até ${Math.floor(maxBytes / 1024 / 1024)} MB.`);
       return;
     }
     const reader = new FileReader();
@@ -66,13 +68,13 @@ export function ProfilePhotoEditor({ value, onChange, onError, maxBytes = 5 * 10
     <div className="profile-photo-editor-controls">
       <strong>{label}</strong>
       <button type="button" className="profile-photo-editor-choose" onClick={() => fileInput.current?.click()}><MaterialIcon name="photo_camera"/>{source ? 'Escolher outra foto' : 'Alterar foto'}</button>
-      <input ref={fileInput} type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={(event) => { choose(event.currentTarget.files?.[0]); event.currentTarget.value = ''; }}/>
+      <input ref={fileInput} type="file" accept={allowGif ? 'image/png,image/jpeg,image/webp,image/gif' : 'image/png,image/jpeg,image/webp'} onChange={(event) => { choose(event.currentTarget.files?.[0]); event.currentTarget.value = ''; }}/>
       {source && <>
         <div className="profile-photo-crop-viewport" ref={viewport} onPointerDown={(event) => { drag.current = { x: event.clientX, y: event.clientY }; event.currentTarget.setPointerCapture(event.pointerId); }} onPointerMove={move} onPointerUp={() => { drag.current = null; }} onPointerCancel={() => { drag.current = null; }} aria-label="Arraste a foto para ajustar o enquadramento">
           <img ref={image} src={source} alt="Prévia do enquadramento" draggable={false} onLoad={(event) => setRatio(event.currentTarget.naturalWidth / event.currentTarget.naturalHeight)} style={{ position: 'absolute', width: `${Math.max(100, ratio * 100) * crop.zoom}%`, height: `${Math.max(100, 100 / ratio) * crop.zoom}%`, left: `${(100 - Math.max(100, ratio * 100) * crop.zoom) * crop.x}%`, top: `${(100 - Math.max(100, 100 / ratio) * crop.zoom) * crop.y}%` }}/>
           <span>Arraste para ajustar</span>
         </div>
-        <label className="profile-photo-zoom">Zoom<input type="range" min="1" max="3" step="0.01" value={crop.zoom} onChange={(event) => setCrop((current) => ({ ...current, zoom: Number(event.currentTarget.value) }))}/></label>
+        <label className="profile-photo-zoom">Zoom<input type="range" min="1" max="3" step="0.01" value={crop.zoom} onChange={(event) => { const zoom = Number(event.currentTarget.value); setCrop((current) => ({ ...current, zoom })); }}/></label>
         {filename && <small className="profile-photo-filename">{filename}</small>}
         <button type="button" className="profile-photo-apply" onClick={apply}>Aplicar enquadramento</button>
       </>}

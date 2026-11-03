@@ -4,6 +4,7 @@ export type ConversationRealtimeEvent = {
   conversationId?: string;
   matchId?: string;
   channelId?: string;
+  messageId?: string;
   profileId?: string;
   otherProfileId?: string;
   typing?: boolean;

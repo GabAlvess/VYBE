@@ -19,6 +19,7 @@ import { CommunityJoinRequest } from '../models/CommunityJoinRequest.js';
 import { VybeAccount } from '../models/VybeAccount.js';
 import { VybeSession } from '../models/VybeSession.js';
 import { VybeNotification } from '../models/VybeNotification.js';
+import { migrateVerificationBeneficiaries } from '../services/migrateVerificationBeneficiaries.js';
 
 config({ path: resolve(dirname(fileURLToPath(import.meta.url)), '../../../../.env') });
 
@@ -46,6 +47,9 @@ try {
   }
 
   await Community.updateMany({ 'settings.characters.minimumAge': { $exists: false } }, { $set: { 'settings.characters.minimumAge': 18 } });
+
+  const verificationMigration = await migrateVerificationBeneficiaries();
+  console.log(`VYBE+ beneficiary migration completed. Updated ${verificationMigration.modifiedCount} legacy requests; removed old requester index: ${verificationMigration.legacyIndexRemoved}.`);
 
   // Preserve existing active users as VYBE accounts while keeping their tenant-scoped characters as memberships.
   const activeAccounts = await Account.find({ status: 'active' }).sort({ createdAt: 1 }).lean();

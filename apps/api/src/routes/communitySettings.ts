@@ -252,11 +252,13 @@ communitySettingsRouter.patch('/settings/community/:section', async (request, re
   const section = request.params.section;
   const changes: Record<string, unknown> = {};
   if (section === 'general') {
-    const name = asString(body.name), description = asString(body.description), category = asString(body.category);
-    if (name.length < 2 || name.length > 80 || description.length < 10 || description.length > 500 || category.length < 2 || category.length > 60) { sendError(response, 400, 'Revise nome (2–80), descrição (10–500) e categoria (2–60).'); return; }
-    changes.name = community.name = name;
-    changes.description = community.description = description;
-    changes.category = community.category = category;
+    const name = body.name === undefined ? community.name : asString(body.name);
+    const description = body.description === undefined ? community.description : asString(body.description);
+    const category = body.category === undefined ? community.category : asString(body.category);
+    if ((body.name !== undefined && (name.length < 2 || name.length > 80)) || (body.description !== undefined && (description.length < 10 || description.length > 500)) || (body.category !== undefined && (category.length < 2 || category.length > 60))) { sendError(response, 400, 'Revise nome (2–80), descrição (10–500) e categoria (2–60).'); return; }
+    if (body.name !== undefined) changes.name = community.name = name;
+    if (body.description !== undefined) changes.description = community.description = description;
+    if (body.category !== undefined) changes.category = community.category = category;
     if (body.logo !== undefined) { try { changes.logoUrl = community.logoUrl = await saveImage(body.logo, community.slug); } catch (error) { sendError(response, 400, error instanceof Error ? error.message : 'Logo inválida.'); return; } }
     if (body.cover !== undefined) { try { changes.coverUrl = community.coverUrl = await saveImage(body.cover, community.slug); } catch (error) { sendError(response, 400, error instanceof Error ? error.message : 'Capa inválida.'); return; } }
     if (body.wallpaper !== undefined) { try { changes.wallpaperUrl = community.wallpaperUrl = await saveImage(body.wallpaper, community.slug); } catch (error) { sendError(response, 400, error instanceof Error ? error.message : 'Wallpaper inválido.'); return; } }

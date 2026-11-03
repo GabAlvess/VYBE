@@ -56,3 +56,468 @@
 @media(max-width:640px){.bank-balance-top{display:grid;grid-template-columns:1fr;gap:10px}.bank-balance-top>span{margin-top:0}.bank-balance-top .bank-virtual-card{width:min(100%,340px);min-width:0;justify-self:end;padding:14px 16px 17px}.bank-card-brand b{font-size:14px}.bank-card-brand small{font-size:9px}.bank-card-number{font-size:11px}.bank-card-holder{font-size:9px}}
 .bank-receipt-brand{display:none}
 @media print{.bank-receipt-brand{display:flex;justify-content:center;padding:4px 0 20px}.bank-receipt-brand img{display:block;width:210px;height:auto;object-fit:contain}.bank-detail-panel{padding:20px}}
+
+/* Banco refresh: warm VYBE canvas with deep teal and soft gold accents. */
+.bank-shell{
+  --bank-green:#246b6e;
+  --bank-dark:#17494b;
+  --bank-mint:#e1f1e8;
+  --bank-cream:#f7f2e8;
+  --bank-line:#e9e1d6;
+  --bank-muted:#69736f;
+  grid-template-columns:280px minmax(0,1fr);
+  gap:0;
+  padding:0;
+  background:
+    radial-gradient(ellipse at 63% -10%,rgba(168,216,210,.65),transparent 19%),
+    radial-gradient(ellipse at 72% 2%,rgba(232,134,123,.20),transparent 14%),
+    linear-gradient(140deg,#fbf7f0 0%,#f7f2e8 55%,#f5efe5 100%);
+  color:#1c211f;
+}
+.bank-sidebar,.bank-main,.bank-detail-panel{border-color:rgba(229,218,202,.72);box-shadow:0 8px 28px rgba(67,55,37,.055)}
+.bank-sidebar{position:sticky;top:0;height:100vh;min-height:620px;padding:27px 17px 20px;border-radius:0 22px 22px 0;background:rgba(255,253,249,.86)}
+.bank-brand{padding:4px 9px 22px;border-color:#eee5d9}
+.bank-brand strong{color:#17494b}
+.bank-brand small{color:#246b6e}
+.bank-community{margin:19px 0 27px;padding:12px;border:1px solid #eee4d7;background:rgba(255,252,247,.9);border-radius:17px}
+.bank-community-icon{background:#e2f1e7;color:#246b6e}
+.bank-sidebar nav{gap:8px}
+.bank-sidebar nav button{min-height:54px;border-radius:15px}
+.bank-sidebar nav button.active{background:#c9ecdc;color:#17494b}
+.bank-sidebar nav button:hover,.bank-admin-shortcut:hover{background:#f3ede3}
+.bank-admin-shortcut{color:#246b6e}
+.bank-main{min-height:100vh;padding:20px 24px 22px;border:0;border-radius:0;background:transparent;overflow:visible}
+.bank-topbar{height:62px;margin:0 0 8px}
+.bank-top-user{gap:14px}
+.bank-top-user>.bank-avatar{width:48px;height:48px;background:linear-gradient(145deg,#e2f2e8,#cee8db);color:#17494b}
+.bank-greeting{padding:6px 8px 17px}
+.bank-greeting h1{color:#123f40;font-size:34px;letter-spacing:-1.2px}
+.bank-greeting p{color:#53615e;font-size:16px}
+.bank-layout{grid-template-columns:minmax(0,1.68fr) minmax(310px,.9fr);gap:16px}
+.bank-primary-column,.bank-side-column{gap:15px}
+.bank-home-grid{grid-template-columns:minmax(0,1.9fr) minmax(220px,.9fr);gap:14px}
+.bank-balance-card{min-height:286px;padding:23px 24px 17px;background:radial-gradient(ellipse at 82% 61%,rgba(67,164,126,.36),transparent 38%),radial-gradient(ellipse at 100% 8%,rgba(110,191,153,.28),transparent 34%),linear-gradient(135deg,#17494b 0%,#00654f 55%,#16826a 100%);box-shadow:0 14px 28px rgba(23,73,75,.15)}
+.bank-balance-card:after{border-color:rgba(197,164,109,.32);box-shadow:0 0 0 26px rgba(255,255,255,.025),0 0 0 56px rgba(197,164,109,.07)}
+.bank-limit-strip{border-color:rgba(255,255,255,.23)}
+.bank-limit-strip .bank-progress{background:rgba(255,255,255,.34)}
+.bank-limit-strip .bank-progress i{background:#c5a46d}
+.bank-virtual-card{background:radial-gradient(ellipse at 90% 30%,rgba(64,177,134,.42),transparent 43%),linear-gradient(135deg,rgba(5,58,52,.92),rgba(18,120,93,.9));box-shadow:0 10px 26px rgba(1,43,33,.19)}
+.bank-virtual-card:after{border-color:rgba(197,164,109,.4);box-shadow:0 0 0 18px rgba(255,255,255,.035),0 0 0 39px rgba(197,164,109,.07)}
+.bank-card-wave{color:#c5a46d}
+.bank-quick-actions,.bank-community-card,.bank-limit-card,.bank-transactions-card{background:rgba(255,253,249,.84);border-color:rgba(233,225,214,.9);border-radius:20px;box-shadow:0 8px 20px rgba(67,55,37,.055)}
+.bank-quick-actions{padding:17px 15px}
+.bank-quick-actions h2,.bank-community-card h2,.bank-limit-card h2{color:#1c3433;font-size:17px}
+.bank-quick-actions>div{gap:9px}
+.bank-quick-actions button{background:#f0f5ed;border-radius:16px}
+.bank-quick-actions button:nth-child(2){background:#f2edf7}
+.bank-quick-actions button:nth-child(2) .material-symbol{color:#8d86c9}
+.bank-quick-actions button:nth-child(3){background:#fbf2df}
+.bank-quick-actions button:nth-child(3) .material-symbol{color:#b98836}
+.bank-quick-actions button:nth-child(4){background:#e7f4f1}
+.bank-quick-actions button:nth-child(4) .material-symbol{color:#246b6e}
+.bank-quick-actions button:hover{filter:brightness(.98)}
+.bank-quick-actions button .material-symbol{color:#246b6e}
+.bank-section-title{border-color:#ece5db}
+.bank-section-title h2{color:#1c3433;font-size:18px}
+.bank-section-title>button{color:#17494b}
+.bank-transaction-row{border-color:#eee8df}
+.bank-transaction-row:hover,.bank-transaction-row.selected{background:#fbf6ee}
+.bank-transaction-icon.in{background:#e3f2e6;color:#227550}
+.bank-transaction-icon.out{background:#fde9e3;color:#d66e5f}
+.bank-transaction-amount.in,.bank-detail-summary>strong.in{color:#24754f}
+.bank-transaction-amount.out,.bank-detail-summary>strong.out{color:#d66e5f}
+.bank-community-select{border-color:#e9dfd2;background:#fffcf8}
+.bank-card-details{background:#e4f1df;color:#17494b}
+.bank-limit-card>p{color:#69736f}
+.bank-progress{background:#ede7dc}
+.bank-progress i{background:linear-gradient(90deg,#246b6e,#4fa77c)}
+.bank-community-banner{min-height:118px;border-radius:19px;background:linear-gradient(115deg,#17494b,#117363 59%,#236e7a)}
+.bank-community-banner:after{background:linear-gradient(90deg,rgba(23,73,75,.02),rgba(23,73,75,.42))}
+.bank-banner-note{color:#fff4d7}
+.bank-page-title>small{color:#9a7a3f}
+.bank-wallet-page-card,.bank-transfer-form,.bank-admin-list article{background:rgba(255,253,249,.9);border-color:#e9e1d6}
+.bank-filter-tabs button{background:#fffdf9;border-color:#e9e1d6}
+.bank-filter-tabs button.active{background:#dff0e6;border-color:#c4dfcd;color:#17494b}
+.bank-recipient-field,.bank-amount-input,.bank-standard-input,.bank-modal input,.bank-admin-adjustment input,.bank-admin-adjustment select{border-color:#e8dfd4;background:#fffdfa}
+.bank-recipient-field:focus-within,.bank-amount-input:focus-within{border-color:#75aaa0;box-shadow:0 0 0 3px rgba(36,107,110,.1)}
+.bank-transfer-review{background:#edf5ed}
+.bank-primary-button{background:linear-gradient(110deg,#17494b,#246b6e 60%,#4fa77c);box-shadow:0 8px 18px rgba(23,73,75,.18)}
+.bank-balance-toggle{color:#246b6e}
+.bank-detail-panel{background:rgba(255,253,249,.96);border-color:#e9e1d6}
+.bank-detail-fields{border-color:#e9e1d6}
+.bank-detail-fields>div{border-color:#eee8df}
+.bank-receipt-button{background:#e2f0e4;color:#17494b}
+.bank-admin-search{background:#fffdfa;border-color:#e9e1d6}
+.bank-admin-list article button{border-color:#d5e4d9;background:#eff6ef;color:#17494b}
+.bank-modal{background:#fffdf9}
+.bank-bulk-credit{border-color:#e7e6d5;background:linear-gradient(145deg,#f0f6ee,#fffdf9)}
+.bank-bulk-credit>div>small{color:#9a7a3f}
+.bank-bulk-withdraw{border-color:#f0dfdc;background:linear-gradient(145deg,#fff8f6,#fffdf9)}
+.bank-notification{color:#17494b}
+.bank-notification:hover,.bank-notification[aria-expanded=true]{background:#e6f1e7}
+.bank-notification-panel{border-color:#e9e1d6;background:#fffdf9;box-shadow:0 18px 50px rgba(54,46,32,.19)}
+.bank-notification-panel>header{border-color:#eee8df}
+.bank-notification-panel>header button{background:#f3eee5;color:#43514b}
+.bank-notification-list article{border-color:#eee8df}
+.bank-notification-list article.unread{background:#f3f7ef}
+.bank-notification-icon{background:#e4f1e6;color:#246b6e}
+.bank-notification-list article b{color:#246b6e}
+@media(max-width:1250px){
+  .bank-shell{grid-template-columns:230px minmax(0,1fr)}
+  .bank-layout{grid-template-columns:minmax(0,1fr) 285px}
+  .bank-home-grid{grid-template-columns:minmax(0,1.55fr) minmax(195px,.85fr)}
+  .bank-balance-card{min-height:260px}
+}
+@media(max-width:980px){
+  .bank-shell{grid-template-columns:1fr}
+  .bank-sidebar{top:auto;height:76px;min-height:0;border-radius:18px 18px 0 0}
+  .bank-main{min-height:100vh;padding:12px 14px 100px}
+  .bank-layout{grid-template-columns:1fr}
+  .bank-home-grid{grid-template-columns:minmax(0,1.5fr) minmax(190px,.8fr)}
+}
+@media(max-width:640px){
+  .bank-main{padding:10px 12px 94px}
+  .bank-home-grid{grid-template-columns:1fr}
+  .bank-balance-card{min-height:242px}
+  .bank-side-column{grid-template-columns:1fr}
+}
+@media(max-width:1150px) and (min-width:981px){
+  .bank-layout{grid-template-columns:minmax(0,1fr) 260px}
+  .bank-home-grid{grid-template-columns:1fr}
+  .bank-balance-card{min-height:245px}
+}
+.bank-topbar{position:relative;z-index:8}
+.bank-top-user>.bank-avatar{width:58px;height:58px;font-size:24px;background:#e0eee4;color:#17494b}
+.bank-notification{width:54px;height:54px;border-radius:50%;background:#fff0e9;color:#1c3433}
+.bank-notification .material-symbol{width:24px;height:24px;font-size:24px}
+.bank-greeting{position:relative}
+.bank-greeting:after{content:"✦";position:absolute;right:9%;top:5px;color:#c5a46d;font-size:36px;font-weight:400;transform:rotate(12deg);text-shadow:12px -8px 0 #f1c76f}
+.bank-transactions-card .bank-section-title h2:before{content:"✦";display:inline-block;margin-right:12px;color:#eebc63;font-size:23px;vertical-align:-1px}
+.bank-quick-actions h2:after{content:"✦";float:right;color:#eebc63;font-size:20px;transform:rotate(18deg)}
+.bank-card-details:after{content:"✦";margin-left:10px;color:#eebc63;font-size:17px}
+.bank-limit-card{position:relative;min-height:174px}
+.bank-limit-card:after{content:"";position:absolute;right:18px;bottom:13px;width:60px;height:38px;border-bottom:2px solid rgba(197,164,109,.35);border-radius:50%;transform:rotate(-16deg);pointer-events:none}
+.bank-shell:before{content:"";position:fixed;z-index:0;pointer-events:none;left:-70px;bottom:-84px;width:345px;height:250px;border-radius:54% 46% 0 0;background:radial-gradient(ellipse at 30% 80%,rgba(88,201,173,.74),rgba(168,216,210,.5) 44%,transparent 45%),radial-gradient(ellipse at 75% 88%,rgba(255,228,213,.83),transparent 61%)}
+.bank-sidebar,.bank-main{z-index:1}
+
+
+
+@media(max-width:980px){.bank-shell:before{display:none}}
+@media(max-width:640px){.bank-greeting:after{right:3%;font-size:24px}.bank-top-user>.bank-avatar{width:42px;height:42px;font-size:18px}.bank-notification{width:42px;height:42px}}
+/* Match the supplied 1672 × 941 Bank dashboard composition. */
+@media(min-width:1251px){
+  .bank-shell{grid-template-columns:295px minmax(0,1fr)}
+  .bank-sidebar{padding:45px 14px 20px 17px}
+  .bank-brand{padding-left:35px;padding-bottom:29px}
+  .bank-brand-symbol{width:49px;height:45px}
+  .bank-brand strong{font-size:29px;letter-spacing:1px}
+  .bank-community{margin-top:28px;margin-bottom:44px;padding:10px}
+  .bank-community small{display:none}
+  .bank-sidebar nav{gap:8px}
+  .bank-sidebar nav button{min-height:58px}
+  .bank-main{padding:58px 24px 22px 30px}
+  .bank-topbar{position:absolute;top:25px;left:30px;right:40px;height:58px;margin:0}
+  .bank-layout{grid-template-columns:minmax(0,2.07fr) minmax(390px,1fr);column-gap:16px;row-gap:19px;align-items:start}
+  .bank-primary-column{gap:19px}
+  .bank-greeting{padding:0 13px 24px}
+  .bank-greeting h1{font-size:40px;line-height:1.12}
+  .bank-greeting p{font-size:18px;margin-top:5px}
+  .bank-greeting:after{right:16%;top:1px;font-size:34px}
+  .bank-home-grid{grid-template-columns:minmax(0,2fr) minmax(270px,.98fr);gap:14px}
+  .bank-balance-card{min-height:334px;padding:25px 30px 18px;container-type:inline-size}
+  .bank-balance-top{display:block;position:static}
+  .bank-balance-top>span{margin-top:18px;font-size:17px}
+  .bank-balance-top .bank-virtual-card{position:absolute;top:25px;right:30px;width:46%;min-width:0;max-width:340px;z-index:1}
+  .bank-balance-top>span,.bank-balance-value{max-width:calc(54% - 40px)}
+  .bank-balance-top>span{white-space:nowrap}
+  .bank-balance-value{font-size:clamp(30px,9.2cqi,48px);line-height:1.1;letter-spacing:-1.2px;white-space:nowrap;overflow:hidden;margin:30px 0 26px}
+  .bank-community-balance{height:50px;width:max-content;max-width:calc(54% - 40px);padding-right:16px;font-size:16px;border-radius:16px;background:rgba(255,255,255,.16);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bank-limit-strip{margin-top:14px;padding-top:10px}
+  .bank-limit-strip strong{font-size:14px}
+  .bank-limit-strip small{font-size:12px}
+  .bank-quick-actions{min-height:334px;padding:17px 18px}
+  .bank-quick-actions h2{font-size:22px;margin-bottom:17px}
+  .bank-quick-actions>div{gap:14px 12px}
+  .bank-quick-actions button{min-height:111px}
+  .bank-quick-actions button .material-symbol{width:32px;height:32px}
+  .bank-quick-actions button span{font-size:15px}
+  .bank-side-column{padding-top:102px;gap:14px}
+  .bank-community-card{padding:20px 22px 19px}
+  .bank-community-card h2{font-size:22px;margin-bottom:7px}
+  .bank-community-card>div:first-child p{font-size:15px;margin:0 0 10px}
+  .bank-community-select{height:52px;margin-bottom:16px;padding:5px 10px;border-radius:14px}
+  .bank-community-select strong{font-size:15px}
+  .bank-community-card .bank-virtual-card.compact{aspect-ratio:1.86/1;padding:17px 20px}
+  .bank-community-card .bank-virtual-card.compact .bank-card-chip{margin-top:14px}
+  .bank-community-card .bank-virtual-card.compact .bank-card-number{font-size:14px;margin-top:9px}
+  .bank-community-card .bank-virtual-card.compact .bank-card-holder{font-size:11px;margin-top:9px}
+  .bank-card-details{height:49px;margin-top:16px;font-size:16px}
+  .bank-limit-card{min-height:174px;padding:18px 22px}
+  .bank-limit-card h2{font-size:22px;margin-bottom:9px}
+  .bank-limit-card>p{font-size:15px;margin:0 0 18px}
+  .bank-limit-empty{font-size:15px}
+  .bank-community-banner{grid-column:1;width:100%;min-height:118px;padding:18px 31px;margin-top:0;border-radius:21px}
+  .bank-community-banner>div strong{font-size:30px}
+  .bank-community-banner>div p{font-size:16px;max-width:450px}
+  .bank-banner-note{font-size:13px;padding:10px 15px;border:1px solid rgba(255,255,255,.25);border-radius:99px;background:rgba(23,73,75,.22)}
+
+  .bank-transaction-row{min-height:66px;padding:10px 7px}
+  .bank-transaction-icon{width:44px;height:44px;border-radius:14px}
+  .bank-transaction-amount{padding:8px 12px;border-radius:99px;background:#eaf4e5}
+  .bank-transaction-amount.out{background:#feebe5}
+  .bank-transaction-amount.in{background:#eaf4e5}
+}
+@media(max-width:1250px) and (min-width:981px){
+  .bank-side-column{padding-top:90px}
+  .bank-community-banner{grid-column:1;width:100%}
+}
+@media(max-width:980px){.bank-layout{grid-template-columns:1fr}.bank-side-column{padding-top:0}.bank-community-banner{grid-column:1;width:100%}}
+@media(min-width:1251px){
+  .bank-main:before,.bank-main:after{content:"";position:absolute;z-index:0;top:-94px;pointer-events:none}
+  .bank-main:before{right:455px;width:405px;height:205px;border-radius:0 0 52% 47%;background:linear-gradient(145deg,#a8d8d2,#bce9df);transform:rotate(7deg);border-bottom:2px solid #c5a46d}
+  .bank-main:after{right:300px;width:365px;height:175px;border-radius:0 0 52% 46%;background:linear-gradient(135deg,rgba(232,134,123,.52),rgba(255,231,214,.2));transform:rotate(-8deg)}
+  .bank-layout{position:relative;z-index:1}
+  .bank-card-brand>.material-symbol{display:none}
+}
+
+
+
+
+/* Banco sidebar aligned to the supplied reference. */
+.bank-sidebar {
+  isolation: isolate;
+  overflow: hidden;
+  padding: 38px 20px 23px;
+  border-radius: 0 22px 22px 0;
+  background: linear-gradient(180deg, rgba(255,253,249,.97), rgba(255,251,246,.95));
+}
+.bank-sidebar::before,
+.bank-sidebar::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+}
+.bank-sidebar::before {
+  left: -19%;
+  bottom: -8%;
+  width: 136%;
+  height: 30%;
+  border-radius: 54% 46% 0 0 / 30% 36% 0 0;
+  background: linear-gradient(145deg, #c9eee1 0%, #9bddc9 52%, #76cdb8 100%);
+  transform: rotate(7deg);
+}
+.bank-sidebar::after {
+  left: -20%;
+  bottom: -13%;
+  width: 145%;
+  height: 23%;
+  border-top: 2px solid #d4b46f;
+  border-radius: 50% 50% 0 0 / 35% 44% 0 0;
+  background: linear-gradient(155deg, #84d1bd 0%, #62c5ad 58%, #bce3d5 100%);
+  transform: rotate(13deg);
+}
+.bank-brand {
+  position: relative;
+  z-index: 1;
+  justify-content: center;
+  gap: 13px;
+  min-height: 111px;
+  padding: 0 8px 27px;
+  border-bottom: 1px solid #eee5d9;
+}
+.bank-brand-symbol {
+  display: block;
+  flex: none;
+  width: 59px;
+  height: 54px;
+  border-radius: 0;
+  background: transparent;
+  object-fit: contain;
+  clip-path: none;
+}
+.bank-brand>span:last-child { display: grid; gap: 2px; }
+.bank-brand strong { color: #17494b; font-size: 29px; letter-spacing: .6px; line-height: 1; }
+.bank-brand small { padding-top: 0; color: #246b6e; font-size: 21px; line-height: 1.1; }
+.bank-community {
+  position: relative;
+  z-index: 1;
+  min-height: 76px;
+  margin: 32px 10px 42px;
+  padding: 10px 13px;
+  gap: 12px;
+  border: 1px solid #eee5da;
+  border-radius: 25px;
+  background: rgba(255,253,249,.86);
+  box-shadow: 0 5px 16px #4c44350b;
+}
+.bank-community .bank-community-icon { width: 52px; height: 52px; border-radius: 18px; background: #e4f2e6; color: #17494b; }
+.bank-community .bank-community-icon .material-symbol { width: 29px; height: 29px; }
+.bank-community strong { color: #1c2928; font-size: 16px; }
+.bank-community small { display: none; }
+.bank-community>.material-symbol { flex: none; width: 20px; height: 20px; color: #1c2928; }
+.bank-sidebar nav {
+  position: relative;
+  z-index: 1;
+  gap: 10px;
+  padding: 0 3px;
+}
+.bank-sidebar nav button {
+  min-height: 75px;
+  gap: 17px;
+  padding: 0 20px;
+  border-radius: 22px;
+  color: #1c211f;
+  font-size: 18px;
+  font-weight: 570;
+  transition: background-color .18s ease, color .18s ease;
+}
+.bank-sidebar nav button .material-symbol { width: 29px; height: 29px; }
+.bank-sidebar nav button.active { background: #c9ecdc; color: #17494b; }
+.bank-sidebar nav button:hover:not(.active) { background: #f2f4ef; }
+.bank-sidebar nav button { gap: 10px; }
+.bank-sidebar .bank-community {
+  min-height: 76px;
+  align-items: center;
+  border: 1px solid #eee5da;
+  border-radius: 25px;
+  background: rgba(255, 253, 249, .9);
+  box-shadow: 0 5px 16px rgba(76, 68, 53, .07);
+}
+.bank-sidebar .bank-community .bank-community-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  flex: none;
+}
+.bank-sidebar .bank-community strong { font-size: 14px; font-weight: 500; }
+@media (min-width: 981px) {
+  .bank-sidebar nav {
+    height: auto;
+    flex: 0 0 auto;
+    align-content: start;
+    gap: 6px;
+  }
+  .bank-sidebar nav button {
+    min-height: 48px;
+    padding: 0 16px;
+    gap: 12px;
+    border-radius: 15px;
+    font-size: 16px;
+    font-weight: 400;
+  }
+  .bank-sidebar nav button .material-symbol { width: 25px; height: 25px; }
+  .bank-sidebar .bank-admin-shortcut {
+    margin-left: 3px;
+    padding: 14px 16px 14px 20px;
+    gap: 12px;
+  }
+  .bank-sidebar .bank-admin-shortcut .material-symbol { width: 25px; height: 25px; }
+}
+.bank-sidebar-sparkle { display: none !important; }
+.bank-admin-shortcut { position: relative; z-index: 1; }
+.bank-sidebar-sparkle {
+  position: absolute;
+  z-index: 1;
+  right: 38%;
+  bottom: 18%;
+  color: #d6ad5c;
+  font-size: 40px;
+  font-weight: 300;
+  line-height: 1;
+  transform: rotate(8deg);
+  pointer-events: none;
+}
+.bank-universe-back { position: relative; z-index: 1; }
+@media (max-width: 980px) {
+  .bank-sidebar { overflow: visible; }
+  .bank-sidebar::before, .bank-sidebar::after, .bank-sidebar-sparkle { display: none; }
+}
+.bank-quick-actions{border:1px solid #e8dfd3;border-radius:22px;background:rgba(255,253,249,.9);box-shadow:0 8px 20px rgba(67,55,37,.07)}
+.bank-quick-actions h2{display:flex;align-items:center;justify-content:space-between;color:#111f22;font-size:22px;letter-spacing:-.55px}
+.bank-quick-actions h2:after{content:none}
+.bank-action-sparkles{width:36px;height:36px;flex:none;margin:-7px -2px 0 8px}
+.bank-action-sparkles svg{display:block;width:100%;height:100%;overflow:visible}
+.bank-action-sparkles path{fill:none;stroke:#efbd61;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round}
+.bank-quick-actions>div{gap:14px 12px}
+.bank-quick-actions button{min-height:111px;border-radius:19px;gap:8px;transition:filter .16s ease,transform .16s ease}
+.bank-quick-actions button:hover{filter:brightness(.985);transform:translateY(-1px)}
+.bank-quick-actions button:nth-child(1){background:#eaf3ec}
+.bank-quick-actions button:nth-child(2){background:#f1ecf8}
+.bank-quick-actions button:nth-child(3){background:#faf1df}
+.bank-quick-actions button:nth-child(4){background:#e4f3f2}
+.bank-quick-icon{display:block;width:32px;height:32px;fill:none;stroke:currentColor;stroke-width:2.35;stroke-linecap:round;stroke-linejoin:round}
+.bank-quick-actions button:nth-child(1) .bank-quick-icon{color:#5aa596}
+.bank-quick-actions button:nth-child(2) .bank-quick-icon{color:#7468ad}
+.bank-quick-actions button:nth-child(3) .bank-quick-icon{color:#b98938}
+.bank-quick-actions button:nth-child(4) .bank-quick-icon{color:#299c83}
+.bank-quick-actions button span{font-size:15px;font-weight:600;color:#152124}
+@media(max-width:640px){.bank-quick-actions h2{font-size:18px}.bank-action-sparkles{width:29px;height:29px}.bank-quick-actions button{min-height:76px}.bank-quick-icon{width:26px;height:26px}.bank-quick-actions button span{font-size:11px}}
+.bank-sidebar nav button,
+.bank-sidebar .bank-community strong,
+.bank-sidebar .bank-admin-shortcut{font-family:inherit;font-size:16px;font-weight:400;letter-spacing:0}
+.bank-sidebar .bank-community strong{min-width:0}
+.bank-sidebar .bank-admin-shortcut{line-height:1.35}
+.bank-main:before,.bank-main:after{display:none!important;content:none!important}
+
+/* Home: give the balance the visual priority and keep its contents inside. */
+@media (min-width: 1251px) {
+  .bank-primary-column { gap: 16px; }
+  .bank-home-grid {
+    grid-template-columns: minmax(0, 2.25fr) minmax(220px, .82fr);
+    align-items: stretch;
+    gap: 14px;
+  }
+  .bank-balance-card,
+  .bank-quick-actions { height: 300px; min-height: 300px; }
+  .bank-balance-card { padding: 21px 26px 16px; }
+  .bank-balance-top .bank-virtual-card {
+    top: 21px;
+    right: 24px;
+    width: 41%;
+    max-width: 330px;
+    min-width: 0;
+    padding: 13px 15px 12px;
+  }
+  .bank-balance-top > span,
+  .bank-balance-value { max-width: 47%; }
+  .bank-balance-top > span {
+    display: flex;
+    gap: 5px;
+    margin-top: 20px;
+    font-size: 14px;
+    white-space: nowrap;
+  }
+  .bank-balance-top > span .material-symbol { width: 18px; height: 18px; }
+  .bank-balance-value {
+    margin: 22px 0 17px;
+    font-size: clamp(29px, 7.4cqi, 43px);
+    line-height: 1.08;
+    letter-spacing: -.8px;
+  }
+  .bank-community-balance {
+    width: max-content;
+    max-width: 47%;
+    height: 46px;
+    gap: 8px;
+    padding-right: 12px;
+    overflow: hidden;
+    white-space: nowrap;
+    font-size: 13px;
+  }
+  .bank-community-balance .bank-community-icon { width: 36px; height: 36px; flex: none; }
+  .bank-limit-strip { margin-top: 9px; padding-top: 7px; }
+  .bank-limit-strip strong { font-size: 12px; }
+  .bank-limit-strip small { font-size: 10px; }
+  .bank-virtual-card:not(.compact) .bank-card-brand b { font-size: 14px; }
+  .bank-virtual-card:not(.compact) .bank-card-brand small { font-size: 9px; max-width: 150px; }
+  .bank-virtual-card:not(.compact) .bank-card-chip { width: 25px; height: 19px; margin-top: 10px; }
+  .bank-virtual-card:not(.compact) .bank-card-number { margin-top: 5px; font-size: 11px; }
+  .bank-virtual-card:not(.compact) .bank-card-holder { margin-top: 4px; font-size: 8px; line-height: 1.1; }
+  .bank-quick-actions { padding: 15px 16px; }
+  .bank-quick-actions h2 { font-size: 19px; margin-bottom: 10px; }
+  .bank-quick-actions > div { gap: 10px; }
+  .bank-quick-actions button { min-height: 99px; }
+  .bank-quick-actions button .bank-quick-icon { width: 27px; height: 27px; }
+  .bank-quick-actions button span { font-size: 13px; }
+}

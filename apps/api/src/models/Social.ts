@@ -31,6 +31,7 @@ accountSchema.index({ tenantId: 1, globalAccountId: 1 }, { unique: true, partial
 export interface CharacterFields {
   tenantId: mongoose.Types.ObjectId;
   accountId: mongoose.Types.ObjectId;
+  platformIdentity?: 'VYBE_SUPPORT';
   username: string;
   displayName: string;
   communityFunction?: string;
@@ -45,13 +46,31 @@ export interface CharacterFields {
   followingCount: number;
   postCount: number;
   verification?: {
+    status?: 'PENDING' | 'ACTIVE' | 'SUSPENDED' | 'REVOKED' | 'EXPIRED';
     verifiedAt?: Date;
+    activatedAt?: Date;
+    expiresAt?: Date | null;
     verifiedBy?: mongoose.Types.ObjectId;
     type?: 'OFFICIAL' | 'CREATOR' | 'PARTNER' | 'STAFF' | 'PAID_PROFILE';
+    source?: 'SELF_PURCHASE' | 'GIFT' | 'GIVEAWAY' | 'PROMOTION' | 'ADMIN_GRANT';
     requestId?: mongoose.Types.ObjectId;
     removedAt?: Date;
     removedBy?: mongoose.Types.ObjectId;
     removalReason?: string;
+  };
+  profileCustomization?: {
+    nameColor?: string;
+    primaryFontId?: string;
+    secondaryFontId?: string;
+    nameFont?: string;
+    fontId?: string;
+    avatarFrame?: string;
+    profileTheme?: string;
+  };
+  profileCustomizations?: {
+    SOCIAL?: CharacterFields['profileCustomization'];
+    ECHO?: CharacterFields['profileCustomization'];
+    MATCH?: CharacterFields['profileCustomization'];
   };
   seedKey?: string;
   createdAt: Date;
@@ -61,6 +80,7 @@ export type CharacterDocument = HydratedDocument<CharacterFields>;
 const characterSchema = new mongoose.Schema<CharacterFields>({
   tenantId: { type: mongoose.Schema.Types.ObjectId, required: true, index: true },
   accountId: { type: mongoose.Schema.Types.ObjectId, required: true, index: true },
+  platformIdentity: { type: String, enum: ['VYBE_SUPPORT'], default: undefined, index: true },
   username: { type: String, required: true, lowercase: true, trim: true, match: /^[a-z0-9._]{3,24}$/ },
   displayName: { type: String, required: true, trim: true, maxlength: 60 },
   communityFunction: { type: String, default: '', trim: true, maxlength: 80 },
@@ -75,13 +95,31 @@ const characterSchema = new mongoose.Schema<CharacterFields>({
   followingCount: { type: Number, min: 0, default: 0 },
   postCount: { type: Number, min: 0, default: 0 },
   verification: {
+    status: { type: String, enum: ['PENDING', 'ACTIVE', 'SUSPENDED', 'REVOKED', 'EXPIRED'] },
     verifiedAt: { type: Date },
+    activatedAt: { type: Date },
+    expiresAt: { type: Date, default: null },
     verifiedBy: { type: mongoose.Schema.Types.ObjectId },
     type: { type: String, enum: ['OFFICIAL', 'CREATOR', 'PARTNER', 'STAFF', 'PAID_PROFILE'] },
+    source: { type: String, enum: ['SELF_PURCHASE', 'GIFT', 'GIVEAWAY', 'PROMOTION', 'ADMIN_GRANT'] },
     requestId: { type: mongoose.Schema.Types.ObjectId },
     removedAt: { type: Date },
     removedBy: { type: mongoose.Schema.Types.ObjectId },
     removalReason: { type: String, maxlength: 500 },
+  },
+  profileCustomization: {
+    nameColor: { type: String, default: 'DEFAULT', validate: { validator: (value: string) => ['DEFAULT', 'TEAL', 'CORAL', 'LILAC', 'GOLD', 'BLUE', 'PINK', 'GRAPHITE'].includes(value) || /^#[0-9A-F]{6}$/i.test(value), message: 'Cor do nome inválida.' } },
+    primaryFontId: { type: String, default: undefined },
+    secondaryFontId: { type: String, default: undefined },
+    nameFont: { type: String, default: undefined },
+    fontId: { type: String, default: undefined },
+    avatarFrame: { type: String, default: 'NONE', validate: { validator: (value: string) => ['NONE', 'TEAL', 'CORAL', 'LILAC', 'GOLD', 'VYBE'].includes(value) || /^#[0-9A-F]{6}$/i.test(value), message: 'Moldura inválida.' } },
+    profileTheme: { type: String, default: 'DEFAULT', validate: { validator: (value: string) => ['DEFAULT', 'TEAL', 'CORAL', 'LILAC', 'GOLD'].includes(value) || /^#[0-9A-F]{6}$/i.test(value), message: 'Tema inválido.' } },
+  },
+  profileCustomizations: {
+    SOCIAL: { nameColor: String, primaryFontId: String, secondaryFontId: String, nameFont: String, fontId: String, avatarFrame: String, profileTheme: String },
+    ECHO: { nameColor: String, primaryFontId: String, secondaryFontId: String, nameFont: String, fontId: String, avatarFrame: String, profileTheme: String },
+    MATCH: { nameColor: String, primaryFontId: String, secondaryFontId: String, nameFont: String, fontId: String, avatarFrame: String, profileTheme: String },
   },
   seedKey: { type: String, default: undefined },
 }, { timestamps: true });
@@ -250,7 +288,7 @@ export interface NotificationFields {
   tenantId: mongoose.Types.ObjectId;
   characterId: mongoose.Types.ObjectId;
   actorId: mongoose.Types.ObjectId;
-  type: 'follow' | 'like' | 'comment' | 'mention' | 'message' | 'echo_like' | 'echo_mention' | 'repost' | 'echo_reply' | 'event_created' | 'event_updated' | 'event_cancelled' | 'event_review' | 'event_pending' | 'verification_requested' | 'verification_payment_confirmed' | 'verification_approved' | 'verification_rejected' | 'verification_removed' | 'bank_transfer_received' | 'bank_admin_credit_received' | 'academic_update' | 'academic_submission' | 'academic_grade' | 'news_published' | 'news_reviewed' | 'career_status' | 'career_job' | 'community_join_update';
+  type: 'follow' | 'like' | 'comment' | 'mention' | 'message' | 'match_created' | 'echo_like' | 'echo_mention' | 'repost' | 'echo_reply' | 'post_trending' | 'event_created' | 'event_updated' | 'event_cancelled' | 'event_review' | 'event_pending' | 'verification_requested' | 'verification_payment_confirmed' | 'verification_payment_issue' | 'verification_approved' | 'verification_rejected' | 'verification_suspended' | 'verification_removed' | 'verification_gift_received' | 'verification_gift_activated' | 'bank_transfer_received' | 'bank_admin_credit_received' | 'academic_update' | 'academic_submission' | 'academic_grade' | 'news_published' | 'news_reviewed' | 'career_status' | 'career_job' | 'community_join_update';
   targetId: mongoose.Types.ObjectId;
   readAt?: Date;
   seedKey?: string;
@@ -261,7 +299,7 @@ const notificationSchema = new mongoose.Schema<NotificationFields>({
   tenantId: { type: mongoose.Schema.Types.ObjectId, required: true, index: true },
   characterId: { type: mongoose.Schema.Types.ObjectId, required: true },
   actorId: { type: mongoose.Schema.Types.ObjectId, required: true },
-  type: { type: String, enum: ['follow', 'like', 'comment', 'mention', 'message', 'echo_like', 'echo_mention', 'repost', 'echo_reply', 'event_created', 'event_updated', 'event_cancelled', 'event_review', 'event_pending', 'verification_requested', 'verification_payment_confirmed', 'verification_approved', 'verification_rejected', 'verification_removed', 'bank_transfer_received', 'bank_admin_credit_received', 'academic_update', 'academic_submission', 'academic_grade', 'news_published', 'news_reviewed', 'career_status', 'career_job', 'community_join_update'], required: true },
+  type: { type: String, enum: ['follow', 'like', 'comment', 'mention', 'message', 'match_created', 'echo_like', 'echo_mention', 'repost', 'echo_reply', 'post_trending', 'event_created', 'event_updated', 'event_cancelled', 'event_review', 'event_pending', 'verification_requested', 'verification_payment_confirmed', 'verification_payment_issue', 'verification_approved', 'verification_rejected', 'verification_suspended', 'verification_removed', 'verification_gift_received', 'verification_gift_activated', 'bank_transfer_received', 'bank_admin_credit_received', 'academic_update', 'academic_submission', 'academic_grade', 'news_published', 'news_reviewed', 'career_status', 'career_job', 'community_join_update'], required: true },
   targetId: { type: mongoose.Schema.Types.ObjectId, required: true },
   readAt: { type: Date },
   seedKey: { type: String, default: undefined },

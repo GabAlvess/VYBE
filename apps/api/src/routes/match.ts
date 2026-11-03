@@ -7,6 +7,8 @@ import { requireSession } from '../middleware/tenant.js';
 import { canAccessMatch, canonicalProfilePair, createsMutualMatch, isPositiveMatchReaction, matchDiscoveryFilter, matchFeatureIsEnabled, validMatchAge, type MatchReactionType } from './matchPolicy.js';
 import { getOrCreateMatchConversation } from './conversationService.js';
 import { emitToProfiles } from '../realtime/chatWebSocket.js';
+import { isVerificationActive, VERIFIED_MATCH_BOOST } from '../services/verifiedSocialBenefits.js';
+import { resolveProfileCustomization } from '../services/profileCustomization.js';
 
 export const matchRouter = Router();
 matchRouter.use(requireSession);
@@ -20,8 +22,9 @@ const currentId = (request: Request) => request.vybeCharacter!._id;
 const isObjectId = (value: unknown): value is string => typeof value === 'string' && mongoose.isValidObjectId(value);
 const positiveTypes = ['like', 'star'];
 
-function identityJson(character: { _id: mongoose.Types.ObjectId; username: string; displayName: string; bio: string; avatarUrl: string; verification?: { verifiedAt?: Date; removedAt?: Date } }) {
-  return { id: character._id.toString(), username: character.username, displayName: character.displayName, bio: character.bio, avatarUrl: character.avatarUrl, verified: Boolean(character.verification?.verifiedAt && !character.verification.removedAt) };
+function identityJson(character: { _id: mongoose.Types.ObjectId; username: string; displayName: string; bio: string; avatarUrl: string; verification?: { status?: string; verifiedAt?: Date; activatedAt?: Date; expiresAt?: Date | null; removedAt?: Date }; profileCustomization?: { nameColor?: string; primaryFontId?: string; secondaryFontId?: string; nameFont?: string; fontId?: string; avatarFrame?: string; profileTheme?: string }; profileCustomizations?: Partial<{ MATCH: { nameColor?: string; primaryFontId?: string; secondaryFontId?: string; nameFont?: string; fontId?: string; avatarFrame?: string; profileTheme?: string } }> }) {
+  const verified = isVerificationActive(character.verification);
+  return { id: character._id.toString(), username: character.username, displayName: character.displayName, bio: character.bio, avatarUrl: character.avatarUrl, verified, ...(verified ? { profileCustomization: resolveProfileCustomization(character.profileCustomizations, character.profileCustomization, 'MATCH') } : {}) };
 }
 
 function profileJson(profile: InstanceType<typeof MatchProfile> | null, character: NonNullable<Request['vybeCharacter']>) {
@@ -41,7 +44,7 @@ async function isBlocked(tenant: mongoose.Types.ObjectId, left: mongoose.Types.O
 
 async function storeMatchPhoto(value: unknown, slug: string, existing: string[]) {
   if (typeof value !== 'string') throw new Error('Foto inválida.');
-  if (existing.includes(value) && new RegExp(`^/media/${slug}/[a-f0-9]{32}\\.(png|jpg|webp)$`).test(value)) return value;
+  if (existing.includes(value) && (value === existing[existing.length - 1] || new RegExp(`^/media/${slug}/[a-f0-9]{32}\\.(png|jpg|webp)$`).test(value))) return value;
   if (value.length > 2_900_000) throw new Error('Cada foto deve ter no máximo 2 MB.');
   const match = value.match(/^data:image\/(png|jpeg|webp);base64,([A-Za-z0-9+/=]+)$/);
   if (!match) throw new Error('Envie uma foto PNG, JPEG ou WebP válida.');
@@ -106,16 +109,19 @@ matchRouter.patch('/profile', async (request, response) => {
   const age = Object.hasOwn(body, 'age') ? body.age : current?.age ?? null;
   const enabled = Object.hasOwn(body, 'enabled') ? body.enabled : current?.enabled ?? false;
   if (typeof enabled !== 'boolean') { response.status(400).json({ error: 'Escolha se seu perfil aparecerá no Match.' }); return; }
-  if (age !== null && !validMatchAge(age)) { response.status(400).json({ error: 'A idade deve ser um número entre 18 e 120 anos.' }); return; }
-  if (enabled && !validMatchAge(age)) { response.status(400).json({ error: 'Informe uma idade válida para ativar seu perfil no Match.' }); return; }
+  if (!validMatchAge(age)) { response.status(400).json({ error: 'Idade: informe um número inteiro entre 18 e 120 anos.' }); return; }
   const bio = Object.hasOwn(body, 'bio') ? body.bio : current?.bio ?? '';
   const location = Object.hasOwn(body, 'location') ? body.location : current?.location ?? '';
   const interests = Object.hasOwn(body, 'interests') ? body.interests : current?.interests ?? [];
-  if (typeof bio !== 'string' || bio.trim().length > 500 || typeof location !== 'string' || location.trim().length > 100 || !Array.isArray(interests) || interests.length > 12 || interests.some((item: unknown) => typeof item !== 'string' || item.trim().length < 1 || item.trim().length > 32)) { response.status(400).json({ error: 'Revise apresentação, localização e até 12 interesses curtos.' }); return; }
+  if (typeof location !== 'string' || !location.trim() || location.trim().length > 100) { response.status(400).json({ error: 'Localização: informe sua localização, com até 100 caracteres.' }); return; }
+  if (typeof bio !== 'string' || !bio.trim() || bio.trim().length > 500) { response.status(400).json({ error: 'Sobre você: escreva uma breve apresentação, com até 500 caracteres.' }); return; }
+  if (!Array.isArray(interests) || interests.length > 12 || interests.some((item: unknown) => typeof item !== 'string' || item.trim().length < 1 || item.trim().length > 32)) { response.status(400).json({ error: 'Revise os interesses: informe até 12 itens com até 32 caracteres.' }); return; }
   const photos = Object.hasOwn(body, 'photos') ? body.photos : current?.photos ?? [];
-  if (!Array.isArray(photos) || photos.length > 6 || photos.some((photo: unknown) => typeof photo !== 'string')) { response.status(400).json({ error: 'Escolha até 6 fotos para o perfil.' }); return; }
+  if (!Array.isArray(photos) || photos.length > 6 || photos.some((photo: unknown) => typeof photo !== 'string' || !photo.trim())) { response.status(400).json({ error: 'Fotos: escolha até 6 fotos válidas para o perfil.' }); return; }
+  const photosToSave = photos.length ? photos : character.avatarUrl ? [character.avatarUrl] : [];
+  if (!photosToSave.length) { response.status(400).json({ error: 'Fotos: adicione pelo menos uma foto ao perfil.' }); return; }
   let savedPhotos: string[];
-  try { savedPhotos = await Promise.all(photos.map((photo: string) => storeMatchPhoto(photo, request.vybeTenant!.slug, [...(current?.photos ?? []), character.avatarUrl]))); }
+  try { savedPhotos = await Promise.all(photosToSave.map((photo: string) => storeMatchPhoto(photo, request.vybeTenant!.slug, [...(current?.photos ?? []), character.avatarUrl]))); }
   catch (error) { response.status(400).json({ error: error instanceof Error ? error.message : 'Não foi possível salvar as fotos.' }); return; }
   const profile = await MatchProfile.findOneAndUpdate({ tenantId: tenant, characterId: character._id }, { $set: { enabled, age, bio: bio.trim(), location: location.trim(), interests: [...new Set(interests.map((item: string) => item.trim()))], photos: savedPhotos } }, { upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true });
   response.json({ identity: identityJson(character), profile: profileJson(profile, character) });
@@ -146,6 +152,15 @@ matchRouter.get('/discovery', async (request, response) => {
     if (!person) return [];
     return [{ ...identityJson(person), age: profile.age, bio: profile.bio || person.bio, location: profile.location, interests: profile.interests, photos: profile.photos.length ? profile.photos : person.avatarUrl ? [person.avatarUrl] : [] }];
   });
+  const profileUpdatedAt = new Map(validProfiles.map((profile) => [profile.characterId.toString(), profile.updatedAt.getTime()]));
+  cards.sort((left, right) => {
+    const score = (card: typeof cards[number]) => {
+      const updatedAt = profileUpdatedAt.get(card.id) ?? 0;
+      const recency = 1 / (1 + Math.max(0, Date.now() - updatedAt) / (7 * 24 * 60 * 60 * 1000));
+      return recency * (card.verified ? 1 + VERIFIED_MATCH_BOOST : 1);
+    };
+    return score(right) - score(left);
+  });
   response.json({ enabled: true, profiles: cards });
 });
 
@@ -164,6 +179,7 @@ matchRouter.post('/reactions', async (request, response) => {
   if (await isBlocked(tenant, fromId, targetId)) { response.status(403).json({ error: 'Esta interação não está disponível.' }); return; }
   const reactionType = type as MatchReactionType;
   const pair = canonicalProfilePair(fromId, targetId);
+  const priorActiveMatch = await Match.exists({ tenantId: tenant, ...pair, status: 'active' });
   const matchResult: { value: InstanceType<typeof Match> | null } = { value: null };
   const session = await mongoose.startSession();
   try {
@@ -187,6 +203,14 @@ matchRouter.post('/reactions', async (request, response) => {
     matchResult.value = await Match.findOne({ tenantId: tenant, ...pair, status: 'active' });
   } finally { await session.endSession(); }
   const match = matchResult.value?.status === 'active' ? await matchSummary(matchResult.value, tenant, fromId) : null;
+  if (match && !priorActiveMatch) {
+    const counterpart = await Character.findOne({ _id: targetId, tenantId: tenant }).select('_id').lean();
+    if (counterpart) {
+      const notifications = [{ characterId: fromId, actorId: targetId }, { characterId: targetId, actorId: fromId }];
+      const outcomes = await Promise.all(notifications.map((item) => Notification.updateOne({ tenantId: tenant, seedKey: `match:${match.id}:${item.characterId.toString()}` }, { $setOnInsert: { tenantId: tenant, characterId: item.characterId, actorId: item.actorId, type: 'match_created', targetId: matchResult.value!._id, seedKey: `match:${match.id}:${item.characterId.toString()}` } }, { upsert: true }).catch(() => null)));
+      if (outcomes.some((outcome: any) => outcome?.upsertedCount)) emitToProfiles(tenant.toString(), [fromId, targetId], { type: 'match:new', matchId: match.id });
+    }
+  }
   response.json({ reaction: reactionType, match });
 });
 
@@ -257,7 +281,7 @@ matchRouter.post('/matches/:matchId/messages', async (request, response) => {
   if (denied || !message) { response.status(403).json({ error: 'Esta conversa não está disponível.' }); return; }
   const recipientParticipant = conversation.participants.find((item) => item.profileId.equals(recipientId));
   if (!recipientParticipant?.mutedAt) await Notification.create({ tenantId: tenantId(request), characterId: recipientId, actorId: me, type: 'message', targetId: message._id });
-  emitToProfiles(tenantId(request).toString(), [me, recipientId], { type: 'match:message', matchId: match._id.toString(), conversationId: conversation._id.toString(), messageId: message._id.toString() });
+  emitToProfiles(tenantId(request).toString(), [recipientId], { type: 'match:message', matchId: match._id.toString(), conversationId: conversation._id.toString(), messageId: message._id.toString() });
   response.status(201).json({ id: message._id.toString(), senderProfileId: me.toString(), recipientProfileId: recipientId.toString(), content: message.content, createdAt: message.createdAt, readAt: null, own: true });
 });
 

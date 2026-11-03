@@ -39,7 +39,17 @@ export async function resolveTenant(request: Request, response: Response, next: 
   const platformHosts = new Set(['vybe.com.br', 'www.vybe.com.br']);
   if (platformHosts.has(host)) { next(); return; }
 
-  const subdomain = tenantSlugForHost(host);
+  const localDevelopmentHost = process.env.NODE_ENV === 'development' && ['localhost', '127.0.0.1'].includes(host);
+  const selectedTenantCookie = localDevelopmentHost
+    ? request.headers.cookie?.split(';').map((part) => part.trim()).find((part) => part.startsWith('vybe_dev_tenant='))?.slice('vybe_dev_tenant='.length)
+    : undefined;
+  let selectedLocalSlug = '';
+  if (selectedTenantCookie) {
+    try { selectedLocalSlug = decodeURIComponent(selectedTenantCookie); } catch { selectedLocalSlug = ''; }
+  }
+  const subdomain = localDevelopmentHost && /^[a-z0-9-]{1,40}$/.test(selectedLocalSlug)
+    ? selectedLocalSlug
+    : tenantSlugForHost(host);
 
   if (!subdomain) {
     response.status(404).json({ error: 'Comunidade não encontrada para este domínio.' });

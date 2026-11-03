@@ -6,7 +6,13 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "db:init": "node --import tsx src/scripts/init-db.ts",
+    "db:migrate:account-profile": "node --import tsx src/scripts/migrate-account-profile.ts",
+    "db:migrate:vybe-plus-beneficiaries": "node --import tsx src/scripts/migrate-vybe-plus-beneficiaries.ts",
     "db:seed": "node --import tsx src/scripts/seed.ts",
+    "db:seed:social-demo": "node --import tsx src/scripts/seed-social-demo.ts",
+    "db:seed:match-demo": "node --import tsx src/scripts/seed-match-demo.ts",
+    "db:seed:messages-demo": "node --import tsx src/scripts/seed-messages-demo.ts",
+    "db:seed:match-incoming-like": "node --import tsx src/scripts/seed-match-incoming-like.ts",
     "test": "node --import tsx --test src/*.test.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",

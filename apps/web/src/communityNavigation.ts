@@ -8,5 +8,8 @@ export function communityHomeHref(subdomain: string) {
 }
 
 export function activateLocalCommunity(subdomain: string) {
-  if (isLocalVybeHost()) sessionStorage.setItem('vybe_active_community', subdomain);
+  if (isLocalVybeHost()) {
+    sessionStorage.setItem('vybe_active_community', subdomain);
+    document.cookie = `vybe_dev_tenant=${encodeURIComponent(subdomain)}; Path=/; SameSite=Lax`;
+  }
 }

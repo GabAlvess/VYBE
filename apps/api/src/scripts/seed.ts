@@ -48,14 +48,14 @@ const demoCharacters = [
 const demoPosts = [
   { key: 'welcome-yasmin', author: 'yasminmv', content: 'As portas da Universidade Bellmont estão abertas. Qual vai ser a primeira história que vamos viver por aqui? 💜', imageUrl: '/community-worlds.png', kind: 'post' as const },
   { key: 'livia-campus', author: 'livia.monteiro', content: 'Mais um dia nesse universo que eu escolhi viver. 💜', imageUrl: '/community-worlds.png', kind: 'post' as const },
-  { key: 'caio-question', author: 'caio.ribeiro', content: 'Discussão incrível na aula de hoje. Quem aí também acha que o caso pode ter mais de uma interpretação?', imageUrl: '', kind: 'post' as const },
+  { key: 'caio-question', author: 'caio.ribeiro', content: 'Discussão incrível na aula de hoje. Quem aí também acha que o caso pode ter mais de uma interpretação?', imageUrl: '/bellmont-campus.png', kind: 'post' as const },
   { key: 'marina-library', author: 'marinaduarte', content: 'Encontrei uma anotação escondida na biblioteca antiga. A letra parece ser de alguém que ainda estuda aqui…', imageUrl: '/community-worlds.png', kind: 'post' as const },
   { key: 'henrique-pulse', author: 'hvalen', content: 'Primeira semana em Bellmont: 3 cafés, 2 corredores errados e uma amizade nova.', imageUrl: '', kind: 'pulse' as const },
   { key: 'sofia-photo', author: 'sofalmeida', content: 'O campus fica ainda mais bonito quando a cidade começa a acender as luzes.', imageUrl: '/community-worlds.png', kind: 'post' as const },
   { key: 'clara-pulse', author: 'clara.snts', content: 'Qual lenda de Bellmont vocês gostariam de investigar primeiro?', imageUrl: '', kind: 'pulse' as const },
   { key: 'marcelo-map', author: 'marcelo.rp', content: 'Atualizei o mapa do campus com os caminhos secretos que descobrimos esta semana.', imageUrl: '/community-worlds.png', kind: 'post' as const },
-  { key: 'isabel-archive', author: 'isabelecruz', content: 'O arquivo municipal guarda uma referência à fundação da universidade. Amanhã vou atrás da fonte original.', imageUrl: '', kind: 'post' as const },
-  { key: 'ravi-announcement', author: 'prof.ravi', content: 'Lembrete: a sala de estudos do prédio norte fica aberta até mais tarde durante a semana de provas.', imageUrl: '', kind: 'post' as const },
+  { key: 'isabel-archive', author: 'isabelecruz', content: 'O arquivo municipal guarda uma referência à fundação da universidade. Amanhã vou atrás da fonte original.', imageUrl: '/bellmont-campus.png', kind: 'post' as const },
+  { key: 'ravi-announcement', author: 'prof.ravi', content: 'Lembrete: a sala de estudos do prédio norte fica aberta até mais tarde durante a semana de provas.', imageUrl: '/community-worlds.png', kind: 'post' as const },
   { key: 'bellmont-event', author: 'diretoriabm', content: 'A Semana Acadêmica já tem data! Salvem o dia e compartilhem suas ideias para a programação.', imageUrl: '/community-worlds.png', kind: 'post' as const },
   { key: 'yasmin-pulse', author: 'yasminmv', content: 'Às vezes, um novo capítulo começa com um simples “oi”.', imageUrl: '', kind: 'pulse' as const },
 ];
