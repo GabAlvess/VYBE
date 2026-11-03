@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 40637)
-Total output lines: 1052
-
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent, type ReactNode, type SyntheticEvent } from 'react';
 import './SocialApp.css';
 import './VybePlus.css';
