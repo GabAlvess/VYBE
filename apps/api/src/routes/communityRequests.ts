@@ -119,63 +119,13 @@ communityRequestsRouter.get('/community-requests/:requestId/photo', requireCommu
   });
 });
 
-communityRequestsRouter.post('/community-requests', requireCommunityRequester, async (request, response) => {
-  const rpgName = typeof request.body?.rpgName === 'string' ? request.body.rpgName.trim() : '';
-  const description = typeof request.body?.description === 'string' ? request.body.description.trim() : '';
-  const photo = typeof request.body?.photo === 'string' ? request.body.photo : '';
-  if (rpgName.length < 2 || rpgName.length > 80) {
-    response.status(400).json({ error: 'O nome do RPG deve ter entre 2 e 80 caracteres.' }); return;
-  }
-  if (description.length < 10 || description.length > 500) {
-    response.status(400).json({ error: 'Conte um pouco sobre o RPG (de 10 a 500 caracteres).' }); return;
-  }
-  const imageMatch = photo.match(/^data:image\/(png|jpeg|webp);base64,([A-Za-z0-9+/=]+)$/);
-  if (!imageMatch) { response.status(400).json({ error: 'Escolha uma imagem PNG, JPG ou WebP para a capa.' }); return; }
-  const imageBytes = Buffer.from(imageMatch[2], 'base64');
-  if (imageBytes.byteLength < 16 || imageBytes.byteLength > 3 * 1024 * 1024) {
-    response.status(400).json({ error: 'A imagem deve ter no máximo 3 MB.' }); return;
-  }
-  const extension = imageMatch[1] === 'jpeg' ? 'jpg' : imageMatch[1];
-  const signatureMatches = extension === 'png'
-    ? imageBytes.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))
-    : extension === 'jpg' ? imageBytes[0] === 0xff && imageBytes[1] === 0xd8 && imageBytes[2] === 0xff
-      : imageBytes.subarray(0, 4).toString() === 'RIFF' && imageBytes.subarray(8, 12).toString() === 'WEBP';
-  if (!signatureMatches) { response.status(400).json({ error: 'O arquivo escolhido não corresponde a uma imagem válida.' }); return; }
-
-  const slug = slugFrom(rpgName);
-  if (slug.length < 3 || reservedSlugs.has(slug)) {
-    response.status(400).json({ error: 'Este nome não pode ser usado como endereço de comunidade.' }); return;
-  }
-  if (await Community.exists({ $or: [{ slug }, { subdomain: slug }] })) {
-    response.status(409).json({ error: 'Já existe uma comunidade com o endereço gerado para esse nome.' }); return;
-  }
-  if (await CommunityRequest.exists({ slug, status: 'pending' })) {
-    response.status(409).json({ error: 'Já existe uma solicitação aguardando aprovação para este RPG.' }); return;
-  }
-
-  const tenant = request.vybeTenant!;
-  const account = request.vybeAccount;
-  const character = request.vybeCharacter;
-  const globalAccount = request.vybeGlobalAccount;
-  const filename = `${randomBytes(16).toString('hex')}.${extension}`;
-  const tenantDirectory = resolve(uploadsDirectory, tenant.slug);
-  await mkdir(tenantDirectory, { recursive: true });
-  await writeFile(resolve(tenantDirectory, filename), imageBytes, { flag: 'wx', mode: 0o600 });
-  const row = await CommunityRequest.create({
-    sourceTenantId: tenant._id, sourceTenantSlug: tenant.slug,
-    ...(account ? { accountId: account._id } : {}), ...(character ? { characterId: character._id } : {}),
-    ...(globalAccount ? { globalAccountId: globalAccount._id } : {}),
-    applicantEmail: globalAccount?.email ?? account!.email,
-    applicantName: globalAccount?.displayName ?? character!.displayName,
-    applicantUsername: globalAccount?.username ?? character!.username,
-    rpgName, slug, description, photoFilename: filename, photoExtension: extension, status: 'pending',
-  });
-  response.status(201).json(requestJson(row));
+communityRequestsRouter.post('/community-requests', requireCommunityRequester, async (_request, response) => {
+  response.status(410).json({ error: 'A criação de comunidades agora é feita em Minha VYBE, com solicitação e pagamento. Acesse a seleção de universos para começar.' });
 });
 
 communityRequestsRouter.get('/platform/community-requests', async (request, response) => {
   if (!isPlatformAdmin(request)) { denyReview(response); return; }
-  const rows = await CommunityRequest.find({ status: 'pending' }).sort({ createdAt: 1 }).limit(100).lean();
+  const rows = await CommunityRequest.find({ status: 'pending', paymentRequired: { $ne: true } }).sort({ createdAt: 1 }).limit(100).lean();
   const characterIds = rows.flatMap((row) => row.characterId ? [row.characterId] : []);
   const globalAccountIds = rows.flatMap((row) => row.globalAccountId ? [row.globalAccountId] : []);
   const tenantIds = [...new Set(rows.map((row) => row.sourceTenantId.toString()))].map((id) => new mongoose.Types.ObjectId(id));
@@ -241,7 +191,7 @@ communityRequestsRouter.delete('/platform/communities/:communityId', async (requ
 communityRequestsRouter.get('/platform/community-requests/:requestId/photo', async (request, response) => {
   if (!isPlatformAdmin(request)) { denyReview(response); return; }
   if (!mongoose.isValidObjectId(request.params.requestId)) { response.status(404).end(); return; }
-  const row = await CommunityRequest.findOne({ _id: request.params.requestId, status: 'pending' });
+  const row = await CommunityRequest.findOne({ _id: request.params.requestId, status: 'pending', paymentRequired: { $ne: true } });
   if (!row || !/^[a-z0-9-]+$/.test(row.sourceTenantSlug)) { response.status(404).end(); return; }
   response.sendFile(row.photoFilename, { root: resolve(uploadsDirectory, row.sourceTenantSlug) }, (error) => {
     if (error && !response.headersSent) response.status(404).end();

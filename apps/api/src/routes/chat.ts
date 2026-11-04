@@ -1,6 +1,6 @@
 import { Router, type Request, type Response } from 'express';
 import mongoose from 'mongoose';
-import { CommunityChannel, CommunityMessage, CommunityMessageReport, DirectMessage, DirectTyping, type ChannelKind, type ChannelPosting } from '../models/Chat.js';
+import { CommunityChannel, CommunityChannelCategory, CommunityMessage, CommunityMessageReport, DirectMessage, DirectTyping, type ChannelKind, type ChannelPosting } from '../models/Chat.js';
 import { CommunityAudit } from '../models/CommunityAudit.js';
 import { Account, Character, Notification } from '../models/Social.js';
 import { Conversation, ConversationBlock, ConversationMessage } from '../models/Conversation.js';
@@ -21,6 +21,12 @@ chatRouter.use((request, response, next) => {
 function tenantId(request: Request) { return request.vybeTenant!._id; }
 function characterId(request: Request) { return request.vybeCharacter!._id; }
 function isStaff(request: Request) { const tenant = request.vybeTenant!; const account = request.vybeAccount!; return tenant.admins.some((id) => id.equals(account._id)) || tenant.moderators.some((id) => id.equals(account._id)); }
+function categoryKey(name: string) { return name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase(); }
+async function canAccessChannel(channel: { private: boolean; category: string }, request: Request) {
+  if (isStaff(request)) return true;
+  if (channel.private) return false;
+  return !await CommunityChannelCategory.exists(tenantScope(tenantId(request), { nameKey: categoryKey(channel.category), private: true }));
+}
 export function canReadChannel(isPrivate: boolean, staff: boolean) { return !isPrivate || staff; }
 export function canPostChannel(posting: ChannelPosting, staff: boolean) { return posting === 'members' || staff; }
 function sendError(response: Response, status: number, error: string) { response.status(status).json({ error }); }
@@ -31,10 +37,49 @@ function characterJson(character: { _id: mongoose.Types.ObjectId; username: stri
   return { id: character._id.toString(), username: character.username, displayName: character.displayName, avatarUrl: character.avatarUrl, verified: (character.verification?.status === 'ACTIVE' || (!character.verification?.status && Boolean(character.verification?.verifiedAt))) && (!character.verification?.expiresAt || character.verification.expiresAt > new Date()) && !character.verification?.removedAt };
 }
 
+chatRouter.get('/conversations/channel-categories', async (request, response) => {
+  const tenant = tenantId(request);
+  const [savedCategories, channelCategories] = await Promise.all([
+    CommunityChannelCategory.find(tenantScope(tenant, isStaff(request) ? {} : { private: false })).sort({ name: 1 }).lean(),
+    CommunityChannel.distinct('category', tenantScope(tenant, {})),
+  ]);
+  const byKey = new Map(savedCategories.map((category) => [category.nameKey, { id: category._id.toString(), name: category.name, private: category.private }]));
+  for (const name of channelCategories) {
+    const key = categoryKey(name);
+    if (!byKey.has(key) && (isStaff(request) || !await CommunityChannelCategory.exists(tenantScope(tenant, { nameKey: key, private: true })))) byKey.set(key, { id: '', name, private: false });
+  }
+  response.json([...byKey.values()].sort((left, right) => left.name.localeCompare(right.name, 'pt-BR')));
+});
+
+chatRouter.get('/conversations/permissions', async (request, response) => {
+  response.json({ canManageChannels: isStaff(request) });
+});
+
+chatRouter.post('/conversations/channel-categories', async (request, response) => {
+  if (!isStaff(request)) { sendError(response, 403, 'Somente a equipe da comunidade pode criar categorias.'); return; }
+  const name = typeof request.body?.name === 'string' ? request.body.name.trim() : '';
+  const isPrivate = request.body?.private === true;
+  if (name.length < 2 || name.length > 60 || (request.body?.private !== undefined && typeof request.body.private !== 'boolean')) { sendError(response, 400, 'Informe um nome de categoria entre 2 e 60 caracteres.'); return; }
+  const nameKey = categoryKey(name);
+  const legacyCategories = await CommunityChannel.distinct('category', tenantScope(tenantId(request), {}));
+  if (legacyCategories.some((category) => categoryKey(category) === nameKey)) { sendError(response, 409, 'Já existe uma categoria com esse nome.'); return; }
+  try {
+    const category = await CommunityChannelCategory.create({ tenantId: tenantId(request), name, nameKey, private: isPrivate, createdBy: characterId(request) });
+    await CommunityAudit.create({ tenantId: tenantId(request), actorId: request.vybeAccount!._id, action: 'channel-categories.created', details: { categoryId: category._id.toString(), name, private: isPrivate } });
+    response.status(201).json({ id: category._id.toString(), name: category.name, private: category.private });
+  } catch (error) {
+    if (error && typeof error === 'object' && 'code' in error && error.code === 11000) { sendError(response, 409, 'Já existe uma categoria com esse nome.'); return; }
+    throw error;
+  }
+});
+
 chatRouter.get('/conversations/channels', async (request, response) => {
   const tenant = tenantId(request);
-  const filter = tenantScope(tenant, isStaff(request) ? {} : { private: false });
-  const channels = await CommunityChannel.find(filter).lean();
+  const [allChannels, privateCategories] = await Promise.all([
+    CommunityChannel.find(tenantScope(tenant, isStaff(request) ? {} : { private: false })).lean(),
+    isStaff(request) ? Promise.resolve([] as string[]) : CommunityChannelCategory.find(tenantScope(tenant, { private: true })).distinct('nameKey'),
+  ]);
+  const channels = isStaff(request) ? allChannels : allChannels.filter((channel) => !privateCategories.includes(categoryKey(channel.category)));
   channels.sort((left, right) => {
     return left.category.localeCompare(right.category, 'pt-BR') || left.name.localeCompare(right.name, 'pt-BR');
   });
@@ -43,12 +88,14 @@ chatRouter.get('/conversations/channels', async (request, response) => {
 
 chatRouter.post('/conversations/channels', async (request, response) => {
   if (!isStaff(request)) { sendError(response, 403, 'Somente a equipe da comunidade pode criar canais.'); return; }
-  const { name, category, description, kind, posting, private: isPrivate } = request.body ?? {};
-  if (typeof name !== 'string' || !/^[a-z0-9-]{2,40}$/.test(name) || typeof category !== 'string' || category.trim().length < 2 || category.trim().length > 60 || !['text', 'announcement', 'roleplay', 'restricted'].includes(kind) || !['members', 'staff', 'restricted'].includes(posting) || typeof isPrivate !== 'boolean') {
+  const { name, category: categoryInput, description, kind, posting, private: isPrivate } = request.body ?? {};
+  if (typeof name !== 'string' || !/^[a-z0-9-]{2,40}$/.test(name) || typeof categoryInput !== 'string' || categoryInput.trim().length < 2 || categoryInput.trim().length > 60 || !['text', 'announcement', 'roleplay', 'restricted', 'voice', 'forum'].includes(kind) || !['members', 'staff', 'restricted'].includes(posting) || typeof isPrivate !== 'boolean') {
     sendError(response, 400, 'Dados do canal inválidos.'); return;
   }
   try {
-    const channel = await CommunityChannel.create({ tenantId: tenantId(request), name, category: category.trim(), description: typeof description === 'string' ? description.trim().slice(0, 240) : '', kind, posting, private: isPrivate, createdBy: characterId(request) });
+    const categoryName = categoryInput.trim();
+    const category = await CommunityChannelCategory.findOne(tenantScope(tenantId(request), { nameKey: categoryKey(categoryName) })).lean();
+    const channel = await CommunityChannel.create({ tenantId: tenantId(request), name, category: categoryName, description: typeof description === 'string' ? description.trim().slice(0, 240) : '', kind, posting, private: isPrivate || Boolean(category?.private), createdBy: characterId(request) });
     await CommunityAudit.create({ tenantId: tenantId(request), actorId: request.vybeAccount!._id, action: 'channels.created', details: { channelId: channel._id.toString(), name: channel.name, category: channel.category, kind: channel.kind } });
     response.status(201).json(channelJson(channel));
   } catch (error) {
@@ -61,7 +108,7 @@ chatRouter.patch('/conversations/channels/:channelId', async (request, response)
   if (!isStaff(request)) { sendError(response, 403, 'Somente a equipe da comunidade pode alterar canais.'); return; }
   if (!mongoose.isValidObjectId(request.params.channelId)) { sendError(response, 400, 'Canal inválido.'); return; }
   const { name, category, description, kind, posting, private: isPrivate } = request.body ?? {};
-  if (typeof name !== 'string' || !/^[a-z0-9-]{2,40}$/.test(name) || typeof category !== 'string' || category.trim().length < 2 || category.trim().length > 60 || typeof description !== 'string' || description.length > 240 || !['text', 'announcement', 'roleplay', 'restricted'].includes(kind) || !['members', 'staff', 'restricted'].includes(posting) || typeof isPrivate !== 'boolean') {
+  if (typeof name !== 'string' || !/^[a-z0-9-]{2,40}$/.test(name) || typeof category !== 'string' || category.trim().length < 2 || category.trim().length > 60 || typeof description !== 'string' || description.length > 240 || !['text', 'announcement', 'roleplay', 'restricted', 'voice', 'forum'].includes(kind) || !['members', 'staff', 'restricted'].includes(posting) || typeof isPrivate !== 'boolean') {
     sendError(response, 400, 'Dados do canal inválidos.'); return;
   }
   const channel = await CommunityChannel.findOne(tenantScope(tenantId(request), { _id: request.params.channelId }));
@@ -87,7 +134,8 @@ chatRouter.get('/conversations/channels/:channelId/messages', async (request, re
   if (!mongoose.isValidObjectId(request.params.channelId)) { sendError(response, 400, 'Canal inválido.'); return; }
   const tenant = tenantId(request);
   const channel = await CommunityChannel.findOne(tenantScope(tenant, { _id: request.params.channelId }));
-  if (!channel || !canReadChannel(channel.private, isStaff(request))) { sendError(response, 404, 'Canal não encontrado nesta comunidade.'); return; }
+  if (!channel || !await canAccessChannel(channel, request)) { sendError(response, 404, 'Canal não encontrado nesta comunidade.'); return; }
+  if (channel.kind === 'voice') { sendError(response, 400, 'Este é um canal de voz e não recebe mensagens de texto.'); return; }
   const messages = await CommunityMessage.find(tenantScope(tenant, { channelId: channel._id })).sort({ createdAt: -1 }).limit(60).lean();
   const ids = [...new Set(messages.map((message) => message.characterId.toString()))].map((id) => new mongoose.Types.ObjectId(id));
   const authors = await Character.find(tenantScope(tenant, { _id: { $in: ids } })).lean();
@@ -101,7 +149,8 @@ chatRouter.post('/conversations/channels/:channelId/messages', async (request, r
   if (!content || content.length > 2000) { sendError(response, 400, 'A mensagem deve ter entre 1 e 2.000 caracteres.'); return; }
   const tenant = tenantId(request);
   const channel = await CommunityChannel.findOne(tenantScope(tenant, { _id: request.params.channelId }));
-  if (!channel || !canReadChannel(channel.private, isStaff(request))) { sendError(response, 404, 'Canal não encontrado nesta comunidade.'); return; }
+  if (!channel || !await canAccessChannel(channel, request)) { sendError(response, 404, 'Canal não encontrado nesta comunidade.'); return; }
+  if (channel.kind === 'voice') { sendError(response, 400, 'Este é um canal de voz e não recebe mensagens de texto.'); return; }
   if (!canPostChannel(channel.posting, isStaff(request))) { sendError(response, 403, 'Você não tem permissão para publicar neste canal.'); return; }
   const message = await CommunityMessage.create({ tenantId: tenant, channelId: channel._id, characterId: characterId(request), content });
   const event = { type: 'channel:message', channelId: channel._id.toString() };
@@ -118,6 +167,8 @@ chatRouter.delete('/conversations/messages/:messageId', async (request, response
   const tenant = tenantId(request);
   const message = await CommunityMessage.findOne(tenantScope(tenant, { _id: request.params.messageId }));
   if (!message) { sendError(response, 404, 'Mensagem não encontrada nesta comunidade.'); return; }
+  const channel = await CommunityChannel.findOne(tenantScope(tenant, { _id: message.channelId }));
+  if (!channel || !await canAccessChannel(channel, request)) { sendError(response, 404, 'Mensagem não encontrada nesta comunidade.'); return; }
   const own = message.characterId.equals(characterId(request));
   if (!own && !isStaff(request)) { sendError(response, 403, 'Você não pode remover esta mensagem.'); return; }
   if (!message.deletedAt) { message.deletedAt = new Date(); message.deletedBy = characterId(request); await message.save(); }
@@ -131,6 +182,8 @@ chatRouter.post('/conversations/messages/:messageId/report', async (request, res
   const tenant = tenantId(request);
   const message = await CommunityMessage.findOne(tenantScope(tenant, { _id: request.params.messageId }));
   if (!message) { sendError(response, 404, 'Mensagem não encontrada nesta comunidade.'); return; }
+  const channel = await CommunityChannel.findOne(tenantScope(tenant, { _id: message.channelId }));
+  if (!channel || !await canAccessChannel(channel, request)) { sendError(response, 404, 'Mensagem não encontrada nesta comunidade.'); return; }
   await CommunityMessageReport.updateOne(tenantScope(tenant, { messageId: message._id, reporterId: characterId(request) }), { $setOnInsert: { reason, status: 'open' } }, { upsert: true });
   response.status(201).json({ reported: true });
 });

@@ -40,7 +40,7 @@ export async function ensureProvisioningCollections() {
 }
 
 export function buildNewCommunityFromRequest(row: Pick<CommunityRequestFields,
-  'rpgName' | 'slug' | 'description' | 'photoFilename'>) {
+  'rpgName' | 'slug' | 'description' | 'photoFilename' | 'category' | 'logoFilename'>) {
   return {
     name: row.rpgName,
     slug: row.slug,
@@ -48,8 +48,9 @@ export function buildNewCommunityFromRequest(row: Pick<CommunityRequestFields,
     description: row.description,
     coverUrl: `/media/${row.slug}/${row.photoFilename}`,
     wallpaperUrl: '',
-    logoUrl: '',
+    logoUrl: row.logoFilename ? `/media/${row.slug}/${row.logoFilename}` : '',
     ...SYSTEM_COMMUNITY_DEFAULTS,
+    category: row.category ?? '',
     rules: [...SYSTEM_COMMUNITY_DEFAULTS.rules],
     brand: { ...SYSTEM_COMMUNITY_DEFAULTS.brand },
     admins: [],
@@ -143,7 +144,7 @@ export async function provisionApprovedCommunity(
     await VybeNotification.create([{
       accountId: row.globalAccountId, communityId: community._id, communityRequestId: row._id,
       type: 'community_creation_update', status: 'APPROVED',
-      message: `Sua solicitação para criar ${community.name} foi aprovada.`,
+      message: `Seu universo está pronto! ✨ A comunidade ${community.name} foi aprovada e já está disponível no VYBE.`,
     }], { session });
   }
   return community;

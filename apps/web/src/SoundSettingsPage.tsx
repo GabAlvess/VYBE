@@ -36,7 +36,7 @@ export function SoundSettingsPage() {
     finally { setSaving(false); }
   }
   return <main className="sound-settings-page">
-    <a className="sound-settings-back" href="/feed"><MaterialIcon name="arrow_back"/> Configurações</a>
+    <a className="sound-settings-back" href="/configuracoes"><MaterialIcon name="arrow_back"/> Configurações</a>
     <header><span>CONTA VYBE</span><h1>Sons e notificações</h1><p>Escolha quais sons você quer ouvir no VYBE. Essas preferências valem em todas as comunidades.</p></header>
     {error && <p className="sound-settings-error" role="alert">{error}</p>}
     <section className="sound-settings-card"><div className="sound-settings-master"><span className="sound-settings-icon"><MaterialIcon name="volume_up"/></span><span><strong>Sons do VYBE</strong><small>Controle todos os sons de uma vez.</small></span><label className="sound-toggle"><input type="checkbox" checked={preferences.enabled} disabled={loading || saving} onChange={(event) => void update({ enabled: event.currentTarget.checked })}/><span/><b>{preferences.enabled ? 'Ativado' : 'Desativado'}</b></label></div>

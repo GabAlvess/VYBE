@@ -60,7 +60,7 @@ function readRecentEmojis() {
   } catch { return []; }
 }
 
-export function EmojiButton({ onSelect, onBeforeOpen, label = 'Adicionar emoji' }: { onSelect: (emoji: string) => void; onBeforeOpen: () => void; label?: string }) {
+export function EmojiButton({ onSelect, onBeforeOpen, label = 'Adicionar emoji', className = '' }: { onSelect: (emoji: string) => void; onBeforeOpen: () => void; label?: string; className?: string }) {
   const [open, setOpen] = useState(false);
   const [popupPosition, setPopupPosition] = useState<{ top: number; left: number; width: number } | null>(null);
   const [recent, setRecent] = useState<string[]>(readRecentEmojis);
@@ -115,9 +115,9 @@ export function EmojiButton({ onSelect, onBeforeOpen, label = 'Adicionar emoji' 
     onSelect(data.emoji);
   }
 
-  return <span className="vybe-emoji-anchor" ref={rootRef}>
+  return <span className={`vybe-emoji-anchor ${className}`} ref={rootRef}>
     <button ref={buttonRef} type="button" className="vybe-emoji-trigger" aria-label={label} aria-expanded={open} aria-haspopup="dialog" onMouseDown={(event) => { onBeforeOpen(); event.preventDefault(); }} onClick={() => setOpen((value) => !value)}><MaterialIcon name="sentiment_satisfied"/></button>
-    {open && createPortal(<span ref={popoverRef} className="vybe-emoji-popover" role="dialog" aria-label="Seletor de emojis" style={popupPosition ? { top: popupPosition.top, left: popupPosition.left, width: popupPosition.width } : undefined}><Suspense fallback={<span className="emoji-loading">Carregando emojis…</span>}><EmojiPickerView
+    {open && createPortal(<span ref={popoverRef} className={`vybe-emoji-popover ${className}`} role="dialog" aria-label="Seletor de emojis" style={popupPosition ? { top: popupPosition.top, left: popupPosition.left, width: popupPosition.width } : undefined}><Suspense fallback={<span className="emoji-loading">Carregando emojis…</span>}><EmojiPickerView
       theme="light"
       emojiStyle="native"
       emojiData={portugueseEmojiData}

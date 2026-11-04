@@ -16,6 +16,7 @@ import { chatRouter } from './chat.js';
 import { communitySettingsRouter } from './communitySettings.js';
 import { matchRouter } from './match.js';
 import { messagesAppRouter } from './messagesApp.js';
+import { messageServersRouter } from './messageServers.js';
 import { bankRouter } from './bank.js';
 import { academicRouter } from './academic.js';
 import { newsRouter } from './news.js';
@@ -256,5 +257,6 @@ tenantRouter.patch('/me/character', async (request, response) => {
 tenantRouter.use(socialRouter);
 tenantRouter.use(verificationRouter);
 tenantRouter.use('/match', matchRouter);
+tenantRouter.use('/messages-v2/servers', messageServersRouter);
 tenantRouter.use('/messages-v2', messagesAppRouter);
 tenantRouter.use(chatRouter);

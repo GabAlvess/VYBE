@@ -1,7 +1,26 @@
 import mongoose, { type HydratedDocument } from 'mongoose';
 
-export type ChannelKind = 'text' | 'announcement' | 'roleplay' | 'restricted';
+export type ChannelKind = 'text' | 'announcement' | 'roleplay' | 'restricted' | 'voice' | 'forum';
 export type ChannelPosting = 'members' | 'staff' | 'restricted';
+
+export interface CommunityChannelCategoryFields {
+  tenantId: mongoose.Types.ObjectId;
+  name: string;
+  nameKey: string;
+  private: boolean;
+  createdBy: mongoose.Types.ObjectId | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+const communityChannelCategorySchema = new mongoose.Schema<CommunityChannelCategoryFields>({
+  tenantId: { type: mongoose.Schema.Types.ObjectId, required: true, index: true },
+  name: { type: String, required: true, trim: true, maxlength: 60 },
+  nameKey: { type: String, required: true, trim: true, lowercase: true },
+  private: { type: Boolean, default: false },
+  createdBy: { type: mongoose.Schema.Types.ObjectId, default: null },
+}, { timestamps: true, collection: 'community_channel_categories' });
+communityChannelCategorySchema.index({ tenantId: 1, nameKey: 1 }, { unique: true });
+export const CommunityChannelCategory: mongoose.Model<CommunityChannelCategoryFields> = (mongoose.models.CommunityChannelCategory as mongoose.Model<CommunityChannelCategoryFields> | undefined) ?? mongoose.model<CommunityChannelCategoryFields>('CommunityChannelCategory', communityChannelCategorySchema);
 
 export interface CommunityChannelFields {
   tenantId: mongoose.Types.ObjectId;
@@ -21,7 +40,7 @@ const communityChannelSchema = new mongoose.Schema<CommunityChannelFields>({
   name: { type: String, required: true, trim: true, lowercase: true, match: /^[a-z0-9-]{2,40}$/ },
   category: { type: String, required: true, trim: true, maxlength: 60 },
   description: { type: String, default: '', trim: true, maxlength: 240 },
-  kind: { type: String, enum: ['text', 'announcement', 'roleplay', 'restricted'], default: 'text' },
+  kind: { type: String, enum: ['text', 'announcement', 'roleplay', 'restricted', 'voice', 'forum'], default: 'text' },
   posting: { type: String, enum: ['members', 'staff', 'restricted'], default: 'members' },
   private: { type: Boolean, default: false },
   createdBy: { type: mongoose.Schema.Types.ObjectId, default: null },

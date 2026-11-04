@@ -1,4 +1,5 @@
-import { randomBytes } from 'node:crypto';
+import { sanitizeFormattedText } from '@vybe/shared';
+import { createHash, randomBytes } from 'node:crypto';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -6,13 +7,15 @@ import { Router, type Request, type Response } from 'express';
 import mongoose from 'mongoose';
 import { Account, Character, Notification } from '../models/Social.js';
 import { DirectMessage } from '../models/Chat.js';
-import { Conversation, ConversationBlock, ConversationMessage } from '../models/Conversation.js';
+import { Conversation, ConversationBlock, ConversationMessage, type ConversationMessageFields } from '../models/Conversation.js';
 import { MessageAppProfile } from '../models/MessageAppProfile.js';
+import { MessageServer, MessageServerMember } from '../models/MessageServer.js';
+import { MessageServerBan, MessageServerConfig, MessageServerCustomRole, MessageServerInvite } from '../models/MessageServerAdmin.js';
 import { Match, MatchBlock } from '../models/Match.js';
 import { requireSession } from '../middleware/tenant.js';
 import { canAccessConversation, canDeleteMessage, canManageConversation, canSendDirect, conversationDirectKey, isActiveParticipant } from './conversationPolicy.js';
 import { getOrCreateMatchConversation } from './conversationService.js';
-import { emitToProfiles } from '../realtime/chatWebSocket.js';
+import { emitToProfiles, getOnlineProfileIds } from '../realtime/chatWebSocket.js';
 
 export const messagesAppRouter = Router();
 messagesAppRouter.use(requireSession);
@@ -24,7 +27,7 @@ function characterJson(item: { _id: mongoose.Types.ObjectId; username: string; d
 function messageIdentity(character: { _id: mongoose.Types.ObjectId; username: string; displayName: string; avatarUrl: string; bio?: string }, profile?: { displayName?: string; bio?: string; avatarUrl?: string; statusMessage?: string }) {
   return { ...characterJson(character), displayName: profile?.displayName || character.displayName, avatarUrl: profile ? profile.avatarUrl ?? '' : character.avatarUrl, bio: profile ? profile.bio ?? '' : character.bio ?? '', statusMessage: profile?.statusMessage ?? '' };
 }
-function memberQuery(request: Request) { return { tenantId: tenantId(request), participants: { $elemMatch: { profileId: selfId(request), leftAt: { $exists: false } } } }; }
+function memberQuery(request: Request) { const archived = request.query.archived === '1'; const closed = request.query.closed === '1'; const state = archived ? { archivedAt: { $exists: true }, closedAt: { $exists: false } } : closed ? { closedAt: { $exists: true }, archivedAt: { $exists: false } } : { archivedAt: { $exists: false }, closedAt: { $exists: false } }; return { tenantId: tenantId(request), participants: { $elemMatch: { profileId: selfId(request), leftAt: { $exists: false }, ...state } } }; }
 async function accessibleConversation(request: Request, id: unknown) {
   if (!validId(id)) return null;
   const conversation = await Conversation.findOne({ _id: id, tenantId: tenantId(request) });
@@ -57,7 +60,7 @@ async function attachmentFrom(value: unknown, slug: string) {
   const match = item.dataUrl.match(/^data:([\w.+-]+\/[\w.+-]+);base64,([A-Za-z0-9+/=]+)$/);
   if (!match) throw new Error('Formato de anexo inválido.');
   const mimeType = match[1].toLowerCase();
-  const allowed = new Set(['image/png','image/jpeg','image/webp','image/gif','application/pdf','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document','application/vnd.ms-excel','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','text/plain','application/zip']);
+  const allowed = new Set(['image/png','image/jpeg','image/webp','image/gif','audio/webm','audio/ogg','audio/mp4','audio/mpeg','audio/wav','application/pdf','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document','application/vnd.ms-excel','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','text/plain','application/zip']);
   if (!allowed.has(mimeType)) throw new Error('Este tipo de arquivo não é permitido.');
   const bytes = Buffer.from(match[2], 'base64');
   if (!bytes.length || bytes.length > 5 * 1024 * 1024) throw new Error('O anexo deve ter até 5 MB.');
@@ -66,11 +69,16 @@ async function attachmentFrom(value: unknown, slug: string) {
     'image/jpeg': (buffer) => buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff,
     'image/webp': (buffer) => buffer.subarray(0,4).toString() === 'RIFF' && buffer.subarray(8,12).toString() === 'WEBP',
     'image/gif': (buffer) => ['GIF87a','GIF89a'].includes(buffer.subarray(0,6).toString()),
+    'audio/webm': (buffer) => buffer.subarray(0,4).equals(Buffer.from([0x1a,0x45,0xdf,0xa3])),
+    'audio/ogg': (buffer) => buffer.subarray(0,4).toString() === 'OggS',
+    'audio/mp4': (buffer) => buffer.subarray(4,8).toString() === 'ftyp',
+    'audio/mpeg': (buffer) => buffer.subarray(0,3).toString() === 'ID3' || (buffer[0] === 0xff && (buffer[1] & 0xe0) === 0xe0),
+    'audio/wav': (buffer) => buffer.subarray(0,4).toString() === 'RIFF' && buffer.subarray(8,12).toString() === 'WAVE',
     'application/pdf': (buffer) => buffer.subarray(0,5).toString() === '%PDF-',
     'application/zip': (buffer) => buffer[0] === 0x50 && buffer[1] === 0x4b,
   };
   if (signatures[mimeType] && !signatures[mimeType](bytes)) throw new Error('O conteúdo do arquivo não corresponde ao tipo informado.');
-  const extensionByMime: Record<string,string> = { 'image/png':'png','image/jpeg':'jpg','image/webp':'webp','image/gif':'gif','application/pdf':'pdf','application/msword':'doc','application/vnd.openxmlformats-officedocument.wordprocessingml.document':'docx','application/vnd.ms-excel':'xls','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':'xlsx','text/plain':'txt','application/zip':'zip' };
+  const extensionByMime: Record<string,string> = { 'image/png':'png','image/jpeg':'jpg','image/webp':'webp','image/gif':'gif','audio/webm':'webm','audio/ogg':'ogg','audio/mp4':'m4a','audio/mpeg':'mp3','audio/wav':'wav','application/pdf':'pdf','application/msword':'doc','application/vnd.openxmlformats-officedocument.wordprocessingml.document':'docx','application/vnd.ms-excel':'xls','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':'xlsx','text/plain':'txt','application/zip':'zip' };
   const uploads = resolve(dirname(fileURLToPath(import.meta.url)), '../../uploads', slug);
   await mkdir(uploads, { recursive: true });
   const filename = `message-${randomBytes(18).toString('hex')}.${extensionByMime[mimeType]}`;
@@ -82,7 +90,8 @@ function messageJson(message: any, me: mongoose.Types.ObjectId) {
   const attachment = storedAttachment && typeof storedAttachment.url === 'string' && storedAttachment.url
     ? { url: storedAttachment.url, name: storedAttachment.name ?? '', mimeType: storedAttachment.mimeType ?? '', size: storedAttachment.size ?? 0 }
     : null;
-  return { id: message._id.toString(), senderProfileId: message.senderProfileId.toString(), own: message.senderProfileId.equals(me), content: message.deletedAt ? 'Mensagem removida.' : message.content, messageType: message.messageType, attachment, replyToMessageId: message.replyToMessageId?.toString() ?? null, favorite: message.favoriteBy?.some((id: mongoose.Types.ObjectId) => id.equals(me)) ?? false, favoriteCount: message.favoriteBy?.length ?? 0, deleted: Boolean(message.deletedAt), readAt: message.readAt ?? null, createdAt: message.createdAt };
+  const serverInvite = !message.deletedAt && message.serverInvite ? { serverId: message.serverInvite.serverId.toString(), name: message.serverInvite.name, description: message.serverInvite.description, imageUrl: message.serverInvite.imageUrl ?? '', inviteUrl: message.serverInvite.inviteUrl } : null;
+  return { id: message._id.toString(), senderProfileId: message.senderProfileId.toString(), own: message.senderProfileId.equals(me), content: message.deletedAt ? 'Mensagem removida.' : message.content, messageType: message.messageType, attachment, serverInvite, replyToMessageId: message.replyToMessageId?.toString() ?? null, favorite: message.favoriteBy?.some((id: mongoose.Types.ObjectId) => id.equals(me)) ?? false, favoriteCount: message.favoriteBy?.length ?? 0, deleted: Boolean(message.deletedAt), readAt: message.readAt ?? null, createdAt: message.createdAt };
 }
 async function summary(request: Request, conversation: any) {
   const me = selfId(request);
@@ -106,7 +115,7 @@ async function summary(request: Request, conversation: any) {
     ConversationBlock.exists({ tenantId: tenantId(request), blockerId: me, blockedId: peerId }),
     ConversationBlock.exists({ tenantId: tenantId(request), blockerId: peerId, blockedId: me }),
   ]) : [false, false];
-  return { id: conversation._id.toString(), kind: conversation.kind, name: conversation.kind === 'group' ? conversation.name : directPerson?.displayName ?? 'Conversa', description: conversation.description, photoUrl: conversation.kind === 'group' ? conversation.photoUrl : directPerson?.avatarUrl ?? '', participants: others.map((p: any) => ({ ...(map.get(p.profileId.toString()) ?? { id: p.profileId.toString(), username: '', displayName: 'Membro', avatarUrl: '', bio: '', statusMessage: '' }), role: p.role })), lastMessage: last ? (last.attachment?.name || last.content || (last.messageType === 'image' ? 'Imagem' : 'Arquivo')) : '', lastMessageAt: last?.createdAt ?? conversation.updatedAt, unreadCount, muted: Boolean(participant?.mutedAt), favorite: Boolean(participant?.favorite), typing, peerLastReadAt, blockedByMe: Boolean(blockedByMe), blockedByThem: Boolean(blockedByThem), currentRole: participant?.role ?? 'member', matchId: match?._id.toString() ?? null, createdBy: conversation.createdBy.toString() };
+  return { id: conversation._id.toString(), kind: conversation.kind, name: conversation.kind === 'group' ? conversation.name : directPerson?.displayName ?? 'Conversa', description: conversation.description, photoUrl: conversation.kind === 'group' ? conversation.photoUrl : directPerson?.avatarUrl ?? '', participants: others.map((p: any) => ({ ...(map.get(p.profileId.toString()) ?? { id: p.profileId.toString(), username: '', displayName: 'Membro', avatarUrl: '', bio: '', statusMessage: '' }), role: p.role })), lastMessage: last ? (last.attachment?.name || last.content || (last.messageType === 'image' ? 'Imagem' : 'Arquivo')) : '', lastMessageAt: last?.createdAt ?? conversation.updatedAt, unreadCount, muted: Boolean(participant?.mutedAt), favorite: Boolean(participant?.favorite), archived: Boolean(participant?.archivedAt), closed: Boolean(participant?.closedAt), typing, peerLastReadAt, blockedByMe: Boolean(blockedByMe), blockedByThem: Boolean(blockedByThem), currentRole: participant?.role ?? 'member', matchId: match?._id.toString() ?? null, createdBy: conversation.createdBy.toString() };
 }
 
 messagesAppRouter.get('/profile', async (request, response) => {
@@ -140,14 +149,17 @@ messagesAppRouter.patch('/profile', async (request, response) => {
 
 messagesAppRouter.get('/people', async (request, response) => {
   const q = typeof request.query.q === 'string' ? request.query.q.trim().slice(0,80) : '';
+  const includeAllCommunityMembers = request.query.all === 'true';
   const self = selfId(request);
   const accounts = await Account.find({ tenantId: tenantId(request), status: 'active' }).select('_id').lean();
   const selector: Record<string, unknown> = { tenantId: tenantId(request), accountId: { $in: accounts.map((x) => x._id) }, _id: { $ne: self } };
   if (q) { const safe = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'); selector.$or = [{ displayName: safe }, { username: safe }]; }
-  const people = await Character.find(selector).sort({ displayName: 1 }).limit(40).lean();
+  const peopleQuery = Character.find(selector).sort({ displayName: 1 });
+  const people = await (includeAllCommunityMembers ? peopleQuery : peopleQuery.limit(40)).lean();
   const profiles = await MessageAppProfile.find({ tenantId: tenantId(request), characterId: { $in: people.map((person) => person._id) } }).lean();
   const profileMap = new Map(profiles.map((profile) => [profile.characterId.toString(), profile]));
-  response.json(people.map((person) => messageIdentity(person, profileMap.get(person._id.toString()))));
+  const onlineProfiles = new Set(getOnlineProfileIds(tenantId(request).toString()));
+  response.json(people.map((person) => ({ ...messageIdentity(person, profileMap.get(person._id.toString())), online: onlineProfiles.has(person._id.toString()) })));
 });
 
 messagesAppRouter.get('/conversations', async (request, response) => {
@@ -178,6 +190,7 @@ messagesAppRouter.post('/direct', async (request, response) => {
   if (await blocked(tenant, selfId(request), other)) { response.status(403).json({ error: 'Esta conversa não está disponível.' }); return; }
   const key = conversationDirectKey(selfId(request), other);
   const conversation = await Conversation.findOneAndUpdate({ tenantId: tenant, kind: 'direct', directKey: key }, { $setOnInsert: { tenantId: tenant, kind: 'direct', directKey: key, createdBy: selfId(request), participants: [{ profileId: selfId(request), role: 'member' }, { profileId: other, role: 'member' }] } }, { upsert: true, new: true, setDefaultsOnInsert: true });
+  if (request.query.open === '1') { response.status(200).json({ id: conversation._id.toString() }); return; }
   response.status(200).json(await summary(request, conversation));
 });
 
@@ -226,16 +239,39 @@ messagesAppRouter.post('/conversations/:conversationId/typing', async (request, 
 messagesAppRouter.post('/conversations/:conversationId/messages', async (request, response) => {
   const conversation = await accessibleConversation(request, request.params.conversationId);
   if (!conversation) { response.status(404).json({ error: 'Conversa não encontrada.' }); return; }
-  const me = selfId(request); const content = typeof request.body?.content === 'string' ? request.body.content.trim().slice(0,4000) : '';
-  let attachment;
+  const me = selfId(request); let content = sanitizeFormattedText(request.body?.content, 4000) ?? '';
+  let attachment; let serverInvite: ConversationMessageFields['serverInvite'];
   try { attachment = await attachmentFrom(request.body?.attachment, request.vybeTenant!.slug); } catch (error) { response.status(400).json({ error: error instanceof Error ? error.message : 'Anexo inválido.' }); return; }
+  if (request.body?.serverInvite !== undefined) {
+    const input = request.body.serverInvite;
+    if (conversation.kind !== 'direct' || !validId(input?.serverId) || !validId(input?.inviteId) || typeof input?.token !== 'string' || input.token.length < 32 || input.token.length > 100) { response.status(400).json({ error: 'Convite de servidor inválido.' }); return; }
+    const tenant = tenantId(request); const serverId = new mongoose.Types.ObjectId(input.serverId); const inviteId = new mongoose.Types.ObjectId(input.inviteId);
+    const senderAccountId = request.vybeAccount!._id;
+    const senderMembership = await MessageServerMember.findOne({ tenantId: tenant, serverId, accountId: senderAccountId }).lean();
+    const senderRoles = senderMembership?.roleIds?.length ? await MessageServerCustomRole.find({ tenantId: tenant, serverId, _id: { $in: senderMembership.roleIds } }).select('permissions').lean() : [];
+    const canInvite = senderMembership && (senderMembership.role === 'owner' || senderMembership.role === 'admin' || senderRoles.some((role) => role.permissions.includes('manage_invites')));
+    const inviteHash = createHash('sha256').update(input.token).digest('hex');
+    const [server, config, invite] = await Promise.all([
+      MessageServer.findOne({ _id: serverId, tenantId: tenant, privacy: 'private' }).lean(),
+      MessageServerConfig.findOne({ tenantId: tenant, serverId }).lean(),
+      MessageServerInvite.findOne({ _id: inviteId, tenantId: tenant, serverId, tokenHash: inviteHash, createdByAccountId: senderAccountId, revokedAt: { $exists: false }, $or: [{ expiresAt: { $exists: false } }, { expiresAt: { $gt: new Date() } }] }).lean(),
+    ]);
+    const recipient = conversation.participants.find((participant) => !participant.profileId.equals(me) && !participant.leftAt);
+    const recipientCharacter = recipient ? await Character.findOne({ _id: recipient.profileId, tenantId: tenant }).select('accountId').lean() : null;
+    const recipientBanned = recipientCharacter ? await MessageServerBan.exists({ tenantId: tenant, serverId, accountId: recipientCharacter.accountId, revokedAt: { $exists: false }, $or: [{ expiresAt: { $exists: false } }, { expiresAt: { $gt: new Date() } }] }) : false;
+    const recipientIsMember = recipientCharacter ? await MessageServerMember.exists({ tenantId: tenant, serverId, accountId: recipientCharacter.accountId }) : false;
+    if (!canInvite || !server || !invite || (config?.accessMode ?? 'invite_only') !== 'invite_only' || (invite.maxUses && invite.uses >= invite.maxUses) || !recipientCharacter || recipientBanned || recipientIsMember) { response.status(403).json({ error: 'Este convite não pode ser enviado a este destinatário.' }); return; }
+    serverInvite = { serverId, name: server.name, description: server.description || 'Um espaço para conversar e compartilhar.', imageUrl: config?.bannerUrl || server.iconUrl || '', inviteUrl: `/mensagens?serverId=${serverId.toString()}&invite=${encodeURIComponent(input.token)}` };
+    content = `Convite para ${server.name}`;
+    attachment = undefined;
+  }
   if (!content && !attachment) { response.status(400).json({ error: 'Escreva uma mensagem ou anexe um arquivo.' }); return; }
   const recipients = conversation.participants.filter((p) => !p.profileId.equals(me) && !p.leftAt).map((p) => p.profileId);
   const isBlocked = conversation.kind === 'direct' && recipients.length === 1 ? await blocked(tenantId(request), me, recipients[0]) : false;
   if (!canSendDirect(conversation.kind, recipients.length, isBlocked)) { response.status(403).json({ error: 'Esta conversa está bloqueada.' }); return; }
   const replyToMessageId = validId(request.body?.replyToMessageId) ? new mongoose.Types.ObjectId(request.body.replyToMessageId) : undefined;
   if (replyToMessageId && !await ConversationMessage.exists({ tenantId: tenantId(request), conversationId: conversation._id, _id: replyToMessageId })) { response.status(400).json({ error: 'A mensagem respondida não pertence a esta conversa.' }); return; }
-  const message = await ConversationMessage.create({ tenantId: tenantId(request), conversationId: conversation._id, senderProfileId: me, content, messageType: attachment ? attachment.mimeType.startsWith('image/') ? 'image' : 'file' : 'text', attachment, replyToMessageId });
+  const message = await ConversationMessage.create({ tenantId: tenantId(request), conversationId: conversation._id, senderProfileId: me, content, messageType: serverInvite ? 'server_invite' : attachment ? attachment.mimeType.startsWith('audio/') ? 'audio' : attachment.mimeType.startsWith('image/') ? 'image' : 'file' : 'text', attachment, serverInvite, replyToMessageId });
   const senderParticipant = conversation.participants.find((p) => p.profileId.equals(me)); if (senderParticipant) senderParticipant.typingAt = undefined;
   conversation.lastMessageAt = message.createdAt; await conversation.save();
   const notifyIds = conversation.participants.filter((participant) => !participant.profileId.equals(me) && !participant.leftAt && !participant.mutedAt).map((participant) => participant.profileId);
@@ -264,7 +300,7 @@ messagesAppRouter.delete('/conversations/:conversationId/messages/:messageId', a
   const message = await ConversationMessage.findOne({ _id: request.params.messageId, tenantId: tenantId(request), conversationId: conversation._id });
   if (!message) { response.status(404).json({ error: 'Mensagem não encontrada.' }); return; }
   if (!canDeleteMessage(message.senderProfileId.toString(), selfId(request).toString(), message.createdAt)) { response.status(403).json({ error: 'Você só pode apagar suas mensagens nos primeiros 5 minutos.' }); return; }
-  if (!message.deletedAt) { message.content = ''; message.attachment = undefined; message.messageType = 'text'; message.deletedAt = new Date(); await message.save(); }
+  if (!message.deletedAt) { message.content = ''; message.attachment = undefined; message.serverInvite = undefined; message.messageType = 'text'; message.deletedAt = new Date(); await message.save(); }
   response.json(messageJson(message, selfId(request)));
 });
 
@@ -274,7 +310,9 @@ messagesAppRouter.patch('/conversations/:conversationId/preferences', async (req
   const participant = conversation.participants.find((item) => item.profileId.equals(selfId(request)))!;
   if (typeof request.body?.muted === 'boolean') participant.mutedAt = request.body.muted ? new Date() : undefined;
   if (typeof request.body?.favorite === 'boolean') participant.favorite = request.body.favorite;
-  await conversation.save(); response.json({ muted: Boolean(participant.mutedAt), favorite: Boolean(participant.favorite) });
+  if (typeof request.body?.archived === 'boolean') { participant.archivedAt = request.body.archived ? new Date() : undefined; if (request.body.archived) participant.closedAt = undefined; }
+  if (typeof request.body?.closed === 'boolean') { participant.closedAt = request.body.closed ? new Date() : undefined; if (request.body.closed) participant.archivedAt = undefined; }
+  await conversation.save(); response.json({ muted: Boolean(participant.mutedAt), favorite: Boolean(participant.favorite), archived: Boolean(participant.archivedAt), closed: Boolean(participant.closedAt) });
 });
 
 messagesAppRouter.post('/conversations/:conversationId/participants', async (request, response) => {

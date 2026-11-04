@@ -72,6 +72,7 @@ export interface CharacterFields {
     ECHO?: CharacterFields['profileCustomization'];
     MATCH?: CharacterFields['profileCustomization'];
   };
+  notificationsClearedAt?: Date;
   seedKey?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -121,6 +122,7 @@ const characterSchema = new mongoose.Schema<CharacterFields>({
     ECHO: { nameColor: String, primaryFontId: String, secondaryFontId: String, nameFont: String, fontId: String, avatarFrame: String, profileTheme: String },
     MATCH: { nameColor: String, primaryFontId: String, secondaryFontId: String, nameFont: String, fontId: String, avatarFrame: String, profileTheme: String },
   },
+  notificationsClearedAt: { type: Date, default: undefined },
   seedKey: { type: String, default: undefined },
 }, { timestamps: true });
 characterSchema.index({ tenantId: 1, username: 1 }, { unique: true });
@@ -288,8 +290,10 @@ export interface NotificationFields {
   tenantId: mongoose.Types.ObjectId;
   characterId: mongoose.Types.ObjectId;
   actorId: mongoose.Types.ObjectId;
-  type: 'follow' | 'like' | 'comment' | 'mention' | 'message' | 'match_created' | 'echo_like' | 'echo_mention' | 'repost' | 'echo_reply' | 'post_trending' | 'event_created' | 'event_updated' | 'event_cancelled' | 'event_review' | 'event_pending' | 'verification_requested' | 'verification_payment_confirmed' | 'verification_payment_issue' | 'verification_approved' | 'verification_rejected' | 'verification_suspended' | 'verification_removed' | 'verification_gift_received' | 'verification_gift_activated' | 'bank_transfer_received' | 'bank_admin_credit_received' | 'academic_update' | 'academic_submission' | 'academic_grade' | 'news_published' | 'news_reviewed' | 'career_status' | 'career_job' | 'community_join_update';
+  type: 'follow' | 'like' | 'comment' | 'mention' | 'message' | 'server_message' | 'match_created' | 'echo_like' | 'echo_mention' | 'repost' | 'echo_reply' | 'post_trending' | 'event_created' | 'event_updated' | 'event_cancelled' | 'event_review' | 'event_pending' | 'verification_requested' | 'verification_payment_confirmed' | 'verification_payment_issue' | 'verification_approved' | 'verification_rejected' | 'verification_suspended' | 'verification_removed' | 'verification_gift_received' | 'verification_gift_activated' | 'bank_transfer_received' | 'bank_admin_credit_received' | 'academic_update' | 'academic_submission' | 'academic_grade' | 'news_published' | 'news_reviewed' | 'career_status' | 'career_job' | 'community_join_update';
   targetId: mongoose.Types.ObjectId;
+  serverId?: mongoose.Types.ObjectId;
+  channelId?: mongoose.Types.ObjectId;
   readAt?: Date;
   seedKey?: string;
   createdAt: Date;
@@ -299,8 +303,9 @@ const notificationSchema = new mongoose.Schema<NotificationFields>({
   tenantId: { type: mongoose.Schema.Types.ObjectId, required: true, index: true },
   characterId: { type: mongoose.Schema.Types.ObjectId, required: true },
   actorId: { type: mongoose.Schema.Types.ObjectId, required: true },
-  type: { type: String, enum: ['follow', 'like', 'comment', 'mention', 'message', 'match_created', 'echo_like', 'echo_mention', 'repost', 'echo_reply', 'post_trending', 'event_created', 'event_updated', 'event_cancelled', 'event_review', 'event_pending', 'verification_requested', 'verification_payment_confirmed', 'verification_payment_issue', 'verification_approved', 'verification_rejected', 'verification_suspended', 'verification_removed', 'verification_gift_received', 'verification_gift_activated', 'bank_transfer_received', 'bank_admin_credit_received', 'academic_update', 'academic_submission', 'academic_grade', 'news_published', 'news_reviewed', 'career_status', 'career_job', 'community_join_update'], required: true },
+  type: { type: String, enum: ['follow', 'like', 'comment', 'mention', 'message', 'server_message', 'match_created', 'echo_like', 'echo_mention', 'repost', 'echo_reply', 'post_trending', 'event_created', 'event_updated', 'event_cancelled', 'event_review', 'event_pending', 'verification_requested', 'verification_payment_confirmed', 'verification_payment_issue', 'verification_approved', 'verification_rejected', 'verification_suspended', 'verification_removed', 'verification_gift_received', 'verification_gift_activated', 'bank_transfer_received', 'bank_admin_credit_received', 'academic_update', 'academic_submission', 'academic_grade', 'news_published', 'news_reviewed', 'career_status', 'career_job', 'community_join_update'], required: true },
   targetId: { type: mongoose.Schema.Types.ObjectId, required: true },
+  serverId: { type: mongoose.Schema.Types.ObjectId }, channelId: { type: mongoose.Schema.Types.ObjectId },
   readAt: { type: Date },
   seedKey: { type: String, default: undefined },
 }, { timestamps: true });

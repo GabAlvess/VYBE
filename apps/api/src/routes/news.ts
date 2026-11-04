@@ -19,7 +19,7 @@ const escapeRegex=(value:string)=>value.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
 
 async function getRoles(req:Request){const records=await NewsRole.find({tenantId:tenantOf(req)._id,profileId:profileOf(req)._id,status:'active'}).select('role').lean();const roles=records.map((item)=>item.role as NewsRoleName);if(await isCommunityOwner(req)&&!roles.includes('NEWS_ADMIN'))roles.push('NEWS_ADMIN');return roles}
 async function requireWriter(req:Request,res:Response){const roles=await getRoles(req);if(mayWriteNews(roles))return roles;fail(res,403,'Você não tem permissão editorial para criar matérias.');return null}
-async function requireReviewer(req:Request,res:Response){const roles=await getRoles(req);if(mayReviewNews(roles))return roles;fail(res,403,'Somente o Admin do Jornal pode aprovar ou publicar matérias.');return null}
+async function requireReviewer(req:Request,res:Response){const roles=await getRoles(req);if(mayReviewNews(roles))return roles;fail(res,403,'Somente editores e administradores do Jornal podem aprovar ou publicar matérias.');return null}
 async function requireNewsAdmin(req:Request,res:Response){const roles=await getRoles(req);if(mayManageNews(roles)||await isCommunityOwner(req))return roles;fail(res,403,'Apenas um News Admin pode gerenciar o jornal.');return null}
 async function generalAdmin(req:Request){const tenant=tenantOf(req);return Boolean(tenant.ownerAccountId?.equals(accountOf(req)._id)||tenant.admins.some((id)=>id.equals(accountOf(req)._id)))}
 async function isCommunityOwner(req:Request){const user=accountOf(req);return checkCommunityOwner(tenantOf(req),user)||isPlatformAppCreator(user)}

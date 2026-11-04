@@ -5,5 +5,6 @@ export type CommunityEntrySettings = {
 
 export function requiresJoinApproval(community: CommunityEntrySettings) {
   const access = community.settings?.access;
-  return community.entry === 'approval' || access?.approvalRequired === true || (access?.visibility !== undefined && access.visibility !== 'public');
+  if (access?.visibility === 'public') return false;
+  return community.entry === 'approval' || access?.approvalRequired === true || access?.visibility === 'controlled' || access?.visibility === 'private';
 }

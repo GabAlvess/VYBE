@@ -5,14 +5,29 @@ import { Community } from '../models/Community.js';
 import { CommunitySanction } from '../models/CommunitySanction.js';
 import { VybeAccount } from '../models/VybeAccount.js';
 import { VybeSession } from '../models/VybeSession.js';
+import { Conversation } from '../models/Conversation.js';
 import { hashSessionToken, tenantSlugForHost } from '../middleware/tenant.js';
 
 type SocketIdentity = { tenantId: string; profileId: string };
-type ConnectedSocket = SocketIdentity & { socket: WebSocket };
+type ConnectedSocket = SocketIdentity & { socket: WebSocket; heartbeat?: NodeJS.Timeout; alive?: boolean };
 type RealtimeEvent = { type: string; [key: string]: unknown };
 
 const peers = new Set<ConnectedSocket>();
-const websocketServer = new WebSocketServer({ noServer: true, maxPayload: 1024 });
+const websocketServer = new WebSocketServer({ noServer: true, maxPayload: 64 * 1024 });
+
+function removePeer(peer: ConnectedSocket) {
+  if (!peers.delete(peer)) return;
+  if (peer.heartbeat) clearInterval(peer.heartbeat);
+  if (!getOnlineProfileIds(peer.tenantId).includes(peer.profileId)) emitPresence(peer.tenantId, peer.profileId, false);
+}
+
+export function disconnectProfile(tenantId: string, profileId: string) {
+  for (const peer of [...peers]) {
+    if (peer.tenantId !== tenantId || peer.profileId !== profileId) continue;
+    peer.socket.terminate();
+    removePeer(peer);
+  }
+}
 
 function cookieValue(header: string | undefined, name: string) {
   const match = header?.split(';').map((part) => part.trim()).find((part) => part.startsWith(`${name}=`));
@@ -60,11 +75,44 @@ export function attachChatWebSocket(server: Server) {
     void authenticate(request).then((identity) => {
       if (!identity) { socket.write('HTTP/1.1 401 Unauthorized\r\nConnection: close\r\n\r\n'); socket.destroy(); return; }
       websocketServer.handleUpgrade(request, socket, head, (ws) => {
-        const peer = { ...identity, socket: ws };
+        const peer: ConnectedSocket = { ...identity, socket: ws, alive: true };
+        const wasOnline = getOnlineProfileIds(identity.tenantId).includes(identity.profileId);
         peers.add(peer);
-        const heartbeat = setInterval(() => { if (ws.readyState === WebSocket.OPEN) ws.ping(); }, 30_000);
-        ws.on('close', () => { clearInterval(heartbeat); peers.delete(peer); });
-        ws.on('error', () => { clearInterval(heartbeat); peers.delete(peer); });
+        ws.send(JSON.stringify({ type: 'presence:snapshot', profileIds: getOnlineProfileIds(identity.tenantId) }));
+        if (!wasOnline) emitPresence(identity.tenantId, identity.profileId, true);
+        peer.heartbeat = setInterval(() => {
+          if (!peer.alive) { ws.terminate(); removePeer(peer); return; }
+          peer.alive = false;
+          if (ws.readyState === WebSocket.OPEN) ws.ping();
+        }, 30_000);
+        ws.on('pong', () => { peer.alive = true; });
+        ws.on('close', () => removePeer(peer));
+        ws.on('error', () => removePeer(peer));
+        ws.on('message', (raw) => {
+          void (async () => {
+            let event: any;
+            try { event = JSON.parse(raw.toString()); } catch { return; }
+            const allowedTypes = new Set(['call:offer', 'call:answer', 'call:ice', 'call:reject', 'call:end']);
+            if (!event || !allowedTypes.has(event.type) || typeof event.conversationId !== 'string' || !/^[a-f\d]{24}$/i.test(event.conversationId) || typeof event.targetProfileId !== 'string' || !/^[a-f\d]{24}$/i.test(event.targetProfileId) || typeof event.callId !== 'string' || event.callId.length > 80) return;
+            if (event.payload !== undefined && JSON.stringify(event.payload).length > 48 * 1024) return;
+            if (event.type === 'call:offer' || event.type === 'call:answer') {
+              const description = event.payload?.description;
+              if (!description || !['offer', 'answer'].includes(description.type) || typeof description.sdp !== 'string' || description.sdp.length > 40 * 1024) return;
+            }
+            if (event.type === 'call:ice') {
+              const candidate = event.payload;
+              if (!candidate || typeof candidate.candidate !== 'string' || candidate.candidate.length > 4096) return;
+            }
+            const conversation: any = await Conversation.findOne({ _id: event.conversationId, tenantId: identity.tenantId, kind: 'direct' }).select('participants').lean();
+            if (!conversation) return;
+            const activeIds = conversation.participants.filter((participant: any) => !participant.leftAt).map((participant: any) => participant.profileId.toString());
+            if (!activeIds.includes(identity.profileId) || !activeIds.includes(event.targetProfileId) || event.targetProfileId === identity.profileId) return;
+            const data = JSON.stringify({ type: event.type, conversationId: event.conversationId, profileId: identity.profileId, callId: event.callId, payload: event.payload });
+            let delivered = false;
+            for (const recipient of peers) if (recipient.tenantId === identity.tenantId && recipient.profileId === event.targetProfileId && recipient.socket.readyState === WebSocket.OPEN) { recipient.socket.send(data); delivered = true; }
+            if (!delivered && event.type === 'call:offer') ws.send(JSON.stringify({ type: 'call:unavailable', conversationId: event.conversationId, callId: event.callId }));
+          })().catch(() => undefined);
+        });
         ws.send(JSON.stringify({ type: 'ready' }));
       });
     }).catch(() => { socket.write('HTTP/1.1 401 Unauthorized\r\nConnection: close\r\n\r\n'); socket.destroy(); });
@@ -73,6 +121,15 @@ export function attachChatWebSocket(server: Server) {
 
 export function closeChatWebSockets() {
   for (const peer of peers) peer.socket.close(1001, 'Server encerrando conexão');
+}
+
+export function getOnlineProfileIds(tenantId: string) {
+  return [...new Set([...peers].filter((peer) => peer.tenantId === tenantId && peer.socket.readyState === WebSocket.OPEN).map((peer) => peer.profileId))];
+}
+
+function emitPresence(tenantId: string, profileId: string, online: boolean) {
+  const data = JSON.stringify({ type: 'presence:update', profileId, online });
+  for (const peer of peers) if (peer.tenantId === tenantId && peer.socket.readyState === WebSocket.OPEN) peer.socket.send(data);
 }
 
 export function emitToProfiles(tenantId: string, profileIds: Array<string | { toString(): string }>, event: RealtimeEvent) {

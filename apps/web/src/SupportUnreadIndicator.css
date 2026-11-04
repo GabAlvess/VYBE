@@ -1,0 +1,4 @@
+.support-unread-anchor{position:relative!important;overflow:visible!important}
+.support-unread-indicator{position:absolute;z-index:4;top:-7px;right:-7px;width:20px;height:20px;box-sizing:border-box;display:grid;place-items:center;border:2px solid #fffdf9;border-radius:50%;background:#e8867b;color:#fff;box-shadow:0 2px 5px #17494b2b}
+.support-unread-indicator .material-symbol{font-size:11px;line-height:1}
+.support-unread-anchor:focus-visible .support-unread-indicator{outline:2px solid #246b6e;outline-offset:2px}

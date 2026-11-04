@@ -7,9 +7,8 @@ import mongoose from 'mongoose';
 import { Community } from '../models/Community.js';
 import { CommunityAudit } from '../models/CommunityAudit.js';
 import { CommunityJoinRequest, type CommunityJoinChangeField } from '../models/CommunityJoinRequest.js';
-import { Account, Character, Notification } from '../models/Social.js';
+import { Account, Character } from '../models/Social.js';
 import { VybeAccount } from '../models/VybeAccount.js';
-import { VybeNotification } from '../models/VybeNotification.js';
 import { isCommunityOwner, isPlatformAppCreator } from './communityAdminPolicy.js';
 import { normalizeJoinUsername, normalizePhotoplayerName, validateJoinAge, validateJoinText, validateJoinUsername } from './communityJoinPolicy.js';
 
@@ -269,10 +268,5 @@ communityJoinRequestsRouter.post('/settings/community/join-requests/:id/review',
   } else { fail(response, 400, 'Escolha aprovar, solicitar alteração ou recusar.'); return; }
   await joinRequest.save();
   await CommunityAudit.create({ tenantId: current._id, actorId: reviewer._id, action: `community.join.${decision}`, details: { joinRequestId: joinRequest._id.toString(), requesterAccountId: joinRequest.accountId.toString(), ...(decision === 'request_changes' ? { fields: joinRequest.requestedChanges, message } : decision === 'reject' ? { reason: message } : {}) } });
-  if (joinRequest.vybeAccountId) {
-    await VybeNotification.create({ accountId: joinRequest.vybeAccountId, communityId: current._id, joinRequestId: joinRequest._id, type: 'community_join_update', status: joinRequest.status, message: joinRequest.status === 'NEEDS_INFORMATION' ? joinRequest.adminMessage : joinRequest.status === 'REJECTED' ? joinRequest.rejectionReason : '' }).catch(() => undefined);
-  } else if (joinRequest.sourceTenantId && joinRequest.sourceCharacterId) {
-    await Notification.create({ tenantId: joinRequest.sourceTenantId, characterId: joinRequest.sourceCharacterId, actorId: joinRequest.sourceCharacterId, targetId: joinRequest._id, type: 'community_join_update' }).catch(() => undefined);
-  }
   response.json({ id: joinRequest._id.toString(), status: joinRequest.status });
 });

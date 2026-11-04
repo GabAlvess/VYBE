@@ -8,6 +8,8 @@
 .picker-account small { color: #737b78; font-size: 12px; }
 .picker-account button { display: inline-flex; align-items: center; gap: 8px; margin-left: 14px; padding: 8px 0 8px 24px; border: 0; border-left: 1px solid #e7ebe9; background: transparent; color: #343a37; font: inherit; font-size: 12px; cursor: pointer; }
 .picker-account button .material-symbol { font-size: 18px; }
+.picker-account .picker-help-link { display: inline-flex; align-items: center; gap: 7px; padding: 8px 10px; border: 1px solid #dce8e1; border-radius: 11px; color: #315f58; background: #fffdf9; font-size: 12px; font-weight: 650; text-decoration: none; white-space: nowrap; }
+.picker-account .picker-help-link .material-symbol { font-size: 17px; }
 .picker-content { width: min(100%, 1240px); margin: 30px auto 0; text-align: center; }
 .picker-eyebrow { margin: 0 0 10px; color: #16815d; font-size: 10px; font-weight: 750; letter-spacing: .22em; }
 .picker-content h1 { margin: 0; color: #171a19; font-size: clamp(30px, 3vw, 43px); font-weight: 740; letter-spacing: -1.7px; }
@@ -99,6 +101,8 @@
   .picker-account > img, .picker-account > span { width: 36px; height: 36px; }
   .picker-account strong, .picker-account small { display: none; }
   .picker-account button { gap: 5px; margin-left: 4px; padding-left: 10px; font-size: 11px; }
+  .picker-account .picker-help-link { gap: 4px; padding: 7px; font-size: 0; }
+  .picker-account .picker-help-link .material-symbol { font-size: 19px; }
   .picker-header > .brand { font-size: 23px; }
   .picker-header .brand-symbol { width: 34px; }
   .picker-content { margin-top: 48px; }

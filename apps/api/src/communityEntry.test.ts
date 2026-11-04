@@ -11,12 +11,14 @@ test('VYBE account identity is global while community accounts and profiles rema
   assert.ok(Character.schema.path('tenantId'));
 });
 
-test('public communities allow immediate entry when approval is not enabled', () => {
+test('public communities allow immediate entry even when a legacy approval flag remains', () => {
   assert.equal(requiresJoinApproval({ entry: 'open', settings: { access: { visibility: 'public', approvalRequired: false } } }), false);
+  assert.equal(requiresJoinApproval({ entry: 'approval', settings: { access: { visibility: 'public', approvalRequired: true } } }), false);
 });
 
 test('private and controlled communities require an approved application', () => {
   assert.equal(requiresJoinApproval({ entry: 'open', settings: { access: { visibility: 'private', approvalRequired: false } } }), true);
   assert.equal(requiresJoinApproval({ entry: 'open', settings: { access: { visibility: 'controlled', approvalRequired: false } } }), true);
-  assert.equal(requiresJoinApproval({ entry: 'approval', settings: { access: { visibility: 'public', approvalRequired: false } } }), true);
+  assert.equal(requiresJoinApproval({ entry: 'approval', settings: { access: { visibility: 'public', approvalRequired: false } } }), false);
+  assert.equal(requiresJoinApproval({ entry: 'approval' }), true);
 });

@@ -1,0 +1,3 @@
+.help-header-link{display:grid;place-items:center;width:34px;height:34px;flex:none;margin-left:auto;border:1px solid #e8e9ed;border-radius:50%;background:rgba(255,255,255,.82);color:#777985;text-decoration:none;transition:background .15s,color .15s,border-color .15s}
+.help-header-link:hover{border-color:#d8d1e8;background:#f7f4fc;color:#65528a}
+.help-header-link .material-symbol{font-size:19px}

@@ -3,6 +3,8 @@ import test from 'node:test';
 import mongoose from 'mongoose';
 import { Community } from './models/Community.js';
 import { VybeNotification } from './models/VybeNotification.js';
+import { CommunityRequest } from './models/CommunityRequest.js';
+import { DEFAULT_COMMUNITY_CREATION_PRICE_CENTS, PlatformProductSettings } from './models/PlatformProductSettings.js';
 import { buildNewCommunityFromRequest, buildOwnerRecords, SYSTEM_COMMUNITY_DEFAULTS } from './services/communityProvisioning.js';
 
 test('nova comunidade usa somente os dados propostos e defaults globais', () => {
@@ -35,6 +37,25 @@ test('nova comunidade usa somente os dados propostos e defaults globais', () => 
   assert.deepEqual(first.settings?.characters?.customFields, []);
 });
 
+test('criação mantém categoria e logo do pedido e não concede VYBE Verificado', () => {
+  const model = new Community(buildNewCommunityFromRequest({ rpgName: 'Meu Universo', slug: 'meu-universo', description: 'Uma comunidade de histórias', category: 'Fantasia', photoFilename: 'c'.repeat(32) + '.jpg', logoFilename: 'd'.repeat(32) + '.png' }));
+  assert.equal(model.category, 'Fantasia');
+  assert.equal(model.logoUrl, `/media/meu-universo/${'d'.repeat(32)}.png`);
+  assert.equal((model as unknown as { verified?: boolean }).verified, undefined);
+});
+
+test('solicitação paga grava BRL e valor fixo como snapshot independente do preço futuro', () => {
+  const accountId = new mongoose.Types.ObjectId();
+  const request = new CommunityRequest({ sourceTenantId: new mongoose.Types.ObjectId(), sourceTenantSlug: 'community', globalAccountId: accountId, applicantEmail: 'ana@example.com', applicantName: 'Ana', applicantUsername: 'ana', rpgName: 'Meu Universo', slug: 'meu-universo', description: 'Uma comunidade para histórias.', photoFilename: 'e'.repeat(32) + '.jpg', photoExtension: 'jpg', paymentRequired: true, amountCents: DEFAULT_COMMUNITY_CREATION_PRICE_CENTS, currency: 'BRL', paymentStatus: 'AWAITING_PAYMENT', status: 'pending' });
+  const settings = new PlatformProductSettings({ key: 'COMMUNITY_CREATION', amountCents: 7500, updatedByPlatformAdminId: new mongoose.Types.ObjectId() });
+  assert.equal(request.validateSync(), undefined);
+  assert.equal(settings.validateSync(), undefined);
+  assert.equal(request.amountCents, 4990);
+  assert.equal(request.currency, 'BRL');
+  assert.equal(request.paymentStatus, 'AWAITING_PAYMENT');
+  assert.equal(settings.amountCents, 7500);
+});
+
 test('Owner recebe registros locais novos em cada tenant, mantendo somente a conta global compartilhada', () => {
   const globalAccountId = new mongoose.Types.ObjectId();
   const firstTenantId = new mongoose.Types.ObjectId();
@@ -60,5 +81,10 @@ test('notificação de aprovação de comunidade pode existir sem solicitação 
     communityRequestId: new mongoose.Types.ObjectId(), type: 'community_creation_update',
     status: 'APPROVED', message: 'Comunidade aprovada.',
   });
+  assert.equal(notification.validateSync(), undefined);
+});
+
+test('notificação da plataforma para atualização de criação pode ser recebida sem tenant ativo', () => {
+  const notification = new VybeNotification({ accountId: new mongoose.Types.ObjectId(), communityRequestId: new mongoose.Types.ObjectId(), type: 'community_creation_update', status: 'PAYMENT_ISSUE', message: 'Pagamento não identificado.' });
   assert.equal(notification.validateSync(), undefined);
 });

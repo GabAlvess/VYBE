@@ -4,6 +4,7 @@ import { MaterialIcon } from './MaterialIcon';
 import { isHexNameColor, ProfileNameColorPicker } from './ProfileNameColorPicker';
 import { notifySnack } from './SnackMessage';
 import { UniverseBackLink } from './UniverseBackLink';
+import { HelpHeaderLink } from './HelpHeaderLink';
 import { VybeLogo } from './VybeLogo';
 import { connectConversationRealtime } from './conversationRealtime';
 import { soundManager } from './soundManager';
@@ -81,7 +82,7 @@ function MatchLogo() {
 
 function MatchSidebar({ community }: { community: string }) {
   const path = window.location.pathname;
-  return <aside className="match-sidebar"><div className="match-sidebar-brand"><MatchLogo/><span className="match-community"><MaterialIcon name="groups"/>{community}</span></div><div className="match-nav-app"><MaterialIcon name="favorite" filled/>Match</div><nav aria-label="Navegação do Match"><a className={path === '/match' ? 'active' : ''} href="/match"><MaterialIcon name="home"/>Início</a><a className={path === '/match/perfil' ? 'active' : ''} href="/match/perfil"><MaterialIcon name="person"/>Perfil</a><a className={path.startsWith('/match/mensagens') ? 'active' : ''} href="/match/mensagens"><MaterialIcon name="chat_bubble"/>Mensagens</a><a className={path === '/match/personalizacao-vybe' ? 'active' : ''} href="/match/personalizacao-vybe"><MaterialIcon name="auto_awesome"/>Personalização VYBE+</a></nav><UniverseBackLink className="match-universe-back"/></aside>;
+  return <aside className="match-sidebar"><div className="match-sidebar-brand"><MatchLogo/><HelpHeaderLink/><span className="match-community"><MaterialIcon name="groups"/>{community}</span></div><div className="match-nav-app"><MaterialIcon name="favorite" filled/>Match</div><nav aria-label="Navegação do Match"><a className={path === '/match' ? 'active' : ''} href="/match"><MaterialIcon name="home"/>Início</a><a className={path === '/match/perfil' ? 'active' : ''} href="/match/perfil"><MaterialIcon name="person"/>Perfil</a><a className={path.startsWith('/match/mensagens') ? 'active' : ''} href="/match/mensagens"><MaterialIcon name="chat_bubble"/>Mensagens</a><a className={path === '/match/personalizacao-vybe' ? 'active' : ''} href="/match/personalizacao-vybe"><MaterialIcon name="auto_awesome"/>Personalização VYBE+</a></nav><UniverseBackLink className="match-universe-back"/></aside>;
 }
 
 function MatchProfilePage({ identity, profile, communityId, onSaved }: { identity: MatchIdentity; profile: MatchProfileData; communityId: string; onSaved: (identity: MatchIdentity, profile: MatchProfileData) => void }) {

@@ -280,7 +280,7 @@
 .match-customization-link span { display:grid; gap:3px; }
 .match-customization-link strong { font-size:13px; }
 .match-customization-link small { color:#738078; font-size:11px; }
-.match-customization-page { width:min(100%,1040px); margin:10px auto; }
+.match-customization-page { width:min(100%,1480px); margin:10px auto; }
 .match-customization-layout { display:grid; grid-template-columns:minmax(0,1fr) minmax(280px,370px); align-items:start; gap:20px; }
 .match-customization-editor,.match-customization-preview-panel,.match-customization-locked { padding:22px; border:1px solid #e3ebe6; border-radius:18px; background:#fff; box-shadow:0 8px 28px #19352608; }
 .match-customization-editor { display:grid; gap:16px; }
@@ -295,7 +295,7 @@
 .match-customization-discovery-preview .match-card-info h1 { flex-wrap:wrap; font-size:22px; }
 .match-customization-discovery-preview .match-card-info p { font-size:12px; }
 .match-customization-preview-panel > small { max-width:290px; text-align:center; }
-.match-customization-locked { display:flex; gap:17px; max-width:720px; margin:0 auto; }
+.match-customization-locked { display:flex; gap:32px; max-width:1380px; margin:36px 0 0 auto; padding:42px; border-radius:32px; }
 .match-customization-locked > span { width:48px; height:48px; flex:none; display:grid; place-items:center; border-radius:15px; background:#e7f3ec; color:#237654; font-size:25px; }
 .match-customization-locked h2 { margin:0 0 7px; color:#203a30; font-size:19px; }
 .match-customization-locked p,.match-customization-locked li { color:#68766e; font-size:13px; line-height:1.55; }

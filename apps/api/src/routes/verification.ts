@@ -9,10 +9,6 @@ import { CommunityAudit } from '../models/CommunityAudit.js';
 import { Account, Character, Notification } from '../models/Social.js';
 import { canTransitionVerification, VerificationRequest, verificationStatuses, type VerificationStatus } from '../models/VerificationRequest.js';
 import { requireSession, tenantScope } from '../middleware/tenant.js';
-import { Conversation, ConversationBlock, ConversationMessage } from '../models/Conversation.js';
-import { conversationDirectKey, canSendDirect } from './conversationPolicy.js';
-import { MatchBlock } from '../models/Match.js';
-import { emitToProfiles } from '../realtime/chatWebSocket.js';
 import { isVerificationActive } from '../services/verifiedSocialBenefits.js';
 import { PlatformPaymentSettings } from '../models/PlatformPaymentSettings.js';
 import { parsePaymentProof, readPaymentProof, savePaymentProof } from '../services/privatePaymentProofs.js';
@@ -67,17 +63,6 @@ export async function ensurePlatformSupport(tenant: NonNullable<Request['vybeTen
       const created = await Character.findOne(tenantScope(tenant._id, { platformIdentity: 'VYBE_SUPPORT' }));
       if (created) return created;
     }
-    throw error;
-  }
-}
-async function ensureSupportConversation(tenantId: mongoose.Types.ObjectId, memberId: mongoose.Types.ObjectId, supportId: mongoose.Types.ObjectId) {
-  const directKey = conversationDirectKey(memberId, supportId);
-  try {
-    return await Conversation.findOneAndUpdate({ tenantId, kind: 'direct', directKey }, { $setOnInsert: { tenantId, kind: 'direct', directKey, createdBy: memberId, participants: [{ profileId: memberId, role: 'member' }, { profileId: supportId, role: 'member' }] } }, { upsert: true, new: true, setDefaultsOnInsert: true });
-  } catch (error) {
-    if (!isDuplicateKey(error)) throw error;
-    const existing = await Conversation.findOne({ tenantId, kind: 'direct', directKey });
-    if (existing) return existing;
     throw error;
   }
 }
@@ -228,38 +213,6 @@ verificationRouter.post('/verification/requests', async (request, response) => {
     }
     sendVerificationRequestError(error, response);
   }
-});
-
-verificationRouter.post('/verification/support/conversation', async (request, response) => {
-  const tenant = request.vybeTenant!;
-  const character = request.vybeCharacter!;
-  const requestId = typeof request.body?.requestId === 'string' ? request.body.requestId : '';
-  if (requestId && !mongoose.isValidObjectId(requestId)) { response.status(400).json({ error: 'Solicitação inválida.' }); return; }
-  const verificationRequest = requestId ? await VerificationRequest.findOne(tenantScope(tenant._id, { _id: requestId, characterId: character._id })) : null;
-  if (requestId && !verificationRequest) { response.status(404).json({ error: 'Solicitação não encontrada para este perfil e comunidade.' }); return; }
-  const support = await ensurePlatformSupport(tenant);
-  const blocked = Boolean(await Promise.all([
-    ConversationBlock.exists({ tenantId: tenant._id, $or: [{ blockerId: character._id, blockedId: support._id }, { blockerId: support._id, blockedId: character._id }] }),
-    MatchBlock.exists({ tenantId: tenant._id, $or: [{ blockerId: character._id, blockedId: support._id }, { blockerId: support._id, blockedId: character._id }] }),
-  ]).then((items) => items.some(Boolean)));
-  if (!canSendDirect('direct', 1, blocked)) { response.status(409).json({ error: 'A conversa com VYBE Suporte está indisponível para este perfil.' }); return; }
-  const conversation = await ensureSupportConversation(tenant._id, character._id, support._id);
-  if (verificationRequest && verificationRequest.conversationId?.toString() !== conversation._id.toString()) {
-    verificationRequest.conversationId = conversation._id;
-    verificationRequest.history = [...(verificationRequest.history ?? []), { action: 'support_conversation_opened', createdAt: new Date() }];
-    await verificationRequest.save();
-  }
-  if (!await ConversationMessage.exists({ tenantId: tenant._id, conversationId: conversation._id })) {
-    const context = verificationRequest
-      ? `Olá! Solicitei o VYBE Verificado para meu perfil na comunidade ${tenant.name}. Minha solicitação é ${verificationRequest._id.toString()}.`
-      : `Olá! Gostaria de saber mais sobre o VYBE+ na comunidade ${tenant.name}.`;
-    const message = await ConversationMessage.create({ tenantId: tenant._id, conversationId: conversation._id, senderProfileId: character._id, content: context, messageType: 'text' });
-    conversation.lastMessageAt = message.createdAt;
-    await conversation.save();
-    await Notification.create({ tenantId: tenant._id, characterId: support._id, actorId: character._id, type: 'message', targetId: message._id }).catch(() => undefined);
-    emitToProfiles(tenant._id.toString(), [character._id, support._id], { type: 'message:new', conversationId: conversation._id.toString(), messageId: message._id.toString() });
-  }
-  response.json({ conversationId: conversation._id.toString(), supportUsername: support.username });
 });
 
 verificationRouter.get('/verification/requests/me', async (request, response) => {

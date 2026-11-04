@@ -8,6 +8,8 @@
     "db:init": "node --import tsx src/scripts/init-db.ts",
     "db:migrate:account-profile": "node --import tsx src/scripts/migrate-account-profile.ts",
     "db:migrate:vybe-plus-beneficiaries": "node --import tsx src/scripts/migrate-vybe-plus-beneficiaries.ts",
+    "db:migrate:community-creation-billing": "node --import tsx src/scripts/migrate-community-creation-billing.ts",
+    "db:migrate:message-server-settings": "node --import tsx src/scripts/migrate-message-server-settings.ts",
     "db:seed": "node --import tsx src/scripts/seed.ts",
     "db:seed:social-demo": "node --import tsx src/scripts/seed-social-demo.ts",
     "db:seed:match-demo": "node --import tsx src/scripts/seed-match-demo.ts",

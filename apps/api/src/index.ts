@@ -49,12 +49,17 @@ if (mongoUri) {
   const mongoOptions = process.env.NODE_ENV === 'development'
     ? { dbName: process.env.VYBE_DEV_DB_NAME ?? 'vybe_dev' }
     : {};
-  mongoose.connect(mongoUri, mongoOptions).then(
-    () => console.log('MongoDB connection established'),
-    (error: unknown) => {
-      console.error('MongoDB connection failed:', error instanceof Error ? error.message : 'unknown error');
-    },
-  );
+  const connectToMongoDB = async () => {
+    try {
+      await mongoose.connect(mongoUri, mongoOptions);
+      console.log('MongoDB connection established');
+    } catch (error: unknown) {
+      console.error('MongoDB connection failed; retrying in 5 seconds:', error instanceof Error ? error.message : 'unknown error');
+      const retry = setTimeout(() => void connectToMongoDB(), 5_000);
+      retry.unref();
+    }
+  };
+  void connectToMongoDB();
 } else {
   console.warn('MONGODB_URI is unset; API is running without database readiness.');
 }

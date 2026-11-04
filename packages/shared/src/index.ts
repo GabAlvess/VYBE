@@ -58,3 +58,5 @@ export function insertUnicodeText(value: string, inserted: string, start: number
   return { value: next, cursor };
 }
 export * from './vybeFonts.js';
+
+export * from './textFormatting.js';

@@ -34,4 +34,20 @@
 .events-delete-confirm:hover:not(:disabled){border-color:#a64036!important;background:#a64036;transform:translateY(-1px)}
 .events-delete-confirm:disabled{opacity:.6;cursor:wait}
 .events-delete-confirm .material-symbol{font-size:18px}
+.events-official-backdrop{z-index:80;background:rgba(16,31,23,.5);backdrop-filter:blur(4px)}
+.events-official-modal{position:relative;display:grid;justify-items:center;gap:12px;width:min(100% - 32px,460px);padding:34px 28px 26px;border:1px solid #e3ebe6;border-radius:22px;background:#fffefa;color:#1c211f;text-align:center;box-shadow:0 26px 80px rgba(12,40,26,.26)}
+.events-official-modal>.modal-x{position:absolute;top:12px;right:12px}
+.events-official-modal>.events-official-icon{display:grid;place-items:center;width:54px;height:54px;border-radius:17px;background:#e6f3ed;color:#1d7a5c}
+.events-official-icon .material-symbol{font-size:28px}
+.events-official-modal>small{color:#658072;font-size:9px;font-weight:750;letter-spacing:.13em}
+.events-official-modal h2{margin:0;color:#1c211f;font-size:22px;letter-spacing:-.03em}
+.events-official-modal>p{margin:0;color:#66716b;font-size:13px;line-height:1.55}
+.events-official-modal>p strong{color:#1c211f}
+.events-official-modal>footer{display:flex;justify-content:center;flex-wrap:wrap;gap:9px;width:100%;padding-top:8px}
+.events-official-modal>footer button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:42px;padding:0 15px;border:1px solid #dfe7e1;border-radius:11px;background:#fff;color:#45554b;font:inherit;font-size:12px;font-weight:650;cursor:pointer}
+.events-official-modal>footer button:hover:not(:disabled){background:#f4f8f5}
+.events-official-modal>footer button:disabled{opacity:.6;cursor:wait}
+.events-official-modal>footer .primary-button{border-color:var(--ev-green);background:var(--ev-green);color:#fff}
+.events-official-modal>footer .primary-button:hover:not(:disabled){background:var(--ev-deep)}
+.events-official-modal>footer .material-symbol{font-size:18px}
 @media(max-width:520px){.vybe-events-app .events-delete-modal{gap:15px;padding:23px 18px 18px;border-radius:18px}.vybe-events-app .events-delete-heading h2{font-size:20px}.events-delete-modal>footer{flex-direction:column-reverse}.events-delete-modal>footer button{width:100%}}

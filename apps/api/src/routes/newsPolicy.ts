@@ -1,6 +1,6 @@
 export type NewsRoleName='NEWS_WRITER'|'NEWS_EDITOR'|'NEWS_ADMIN';
 export function mayWriteNews(roles:readonly NewsRoleName[]){return roles.some((role)=>['NEWS_WRITER','NEWS_EDITOR','NEWS_ADMIN'].includes(role));}
-export function mayReviewNews(roles:readonly NewsRoleName[]){return roles.includes('NEWS_ADMIN');}
+export function mayReviewNews(roles:readonly NewsRoleName[]){return roles.some((role)=>role==='NEWS_EDITOR'||role==='NEWS_ADMIN');}
 export function mayManageNews(roles:readonly NewsRoleName[]){return roles.includes('NEWS_ADMIN');}
 export function mayEditArticle(input:{roles:readonly NewsRoleName[];author:boolean;status:string}){
   if(input.roles.includes('NEWS_ADMIN')||input.roles.includes('NEWS_EDITOR'))return true;

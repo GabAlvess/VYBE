@@ -15,7 +15,7 @@ import { CommunityJoinRequest } from '../models/CommunityJoinRequest.js';
 import { VybeAccount } from '../models/VybeAccount.js';
 import { isVerificationActive, socialDistributionScore } from '../services/verifiedSocialBenefits.js';
 import { defaultProfileCustomization, resolveProfileCustomization, updateProfileCustomization, type CustomizationApp } from '../services/profileCustomization.js';
-import { isAllowedVybeFont, normalizeVybeFontId } from '@vybe/shared';
+import { isAllowedVybeFont, normalizeVybeFontId, sanitizeFormattedText } from '@vybe/shared';
 
 export const socialRouter = Router();
 socialRouter.use(requireSession);
@@ -455,7 +455,7 @@ socialRouter.post('/posts/:postId/poll/vote', async (request, response) => {
 
 async function createPost(request: Request, response: Response, kind: 'post' | 'pulse') {
   if (!request.vybeTenant!.settings?.features?.[kind === 'pulse' ? 'pulse' : 'feed']) { response.status(403).json({ error: `O ${kind === 'pulse' ? 'Echo' : 'Social'} está desativado nesta comunidade.` }); return; }
-  const content = typeof request.body?.content === 'string' ? request.body.content.trim() : '';
+  const content = sanitizeFormattedText(request.body?.content, 100_000) ?? '';
   let poll: PostFields['poll'];
   if (request.body?.poll !== undefined) {
     const question = typeof request.body.poll?.question === 'string' ? request.body.poll.question.trim() : '';
@@ -593,7 +593,7 @@ socialRouter.get('/posts/:postId/comments', async (request, response) => {
 
 socialRouter.post('/posts/:postId/comments', async (request, response) => {
   if (!mongoose.isValidObjectId(request.params.postId)) { badRequest(response, 'Publicação inválida.'); return; }
-  const content = typeof request.body?.content === 'string' ? request.body.content.trim() : '';
+  const content = sanitizeFormattedText(request.body?.content, 1000) ?? '';
   if (!content || content.length > 1000) { badRequest(response, 'O comentário deve ter entre 1 e 1000 caracteres.'); return; }
   const tenant = tenantId(request);
   const post = await Post.findOne(tenantScope(tenant, { _id: request.params.postId }));
@@ -1018,12 +1018,14 @@ socialRouter.delete('/events/:eventId', async (request, response) => {
 });
 
 socialRouter.get('/notifications', async (request, response) => {
+  response.set('Cache-Control', 'no-store');
   const tenant = tenantId(request);
   const requestedLimit = Number(request.query.limit);
   const limit = Number.isFinite(requestedLimit) ? Math.max(1, Math.min(50, Math.floor(requestedLimit))) : 50;
   const bankTypes = ['bank_transfer_received', 'bank_admin_credit_received'];
   const scope = request.query.scope === 'bank' ? { type: { $in: bankTypes } } : {};
-  const notifications = await Notification.find({ tenantId: tenant, characterId: activeCharacter(request)._id, ...scope }).sort({ createdAt: -1 }).limit(limit).lean();
+  const clearedAt = activeCharacter(request).notificationsClearedAt;
+  const notifications = await Notification.find({ tenantId: tenant, characterId: activeCharacter(request)._id, ...scope, ...(clearedAt ? { createdAt: { $gt: clearedAt } } : {}) }).sort({ createdAt: -1 }).limit(limit).lean();
   const actorIds = notifications.map((notification) => notification.actorId);
   const actors = await Character.find({ _id: { $in: actorIds }, tenantId: tenant }).lean();
   const actorMap = new Map(actors.map((actor) => [actor._id.toString(), actor]));
@@ -1038,11 +1040,16 @@ socialRouter.get('/notifications', async (request, response) => {
   const joinCommunities = await Community.find({ _id: { $in: joinCommunityIds } }).select('name').lean();
   const joinCommunityMap = new Map(joinCommunities.map((item) => [String(item._id), item.name]));
   const joinUpdateMap = new Map(joinUpdates.map((item) => [String(item._id), { status: item.status, communityName: joinCommunityMap.get(String(item.communityId)) ?? 'comunidade', message: item.status === 'NEEDS_INFORMATION' ? item.adminMessage : item.status === 'REJECTED' ? item.rejectionReason : '' }]));
-  response.json(notifications.map((item) => ({ id: item._id.toString(), type: item.type, targetId: item.targetId.toString(), eventTitle: eventMap.get(item.targetId.toString()) ?? '', amountCents: bankMap.get(item.targetId.toString())?.amountCents ?? null, description: bankMap.get(item.targetId.toString())?.description ?? '', joinUpdate: joinUpdateMap.get(item.targetId.toString()) ?? null, communityId: tenant.toString(), communityName: ['verification_gift_received', 'verification_gift_activated'].includes(item.type) ? request.vybeTenant?.name ?? '' : '', readAt: item.readAt, createdAt: item.createdAt, actor: actorMap.has(item.actorId.toString()) ? characterJson(actorMap.get(item.actorId.toString())!) : null })));
+  response.json(notifications.map((item) => ({ id: item._id.toString(), type: item.type, targetId: item.targetId.toString(), serverId: item.serverId?.toString() ?? '', channelId: item.channelId?.toString() ?? '', eventTitle: eventMap.get(item.targetId.toString()) ?? '', amountCents: bankMap.get(item.targetId.toString())?.amountCents ?? null, description: bankMap.get(item.targetId.toString())?.description ?? '', joinUpdate: joinUpdateMap.get(item.targetId.toString()) ?? null, communityId: tenant.toString(), communityName: ['verification_gift_received', 'verification_gift_activated'].includes(item.type) ? request.vybeTenant?.name ?? '' : '', readAt: item.readAt, createdAt: item.createdAt, actor: actorMap.has(item.actorId.toString()) ? characterJson(actorMap.get(item.actorId.toString())!) : null })));
 });
 
 socialRouter.delete('/notifications', async (request, response) => {
-  const result = await Notification.deleteMany({ tenantId: tenantId(request), characterId: activeCharacter(request)._id });
+  response.set('Cache-Control', 'no-store');
+  const tenant = tenantId(request);
+  const character = activeCharacter(request);
+  const clearedAt = new Date();
+  await Character.updateOne({ _id: character._id, tenantId: tenant }, { $set: { notificationsClearedAt: clearedAt } });
+  const result = await Notification.deleteMany({ tenantId: tenant, characterId: character._id });
   response.json({ deleted: result.deletedCount });
 });
 

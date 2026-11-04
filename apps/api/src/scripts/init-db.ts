@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import mongoose from 'mongoose';
 import { Account, Character, CommunityEvent, EventRSVP, Notification } from '../models/Social.js';
 import { CommunityAudit } from '../models/CommunityAudit.js';
-import { DirectMessage, DirectTyping } from '../models/Chat.js';
+import { CommunityChannelCategory, DirectMessage, DirectTyping } from '../models/Chat.js';
 import { VerificationRequest } from '../models/VerificationRequest.js';
 import { Match, MatchBlock, MatchMessage, MatchProfile, MatchReaction } from '../models/Match.js';
 import { Conversation, ConversationBlock, ConversationMessage } from '../models/Conversation.js';
@@ -16,6 +16,8 @@ import { NewsArticle, NewsAudit, NewsCategory, NewsComment, NewsEdition, NewsEdi
 import { CareerApplication, CareerGrant, CareerJob, CareerListing, CareerProfile, MentorshipRequest } from '../models/Career.js';
 import { Community } from '../models/Community.js';
 import { CommunityJoinRequest } from '../models/CommunityJoinRequest.js';
+import { CommunityRequest } from '../models/CommunityRequest.js';
+import { PlatformProductSettings } from '../models/PlatformProductSettings.js';
 import { VybeAccount } from '../models/VybeAccount.js';
 import { VybeSession } from '../models/VybeSession.js';
 import { VybeNotification } from '../models/VybeNotification.js';
@@ -68,7 +70,7 @@ try {
   }
 
   // Apply indexes for community membership, events, messaging, Match, virtual wallets, academic records, and Career.
-  await Promise.all([Community.createIndexes(), Account.createIndexes(), Character.createIndexes(), CommunityJoinRequest.createIndexes(), VybeAccount.createIndexes(), VybeSession.createIndexes(), VybeNotification.createIndexes(), CommunityEvent.createIndexes(), EventRSVP.createIndexes(), Notification.createIndexes(), CommunityAudit.createIndexes(), DirectMessage.createIndexes(), DirectTyping.createIndexes(), VerificationRequest.createIndexes(), MatchProfile.createIndexes(), MatchReaction.createIndexes(), Match.createIndexes(), MatchBlock.createIndexes(), MatchMessage.createIndexes(), Conversation.createIndexes(), ConversationMessage.createIndexes(), ConversationBlock.createIndexes(), MessageAppProfile.createIndexes(), EchoAppProfile.createIndexes(), Wallet.createIndexes(), WalletTransaction.createIndexes(), AcademicRole.createIndexes(), AcademicProfile.createIndexes(), AcademicDiscipline.createIndexes(), AcademicDisciplineTeacher.createIndexes(), AcademicEnrollment.createIndexes(), AcademicLesson.createIndexes(), AcademicContent.createIndexes(), AcademicAssignment.createIndexes(), AcademicSubmission.createIndexes(), AcademicExam.createIndexes(), AcademicExamSubmission.createIndexes(), AcademicGrade.createIndexes(), AcademicInvite.createIndexes(), NewsRole.createIndexes(), NewsCategory.createIndexes(), NewsArticle.createIndexes(), NewsView.createIndexes(), NewsComment.createIndexes(), NewsEdition.createIndexes(), NewsEditionArticle.createIndexes(), NewsAudit.createIndexes(), CareerProfile.createIndexes(), CareerJob.createIndexes(), CareerApplication.createIndexes(), CareerGrant.createIndexes(), CareerListing.createIndexes(), MentorshipRequest.createIndexes()]);
+  await Promise.all([Community.createIndexes(), Account.createIndexes(), Character.createIndexes(), CommunityJoinRequest.createIndexes(), CommunityRequest.createIndexes(), PlatformProductSettings.createIndexes(), VybeAccount.createIndexes(), VybeSession.createIndexes(), VybeNotification.createIndexes(), CommunityEvent.createIndexes(), EventRSVP.createIndexes(), Notification.createIndexes(), CommunityAudit.createIndexes(), CommunityChannelCategory.createIndexes(), DirectMessage.createIndexes(), DirectTyping.createIndexes(), VerificationRequest.createIndexes(), MatchProfile.createIndexes(), MatchReaction.createIndexes(), Match.createIndexes(), MatchBlock.createIndexes(), MatchMessage.createIndexes(), Conversation.createIndexes(), ConversationMessage.createIndexes(), ConversationBlock.createIndexes(), MessageAppProfile.createIndexes(), EchoAppProfile.createIndexes(), Wallet.createIndexes(), WalletTransaction.createIndexes(), AcademicRole.createIndexes(), AcademicProfile.createIndexes(), AcademicDiscipline.createIndexes(), AcademicDisciplineTeacher.createIndexes(), AcademicEnrollment.createIndexes(), AcademicLesson.createIndexes(), AcademicContent.createIndexes(), AcademicAssignment.createIndexes(), AcademicSubmission.createIndexes(), AcademicExam.createIndexes(), AcademicExamSubmission.createIndexes(), AcademicGrade.createIndexes(), AcademicInvite.createIndexes(), NewsRole.createIndexes(), NewsCategory.createIndexes(), NewsArticle.createIndexes(), NewsView.createIndexes(), NewsComment.createIndexes(), NewsEdition.createIndexes(), NewsEditionArticle.createIndexes(), NewsAudit.createIndexes(), CareerProfile.createIndexes(), CareerJob.createIndexes(), CareerApplication.createIndexes(), CareerGrant.createIndexes(), CareerListing.createIndexes(), MentorshipRequest.createIndexes()]);
 
   console.log('Database initialization and application indexes completed.');
 } catch {

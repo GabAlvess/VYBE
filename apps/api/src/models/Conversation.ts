@@ -8,6 +8,8 @@ export interface ConversationParticipantFields {
   leftAt?: Date;
   mutedAt?: Date;
   favorite?: boolean;
+  archivedAt?: Date;
+  closedAt?: Date;
   lastReadAt?: Date;
   typingAt?: Date;
 }
@@ -16,6 +18,7 @@ export interface ConversationFields {
   kind: ConversationKind;
   directKey?: string;
   participants: ConversationParticipantFields[];
+  platformParticipantAccountIds?: mongoose.Types.ObjectId[];
   name: string;
   description: string;
   photoUrl: string;
@@ -29,13 +32,15 @@ export interface ConversationFields {
 const participantSchema = new mongoose.Schema<ConversationParticipantFields>({
   profileId: { type: mongoose.Schema.Types.ObjectId, required: true },
   role: { type: String, enum: ['member', 'admin'], default: 'member' },
-  joinedAt: { type: Date, default: Date.now }, leftAt: Date, mutedAt: Date, favorite: { type: Boolean, default: false }, lastReadAt: Date, typingAt: Date,
+  joinedAt: { type: Date, default: Date.now }, leftAt: Date, mutedAt: Date, favorite: { type: Boolean, default: false }, archivedAt: Date, closedAt: Date, lastReadAt: Date, typingAt: Date,
 }, { _id: false });
 const conversationSchema = new mongoose.Schema<ConversationFields>({
   tenantId: { type: mongoose.Schema.Types.ObjectId, required: true },
   kind: { type: String, enum: ['direct', 'group'], required: true },
   directKey: { type: String, default: undefined },
   participants: { type: [participantSchema], default: [] },
+  // Global platform-support participants authenticate through VYBE accounts and do not need a community membership/profile.
+  platformParticipantAccountIds: { type: [{ type: mongoose.Schema.Types.ObjectId }], default: [] },
   name: { type: String, default: '', trim: true, maxlength: 80 },
   description: { type: String, default: '', trim: true, maxlength: 500 },
   photoUrl: { type: String, default: '' },
@@ -52,9 +57,11 @@ export interface ConversationMessageFields {
   tenantId: mongoose.Types.ObjectId;
   conversationId: mongoose.Types.ObjectId;
   senderProfileId: mongoose.Types.ObjectId;
+  senderGlobalAccountId?: mongoose.Types.ObjectId;
   content: string;
-  messageType: 'text' | 'image' | 'file';
+  messageType: 'text' | 'image' | 'file' | 'audio' | 'server_invite';
   attachment?: { url: string; name: string; mimeType: string; size: number };
+  serverInvite?: { serverId: mongoose.Types.ObjectId; name: string; description: string; imageUrl: string; inviteUrl: string };
   legacyMessageId?: mongoose.Types.ObjectId;
   readAt?: Date;
   replyToMessageId?: mongoose.Types.ObjectId;
@@ -63,13 +70,16 @@ export interface ConversationMessageFields {
   createdAt: Date;
   updatedAt: Date;
 }
+const serverInviteSchema = new mongoose.Schema({ serverId: mongoose.Schema.Types.ObjectId, name: { type: String, maxlength: 60 }, description: { type: String, maxlength: 240 }, imageUrl: { type: String, maxlength: 500 }, inviteUrl: { type: String, maxlength: 300 } }, { _id: false });
 const messageSchema = new mongoose.Schema<ConversationMessageFields>({
   tenantId: { type: mongoose.Schema.Types.ObjectId, required: true },
   conversationId: { type: mongoose.Schema.Types.ObjectId, required: true },
   senderProfileId: { type: mongoose.Schema.Types.ObjectId, required: true },
+  senderGlobalAccountId: { type: mongoose.Schema.Types.ObjectId, default: undefined, index: true },
   content: { type: String, default: '', trim: true, maxlength: 4000 },
-  messageType: { type: String, enum: ['text', 'image', 'file'], default: 'text' },
+  messageType: { type: String, enum: ['text', 'image', 'file', 'audio', 'server_invite'], default: 'text' },
   attachment: { url: String, name: String, mimeType: String, size: Number },
+  serverInvite: { type: serverInviteSchema, default: undefined },
   legacyMessageId: { type: mongoose.Schema.Types.ObjectId, default: undefined },
   readAt: Date,
   replyToMessageId: { type: mongoose.Schema.Types.ObjectId, default: undefined },

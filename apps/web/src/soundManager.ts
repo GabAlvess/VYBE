@@ -39,7 +39,7 @@ class SoundManager {
   private context: AudioContext | null = null;
   private lastPlayed = new Map<SoundType, number>();
   private playedEvents = new Set<string>();
-  private pendingType: SoundType | null = null;
+  private pendingTypes: SoundType[] = [];
   private busyUntil = 0;
   private queueTimer = 0;
   private unlockInstalled = false;
@@ -89,20 +89,30 @@ class SoundManager {
     }
     const now = Date.now();
     if (now - (this.lastPlayed.get(type) ?? 0) < cooldownMs[type]) return;
-    if (!this.context || this.context.state !== 'running') { if (type === 'match' || type === 'vybePlus') this.pendingType = type; this.unlockAudio(); return; }
+    if (!this.context || this.context.state !== 'running') { this.queuePending(type); this.unlockAudio(); return; }
     this.playTone(type);
   }
+  private queuePending(type: SoundType) {
+    if (this.pendingTypes.includes(type)) return;
+    if (this.pendingTypes.length >= 6) this.pendingTypes.shift();
+    this.pendingTypes.push(type);
+  }
   private flushPending() {
-    if (!this.pendingType || !this.context || this.context.state !== 'running') return;
+    if (!this.pendingTypes.length || !this.context || this.context.state !== 'running') return;
     const wait = this.busyUntil - Date.now();
     if (wait > 0) { window.clearTimeout(this.queueTimer); this.queueTimer = window.setTimeout(() => this.flushPending(), wait + 20); return; }
-    const type = this.pendingType; this.pendingType = null; this.playTone(type);
+    const type = this.pendingTypes.shift()!;
+    this.playTone(type);
+    if (this.pendingTypes.length) {
+      window.clearTimeout(this.queueTimer);
+      this.queueTimer = window.setTimeout(() => this.flushPending(), Math.max(20, this.busyUntil - Date.now() + 20));
+    }
   }
   private playTone(type: SoundType) {
     const context = this.context;
     if (!context || context.state !== 'running') return;
     if (Date.now() < this.busyUntil) {
-      if (type === 'match' || type === 'vybePlus') { this.pendingType = type; window.clearTimeout(this.queueTimer); this.queueTimer = window.setTimeout(() => this.flushPending(), this.busyUntil - Date.now() + 20); }
+      this.queuePending(type); window.clearTimeout(this.queueTimer); this.queueTimer = window.setTimeout(() => this.flushPending(), this.busyUntil - Date.now() + 20);
       return;
     }
     const now = context.currentTime;
